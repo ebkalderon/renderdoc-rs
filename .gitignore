@@ -1,0 +1,15 @@
+# Unwanted files
+target
+Cargo.lock
+
+# Backup files
+.DS_Store
+thumbs.db
+*~
+*.rs.bk
+*.swp
+
+# IDE / Editor files
+*.iml
+.idea
+.vscode
