@@ -1,6 +1,6 @@
 //! RenderDoc Application API.
 
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_ulonglong, c_void};
 use std::{ptr, u32};
 use std::rc::Rc;
@@ -319,14 +319,13 @@ impl RenderDoc<V110> {
 
     pub fn get_capture(&self, index: u32) -> Option<(String, u64)> {
         unsafe {
-            // let path: *mut c_char = ptr::null_mut();
-            // let path_len: *mut u32 = ptr::null_mut();
-            // let time: *mut u64 = ptr::null_mut();
-
-            let (path, path_len, time) = (ptr::null_mut(), ptr::null_mut(), ptr::null_mut());
+            let path: *mut c_char = ptr::null_mut();
+            let path_len: *mut u32 = ptr::null_mut();
+            let time: *mut u64 = ptr::null_mut();
 
             if (self.api.get_capture)(index, path, path_len, time) == 1 {
-                let name = String::from_raw_parts(path as *mut _, *path_len as usize, *path_len as usize);
+
+                let name = CString::from_raw(path).into_string().unwrap();
                 Some((name, *time))
             } else {
                 None

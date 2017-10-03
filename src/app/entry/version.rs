@@ -42,7 +42,7 @@ pub trait ApiVersion: Sized {
         use std::{mem, ptr};
 
         let api = unsafe {
-            let get_api = match *::app::entry::RD_LIB {
+            let get_api = match *super::RD_LIB {
                 Ok(ref lib) => {
                     let f = lib.symbol::<()>("RENDERDOC_GetAPI")?;
                     Ok(mem::transmute::<_, GetApiFn<Self::Entry>>(f))
@@ -50,9 +50,9 @@ pub trait ApiVersion: Sized {
                 Err(ref err) => Err(err.to_string()),
             }?;
 
-            let obj: *mut *mut Self::Entry = &mut ptr::null_mut();
-            match get_api(Self::VERSION, obj) {
-                1 => Rc::from_raw(*obj),
+            let mut obj: *mut Self::Entry = ptr::null_mut();
+            match get_api(Self::VERSION, &mut obj) {
+                1 => Rc::from_raw(obj),
                 0 => Err("Failed to load GetAPI!")?,
                 _ => Err("Something else went wrong!")?,
             }
