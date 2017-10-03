@@ -91,6 +91,7 @@ pub fn main() {
                     glutin::WindowEvent::KeyboardInput {
                         input: glutin::KeyboardInput {
                             virtual_keycode: Some(glutin::VirtualKeyCode::C),
+                            state: glutin::ElementState::Pressed,
                             .. },
                         ..
                     } => rd.trigger_capture(),
