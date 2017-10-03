@@ -163,7 +163,7 @@ pub type IsTargetControlConnectedFn = unsafe extern "C" fn() -> u32;
 ///
 /// Returns the PID of the replay UI if successful, otherwise returns `0`.
 pub type LaunchReplayUiFn = unsafe extern "C" fn(connect_target_control: u32,
-                                                 cmd_line: *const char)
+                                                 cmd_line: *const c_char)
                                                  -> u32;
 
 /// Activates the RenderDoc in-app overlay inside the given window handle
@@ -309,4 +309,3 @@ mod tests {
         );
     }
 }
-

@@ -1,8 +1,9 @@
 //! RenderDoc Application API.
 
-use std::os::raw::{c_ulonglong, c_void};
+use std::ffi::CStr;
+use std::os::raw::{c_char, c_ulonglong, c_void};
+use std::{ptr, u32};
 use std::rc::Rc;
-use std::u32;
 
 #[cfg(target_os = "windows")]
 use winapi::guiddef::GUID;
@@ -113,7 +114,7 @@ pub enum CaptureOption {
 ///
 /// For example, this could be a pointer to an `ID3D11Device`,
 /// `HGLRC`/`GLXContext`, `ID3D12Device`, etc.
-pub type DevicePointer = *mut c_void;
+pub type DevicePointer = *const c_void;
 
 /// User input key codes.
 #[allow(missing_docs)]
@@ -230,7 +231,7 @@ bitflags! {
 }
 
 /// Raw mutable pointer to the OS-provided window handle.
-pub type WindowHandle = *mut c_void;
+pub type WindowHandle = *const c_void;
 
 /// An instance of the RenderDoc API with baseline version `V`.
 #[derive(Clone, Debug)]
@@ -281,19 +282,23 @@ impl RenderDoc<V110> {
     pub fn set_capture_keys(&self) {}
     pub fn set_focus_toggle_keys(&self) {}
 
-    pub fn shutdown(&self) {}
-    pub fn unload_crash_handler(&self) {}
+    pub fn shutdown(&self) {
+        unsafe { (self.api.shutdown)(); }
+    }
+
+    pub fn unload_crash_handler(&self) {
+        unsafe { (self.api.unload_crash_handler)(); }
+    }
 
     pub fn get_overlay_bits(&self) -> OverlayBits {
         unsafe { (self.api.get_overlay_bits)() }
     }
 
     pub fn mask_overlay_bits(&self, and: OverlayBits, or: OverlayBits) {
-        unsafe { (self.api.mask_overlay_bits)(and, or) }
+        unsafe { (self.api.mask_overlay_bits)(and, or); }
     }
 
     pub fn get_log_file_path_template(&self) -> &str {
-        use std::ffi::CStr;
         unsafe {
             let raw = (self.api.get_log_file_path_template)();
             CStr::from_ptr(raw).to_str().unwrap()
@@ -301,7 +306,6 @@ impl RenderDoc<V110> {
     }
 
     pub fn set_log_file_path_template<P: AsRef<str>>(&self, path_template: P) {
-        use std::ffi::CStr;
         let bytes = path_template.as_ref().as_bytes();
         unsafe {
             let pt = CStr::from_bytes_with_nul_unchecked(bytes);
@@ -313,27 +317,63 @@ impl RenderDoc<V110> {
         unsafe { (self.api.get_num_captures)() }
     }
 
-    pub fn get_capture(&self) {}
+    pub fn get_capture(&self, index: u32) -> Option<(String, u64)> {
+        unsafe {
+            // let path: *mut c_char = ptr::null_mut();
+            // let path_len: *mut u32 = ptr::null_mut();
+            // let time: *mut u64 = ptr::null_mut();
+
+            let (path, path_len, time) = (ptr::null_mut(), ptr::null_mut(), ptr::null_mut());
+
+            if (self.api.get_capture)(index, path, path_len, time) == 1 {
+                let name = String::from_raw_parts(path as *mut _, *path_len as usize, *path_len as usize);
+                Some((name, *time))
+            } else {
+                None
+            }
+        }
+    }
 
     pub fn trigger_capture(&self) {
-        unsafe { (self.api.trigger_capture)() };
+        unsafe { (self.api.trigger_capture)(); }
     }
 
     pub fn is_target_control_connected(&self) -> bool {
         unsafe { (self.api.is_target_control_connected)() == 1 }
     }
 
-    pub fn launch_replay_ui(&self) {
-        unsafe { (self.api.launch_replay_ui)(0, ::std::ptr::null()); }
+    pub fn launch_replay_ui<C: Into<Option<&'static str>>>(&self, cmd_line: C) -> Result<u32, ()> {
+        unsafe {
+            let with_cmd = cmd_line.into();
+            let (enabled, cmd_text) = if let Some(ref cmd) = with_cmd {
+                let bytes = cmd.as_bytes();
+                (1, CStr::from_bytes_with_nul_unchecked(bytes))
+            } else {
+                (0, Default::default())
+            };
+
+            match (self.api.launch_replay_ui)(enabled, cmd_text.as_ptr()) {
+                0 => Err(()),
+                pid => Ok(pid)
+            }
+        }
     }
 
-    pub fn set_active_window(&self, dev: ::app::DevicePointer, win: ::app::WindowHandle) {
+    pub fn set_active_window(&self, dev: DevicePointer, win: WindowHandle) {
         unsafe { (self.api.set_active_window)(dev, win); }
     }
 
-    pub fn start_frame_capture(&self) {}
-    pub fn is_frame_capturing(&self) {}
-    pub fn end_frame_capture(&self) {}
+    pub fn start_frame_capture(&self, dev: DevicePointer, win: WindowHandle) {
+        unsafe { (self.api.start_frame_capture)(dev, win); }
+    }
+
+    pub fn is_frame_capturing(&self) -> bool {
+        unsafe { (self.api.is_frame_capturing)() == 1 }
+    }
+
+    pub fn end_frame_capture(&self, dev: DevicePointer, win: WindowHandle) {
+        unsafe { (self.api.end_frame_capture)(dev, win); }
+    }
 
     pub fn trigger_multi_frame_capture(&self, num_frames: u32) {
         unsafe { (self.api.trigger_multi_frame_capture)(num_frames); }
