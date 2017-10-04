@@ -1,5 +1,7 @@
 //! RenderDoc Application API.
 
+pub use self::entry::version::{ApiVersion, V100, V110, V111};
+
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_ulonglong, c_void};
 use std::{ptr, u32};
@@ -7,8 +9,8 @@ use std::rc::Rc;
 
 #[cfg(target_os = "windows")]
 use winapi::guiddef::GUID;
-
-pub use self::entry::version::{ApiVersion, V100, V110, V111};
+#[cfg(feature = "winit")]
+use winit::{self, VirtualKeyCode};
 
 pub mod entry;
 
@@ -208,6 +210,77 @@ pub enum InputButton {
     Pause,
 
     Max,
+}
+
+#[cfg(feature = "winit")]
+impl From<winit::VirtualKeyCode> for InputButton {
+    fn from(code: winit::VirtualKeyCode) -> InputButton {
+        match code {
+            VirtualKeyCode::Key1 => InputButton::Key1,
+            VirtualKeyCode::Key2 => InputButton::Key2,
+            VirtualKeyCode::Key3 => InputButton::Key3,
+            VirtualKeyCode::Key4 => InputButton::Key4,
+            VirtualKeyCode::Key5 => InputButton::Key5,
+            VirtualKeyCode::Key6 => InputButton::Key6,
+            VirtualKeyCode::Key7 => InputButton::Key7,
+            VirtualKeyCode::Key8 => InputButton::Key8,
+            VirtualKeyCode::Key9 => InputButton::Key9,
+            VirtualKeyCode::Key0 => InputButton::Key0,
+            VirtualKeyCode::A => InputButton::A,
+            VirtualKeyCode::B => InputButton::B,
+            VirtualKeyCode::C => InputButton::C,
+            VirtualKeyCode::D => InputButton::D,
+            VirtualKeyCode::E => InputButton::E,
+            VirtualKeyCode::F => InputButton::F,
+            VirtualKeyCode::G => InputButton::G,
+            VirtualKeyCode::H => InputButton::H,
+            VirtualKeyCode::I => InputButton::I,
+            VirtualKeyCode::J => InputButton::J,
+            VirtualKeyCode::K => InputButton::K,
+            VirtualKeyCode::L => InputButton::L,
+            VirtualKeyCode::M => InputButton::M,
+            VirtualKeyCode::N => InputButton::N,
+            VirtualKeyCode::O => InputButton::O,
+            VirtualKeyCode::P => InputButton::P,
+            VirtualKeyCode::Q => InputButton::Q,
+            VirtualKeyCode::R => InputButton::R,
+            VirtualKeyCode::S => InputButton::S,
+            VirtualKeyCode::T => InputButton::T,
+            VirtualKeyCode::U => InputButton::U,
+            VirtualKeyCode::V => InputButton::V,
+            VirtualKeyCode::W => InputButton::W,
+            VirtualKeyCode::X => InputButton::X,
+            VirtualKeyCode::Y => InputButton::Y,
+            VirtualKeyCode::Z => InputButton::Z,
+            VirtualKeyCode::Divide => InputButton::Divide,
+            VirtualKeyCode::Multiply => InputButton::Multiply,
+            VirtualKeyCode::Subtract => InputButton::Subtract,
+            VirtualKeyCode::Add => InputButton::Plus,
+            VirtualKeyCode::F1 => InputButton::F1,
+            VirtualKeyCode::F2 => InputButton::F2,
+            VirtualKeyCode::F3 => InputButton::F3,
+            VirtualKeyCode::F4 => InputButton::F4,
+            VirtualKeyCode::F5 => InputButton::F5,
+            VirtualKeyCode::F6 => InputButton::F6,
+            VirtualKeyCode::F7 => InputButton::F7,
+            VirtualKeyCode::F8 => InputButton::F8,
+            VirtualKeyCode::F9 => InputButton::F9,
+            VirtualKeyCode::F10 => InputButton::F10,
+            VirtualKeyCode::F11 => InputButton::F11,
+            VirtualKeyCode::F12 => InputButton::F12,
+            VirtualKeyCode::Home => InputButton::Home,
+            VirtualKeyCode::End => InputButton::End,
+            VirtualKeyCode::Insert => InputButton::Insert,
+            VirtualKeyCode::Delete => InputButton::Delete,
+            VirtualKeyCode::PageUp => InputButton::PageUp,
+            VirtualKeyCode::PageDown => InputButton::PageDn,
+            VirtualKeyCode::Back => InputButton::Backspace,
+            VirtualKeyCode::Tab => InputButton::Tab,
+            VirtualKeyCode::Snapshot => InputButton::PrtScrn,
+            VirtualKeyCode::Pause => InputButton::Pause,
+            _ => InputButton::Max,
+        }
+    }
 }
 
 bitflags! {

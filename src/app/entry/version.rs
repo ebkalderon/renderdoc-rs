@@ -53,8 +53,7 @@ pub trait ApiVersion: Sized {
             let mut obj: *mut Self::Entry = ptr::null_mut();
             match get_api(Self::VERSION, &mut obj) {
                 1 => Rc::from_raw(obj),
-                0 => Err("Failed to load GetAPI!")?,
-                _ => Err("Something else went wrong!")?,
+                _ => Err("Compatible API version not available.")?,
             }
         };
 

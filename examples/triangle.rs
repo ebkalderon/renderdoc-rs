@@ -21,8 +21,6 @@ extern crate renderdoc;
 use gfx::traits::FactoryExt;
 use gfx::Device;
 use glutin::GlContext;
-// use glutin::os::ContextExt;
-// use glutin::os::unix::Context;
 use renderdoc::app::{self, RenderDoc, V110};
 
 pub type ColorFormat = gfx::format::Rgba8;
@@ -71,15 +69,6 @@ pub fn main() {
         out: main_color
     };
 
-    // let wnd_handle = unsafe { window.platform_window() };
-    // let ctx_handle = unsafe {
-    //     match window.context().as_mut_ptr() {
-    //         Context::Glx(ref ctx) => *ctx,
-    //         Context::Egl(_) => panic!(),
-    //     }
-    // };
-
-    // rd.set_active_window(ctx_handle as *const _, wnd_handle as *const _);
     rd.mask_overlay_bits(app::OverlayBits::DEFAULT, app::OverlayBits::DEFAULT);
 
     let mut running = true;

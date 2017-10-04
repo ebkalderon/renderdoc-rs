@@ -4,16 +4,17 @@ version = "0.1.0"
 authors = ["Eyal Kalderon <ebkalderon@gmail.com>"]
 description = "RenderDoc application bindings for Rust"
 license = "MIT OR Apache-2.0"
-readme = "README.md"
 repository = "https://github.com/ebkalderon/renderdoc.rs"
-keywords = ["graphics", "profile", "renderdoc", "trace"]
 documentation = ""
+readme = "README.md"
+keywords = ["graphics", "profile", "renderdoc", "trace"]
 
 [dependencies]
 bitflags = "1.0"
 lazy_static = "0.2.8"
-libc = "0.2.30"
 shared_library = "0.1.7"
+
+winit = { version = "0.8", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 winapi = "0.2.8"
@@ -22,7 +23,3 @@ winapi = "0.2.8"
 gfx = "0.16.1"
 gfx_window_glutin = "0.18"
 glutin = "0.10"
-
-# gfx = { path = "/home/ekalderon/gfx/src/render/", version = "0.16.1" }
-# gfx_window_glutin = { path = "/home/ekalderon/gfx/src/window/glutin/", version = "0.18" }
-# glutin = { path = "/home/ekalderon/glutin/", version = "0.10" }
