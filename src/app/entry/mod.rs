@@ -103,7 +103,7 @@ pub type UnloadCrashHandlerFn = unsafe extern "C" fn();
 ///
 /// ```c
 /// SetLogPathTemplateFn("my_captures/example");
-/// 
+///
 /// // This function call will result in the following captures:
 /// //
 /// // Capture #1 -> my_captures/example_frame123.rdc
@@ -170,8 +170,7 @@ pub type LaunchReplayUiFn = unsafe extern "C" fn(connect_target_control: u32,
 /// `wnd_handle` and API device pointer `device`.
 ///
 /// Neither parameter can be `std::ptr::null_mut()`.
-pub type SetActiveWindowFn = unsafe extern "C" fn(device: DevicePointer,
-                                                  wnd_handle: WindowHandle);
+pub type SetActiveWindowFn = unsafe extern "C" fn(device: DevicePointer, wnd_handle: WindowHandle);
 
 /// Immediately starts capturing API calls from the specified device pointer
 /// and window handle.
@@ -180,7 +179,7 @@ pub type SetActiveWindowFn = unsafe extern "C" fn(device: DevicePointer,
 /// `wnd_handle` will be captured, regardless of API device(s). This is useful
 /// if the API device being used isn't necessarily known at runtime.
 ///
-/// If `wnd_handle` is `std::ptr::null_mut()`, then all API calls to `device` 
+/// If `wnd_handle` is `std::ptr::null_mut()`, then all API calls to `device`
 /// will be captured, regardless of its output window(s). This is useful for
 /// headless rendering.
 ///
@@ -203,8 +202,7 @@ pub type IsFrameCapturingFn = unsafe extern "C" fn() -> u32;
 /// Data is saved to a capture log file at the location specified via the
 /// `SetLogFilePathTemplateFn` function call. Returns `1` if the capture
 /// succeeded, otherwise returns `0`.
-pub type EndFrameCaptureFn = unsafe extern "C" fn(device: DevicePointer,
-                                                  wnd_handle: WindowHandle)
+pub type EndFrameCaptureFn = unsafe extern "C" fn(device: DevicePointer, wnd_handle: WindowHandle)
                                                   -> u32;
 
 /// Captures the next _n_ frames from the currently active window and API device.
@@ -249,28 +247,29 @@ pub struct EntryV100 {
 #[repr(C)]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EntryV110 {
-    pub get_api_version: GetApiVersionFn,
-    pub set_capture_option_u32: SetCaptureOptionU32Fn,
-    pub set_capture_option_f32: SetCaptureOptionF32Fn,
-    pub get_capture_option_u32: GetCaptureOptionU32Fn,
-    pub get_capture_option_f32: GetCaptureOptionF32Fn,
-    pub set_focus_toggle_keys: SetFocusToggleKeysFn,
-    pub set_capture_keys: SetCaptureKeysFn,
-    pub get_overlay_bits: GetOverlayBitsFn,
-    pub mask_overlay_bits: MaskOverlayBitsFn,
-    pub shutdown: ShutdownFn,
-    pub unload_crash_handler: UnloadCrashHandlerFn,
-    pub set_log_file_path_template: SetLogFilePathTemplateFn,
-    pub get_log_file_path_template: GetLogFilePathTemplateFn,
-    pub get_num_captures: GetNumCapturesFn,
-    pub get_capture: GetCaptureFn,
-    pub trigger_capture: TriggerCaptureFn,
-    pub is_target_control_connected: IsTargetControlConnectedFn,
-    pub launch_replay_ui: LaunchReplayUiFn,
-    pub set_active_window: SetActiveWindowFn,
-    pub start_frame_capture: StartFrameCaptureFn,
-    pub is_frame_capturing: IsFrameCapturingFn,
-    pub end_frame_capture: EndFrameCaptureFn,
+    // pub get_api_version: GetApiVersionFn,
+    // pub set_capture_option_u32: SetCaptureOptionU32Fn,
+    // pub set_capture_option_f32: SetCaptureOptionF32Fn,
+    // pub get_capture_option_u32: GetCaptureOptionU32Fn,
+    // pub get_capture_option_f32: GetCaptureOptionF32Fn,
+    // pub set_focus_toggle_keys: SetFocusToggleKeysFn,
+    // pub set_capture_keys: SetCaptureKeysFn,
+    // pub get_overlay_bits: GetOverlayBitsFn,
+    // pub mask_overlay_bits: MaskOverlayBitsFn,
+    // pub shutdown: ShutdownFn,
+    // pub unload_crash_handler: UnloadCrashHandlerFn,
+    // pub set_log_file_path_template: SetLogFilePathTemplateFn,
+    // pub get_log_file_path_template: GetLogFilePathTemplateFn,
+    // pub get_num_captures: GetNumCapturesFn,
+    // pub get_capture: GetCaptureFn,
+    // pub trigger_capture: TriggerCaptureFn,
+    // pub is_target_control_connected: IsTargetControlConnectedFn,
+    // pub launch_replay_ui: LaunchReplayUiFn,
+    // pub set_active_window: SetActiveWindowFn,
+    // pub start_frame_capture: StartFrameCaptureFn,
+    // pub is_frame_capturing: IsFrameCapturingFn,
+    // pub end_frame_capture: EndFrameCaptureFn,
+    pub entry_v100: EntryV100,
     pub trigger_multi_frame_capture: TriggerMultiFrameCaptureFn,
 }
 

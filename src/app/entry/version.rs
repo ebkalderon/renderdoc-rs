@@ -1,7 +1,5 @@
 //! API versioning.
 
-use std::rc::Rc;
-
 use app::entry::{EntryV100, EntryV110};
 
 /// Available versions of the RenderDoc API.
@@ -22,23 +20,27 @@ pub enum Version {
 
 /// Initializes a new instance of the RenderDoc API.
 ///
+/// # Safety
+///
 /// This function is not thread-safe and should not be called on multiple
 /// threads at once.
 type GetApiFn<T> = unsafe extern "C" fn(ver: Version, out: *mut *mut T) -> i32;
 
 /// Entry point into the RenderDoc API.
-pub trait ApiVersion: Sized {
+pub trait ApiVersion {
     /// Minimum compatible version number.
     const VERSION: Version;
 
     /// Entry point struct.
-    type Entry;
-    
+    type Entry: Clone;
+
     /// Initializes a new instance of the RenderDoc API.
+    ///
+    /// # Safety
     ///
     /// This function is not thread-safe and should not be called on multiple
     /// threads at once.
-    fn load() -> Result<Rc<Self::Entry>, String> {
+    fn load() -> Result<Self::Entry, String> {
         use std::{mem, ptr};
 
         let api = unsafe {
@@ -50,9 +52,9 @@ pub trait ApiVersion: Sized {
                 Err(ref err) => Err(err.to_string()),
             }?;
 
-            let mut obj: *mut Self::Entry = ptr::null_mut();
+            let mut obj = ptr::null_mut();
             match get_api(Self::VERSION, &mut obj) {
-                1 => Rc::from_raw(obj),
+                1 => ptr::read(obj),
                 _ => Err("Compatible API version not available.")?,
             }
         };

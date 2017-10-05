@@ -2,23 +2,23 @@
 
 pub use self::entry::version::{ApiVersion, V100, V110, V111};
 
-use std::ffi::{CStr, CString};
-use std::os::raw::{c_char, c_ulonglong, c_void};
-use std::{ptr, u32};
-use std::rc::Rc;
+use std::os::raw::{c_ulonglong, c_void};
+use std::u32;
 
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 use winapi::guiddef::GUID;
 #[cfg(feature = "winit")]
 use winit::{self, VirtualKeyCode};
 
 pub mod entry;
+pub mod prelude;
+pub mod version;
 
 /// Magic value used for when applications pass a path where shader debug
 /// information can be found to match up with a stripped shader.
 ///
 /// Windows GUID representation intended for consumption by D3D.
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 pub const SHADER_MAGIC_DEBUG_VALUE_STRUCT: GUID = GUID {
     Data1: 0xeab25520,
     Data2: 0x6670,
@@ -308,153 +308,60 @@ pub type WindowHandle = *const c_void;
 
 /// An instance of the RenderDoc API with baseline version `V`.
 #[derive(Clone, Debug)]
-pub struct RenderDoc<V: ApiVersion> {
-    api: Rc<V::Entry>,
-}
+pub struct RenderDoc<V: ApiVersion>(V::Entry);
 
 impl<V: ApiVersion> RenderDoc<V> {
     /// Initializes a new instance of the RenderDoc API.
     pub fn new() -> Result<RenderDoc<V>, String> {
         let api = V::load()?;
-        Ok(RenderDoc { api })
+        Ok(RenderDoc(api))
+    }
+
+    /// Returns the raw entry point of the API.
+    ///
+    /// # Safety
+    ///
+    /// Using the entry point structure directly will discard any thread safety
+    /// provided by default with this library.
+    pub unsafe fn raw_api(&self) -> V::Entry {
+        self.0.clone()
     }
 }
 
-#[allow(missing_docs)]
-impl RenderDoc<V110> {
-    pub fn get_api_version(&self) -> (u32, u32, u32) {
-        let (mut major, mut minor, mut patch) = (0, 0, 0);
-        unsafe { (self.api.get_api_version)(&mut major, &mut minor, &mut patch); }
-        (major as u32, minor as u32, patch as u32)
+impl self::version::RenderDocV100 for RenderDoc<V100> {
+    unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
+        &self.0
     }
+}
 
-    pub fn set_capture_option_f32(&self, opt: CaptureOption, val: f32) {
-        let err = unsafe { (self.api.set_capture_option_f32)(opt, val) };
-        assert_eq!(err, 1);
+impl self::version::RenderDocV100 for RenderDoc<V110> {
+    unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
+        &self.0.entry_v100
     }
+}
 
-    pub fn set_capture_option_u32(&self, opt: CaptureOption, val: u32) {
-        let err = unsafe { (self.api.set_capture_option_u32)(opt, val) };
-        assert_eq!(err, 1);
+impl self::version::RenderDocV110 for RenderDoc<V110> {
+    unsafe fn entry_v110(&self) -> &self::entry::EntryV110 {
+        &self.0
     }
+}
 
-    pub fn get_capture_option_f32(&self, opt: CaptureOption) -> f32 {
-        use std::f32::MAX;
-        let val = unsafe { (self.api.get_capture_option_f32)(opt) };
-        assert_ne!(val, -MAX);
-        val
+impl self::version::RenderDocV100 for RenderDoc<V111> {
+    unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
+        &self.0.entry_v100
     }
+}
 
-    pub fn get_capture_option_u32(&self, opt: CaptureOption) -> u32 {
-        use std::u32::MAX;
-        let val = unsafe { (self.api.get_capture_option_u32)(opt) };
-        assert_ne!(val, MAX);
-        val
-    }
-
-    pub fn set_capture_keys(&self) {}
-    pub fn set_focus_toggle_keys(&self) {}
-
-    pub fn shutdown(&self) {
-        unsafe { (self.api.shutdown)(); }
-    }
-
-    pub fn unload_crash_handler(&self) {
-        unsafe { (self.api.unload_crash_handler)(); }
-    }
-
-    pub fn get_overlay_bits(&self) -> OverlayBits {
-        unsafe { (self.api.get_overlay_bits)() }
-    }
-
-    pub fn mask_overlay_bits(&self, and: OverlayBits, or: OverlayBits) {
-        unsafe { (self.api.mask_overlay_bits)(and, or); }
-    }
-
-    pub fn get_log_file_path_template(&self) -> &str {
-        unsafe {
-            let raw = (self.api.get_log_file_path_template)();
-            CStr::from_ptr(raw).to_str().unwrap()
-        }
-    }
-
-    pub fn set_log_file_path_template<P: AsRef<str>>(&self, path_template: P) {
-        let bytes = path_template.as_ref().as_bytes();
-        unsafe {
-            let pt = CStr::from_bytes_with_nul_unchecked(bytes);
-            (self.api.set_log_file_path_template)(pt.as_ptr());
-        }
-    }
-
-    pub fn get_num_captures(&self) -> u32 {
-        unsafe { (self.api.get_num_captures)() }
-    }
-
-    pub fn get_capture(&self, index: u32) -> Option<(String, u64)> {
-        unsafe {
-            let path: *mut c_char = ptr::null_mut();
-            let path_len: *mut u32 = ptr::null_mut();
-            let time: *mut u64 = ptr::null_mut();
-
-            if (self.api.get_capture)(index, path, path_len, time) == 1 {
-
-                let name = CString::from_raw(path).into_string().unwrap();
-                Some((name, *time))
-            } else {
-                None
-            }
-        }
-    }
-
-    pub fn trigger_capture(&self) {
-        unsafe { (self.api.trigger_capture)(); }
-    }
-
-    pub fn is_target_control_connected(&self) -> bool {
-        unsafe { (self.api.is_target_control_connected)() == 1 }
-    }
-
-    pub fn launch_replay_ui<C: Into<Option<&'static str>>>(&self, cmd_line: C) -> Result<u32, ()> {
-        unsafe {
-            let with_cmd = cmd_line.into();
-            let (enabled, cmd_text) = if let Some(ref cmd) = with_cmd {
-                let bytes = cmd.as_bytes();
-                (1, CStr::from_bytes_with_nul_unchecked(bytes))
-            } else {
-                (0, Default::default())
-            };
-
-            match (self.api.launch_replay_ui)(enabled, cmd_text.as_ptr()) {
-                0 => Err(()),
-                pid => Ok(pid)
-            }
-        }
-    }
-
-    pub fn set_active_window(&self, dev: DevicePointer, win: WindowHandle) {
-        unsafe { (self.api.set_active_window)(dev, win); }
-    }
-
-    pub fn start_frame_capture(&self, dev: DevicePointer, win: WindowHandle) {
-        unsafe { (self.api.start_frame_capture)(dev, win); }
-    }
-
-    pub fn is_frame_capturing(&self) -> bool {
-        unsafe { (self.api.is_frame_capturing)() == 1 }
-    }
-
-    pub fn end_frame_capture(&self, dev: DevicePointer, win: WindowHandle) {
-        unsafe { (self.api.end_frame_capture)(dev, win); }
-    }
-
-    pub fn trigger_multi_frame_capture(&self, num_frames: u32) {
-        unsafe { (self.api.trigger_multi_frame_capture)(num_frames); }
+impl self::version::RenderDocV110 for RenderDoc<V111> {
+    unsafe fn entry_v110(&self) -> &self::entry::EntryV110 {
+        &self.0
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::version::*;
 
     #[test]
     fn get_api_version() {
@@ -466,7 +373,7 @@ mod tests {
 
     #[test]
     fn get_set_capture_option_f32() {
-        let rd: RenderDoc<V110> = RenderDoc::new().expect("Failed to init");
+        let mut rd: RenderDoc<V110> = RenderDoc::new().expect("Failed to init");
 
         let delay = rd.get_capture_option_f32(CaptureOption::DelayForDebugger);
         assert_eq!(delay, 0.0f32);
