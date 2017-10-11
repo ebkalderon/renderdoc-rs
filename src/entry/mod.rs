@@ -58,14 +58,14 @@ pub type GetCaptureOptionF32Fn = unsafe extern "C" fn(opt: CaptureOption) -> f32
 
 /// Sets which key(s) can be used to toggle focus between multiple windows.
 ///
-/// If `keys` is `std::ptr::null_mut()`, then window toggling will be disabled.
-pub type SetFocusToggleKeysFn = unsafe extern "C" fn(keys: *mut InputButton, num: c_int);
+/// If `keys` is `std::ptr::null()`, then window toggling will be disabled.
+pub type SetFocusToggleKeysFn = unsafe extern "C" fn(keys: *const InputButton, num: c_int);
 
 /// Sets which key(s) can be used to capture the next frame.
 ///
-/// If `keys` is `std::ptr::null_mut()`, then frame capture functionality will
+/// If `keys` is `std::ptr::null()`, then frame capture functionality will
 /// be disabled.
-pub type SetCaptureKeysFn = unsafe extern "C" fn(keys: *mut InputButton, num: c_int);
+pub type SetCaptureKeysFn = unsafe extern "C" fn(keys: *const InputButton, num: c_int);
 
 /// Returns the `OverlayBits` that have been set.
 pub type GetOverlayBitsFn = unsafe extern "C" fn() -> OverlayBits;

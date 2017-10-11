@@ -2,10 +2,12 @@
 
 #![allow(missing_docs)]
 
-use {CaptureOption, DevicePointer, OverlayBits, WindowHandle};
+use {CaptureOption, DevicePointer, OverlayBits, InputButton, WindowHandle};
 use entry::{EntryV100, EntryV110};
 
 use std::ffi::{CStr, CString};
+use std::mem;
+use std::path::Path;
 
 pub trait RenderDocV100: Sized {
     unsafe fn entry_v100(&self) -> &EntryV100;
@@ -42,9 +44,19 @@ pub trait RenderDocV100: Sized {
         val
     }
 
-    fn set_capture_keys(&mut self) {}
+    fn set_capture_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
+        unsafe {
+            let k: Vec<_> = keys.iter().cloned().map(|k| k.into()).collect();
+            (self.entry_v100().set_capture_keys)(k.as_ptr(), k.len() as i32)
+        }
+    }
 
-    fn set_focus_toggle_keys(&mut self) {}
+    fn set_focus_toggle_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
+        unsafe {
+            let k: Vec<_> = keys.iter().cloned().map(|k| k.into()).collect();
+            (self.entry_v100().set_focus_toggle_keys)(k.as_ptr(), k.len() as i32)
+        }
+    }
 
     unsafe fn shutdown(self) {
         (self.entry_v100().shutdown)();
@@ -73,11 +85,11 @@ pub trait RenderDocV100: Sized {
         }
     }
 
-    fn set_log_file_path_template<P: AsRef<str>>(&mut self, path_template: P) {
-        let bytes = path_template.as_ref().as_bytes();
+    fn set_log_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
         unsafe {
-            let pt = CStr::from_bytes_with_nul_unchecked(bytes);
-            (self.entry_v100().set_log_file_path_template)(pt.as_ptr());
+            let bytes = mem::transmute(path_template.as_ref().as_os_str());
+            let cstr = CStr::from_bytes_with_nul_unchecked(bytes);
+            (self.entry_v100().set_log_file_path_template)(cstr.as_ptr());
         }
     }
 
@@ -116,14 +128,14 @@ pub trait RenderDocV100: Sized {
     fn launch_replay_ui<C: Into<Option<&'static str>>>(&self, cmd_line: C) -> Result<u32, ()> {
         unsafe {
             let with_cmd = cmd_line.into();
-            let (enabled, cmd_text) = if let Some(ref cmd) = with_cmd {
+            let (enabled, text) = if let Some(ref cmd) = with_cmd {
                 let bytes = cmd.as_bytes();
                 (1, CStr::from_bytes_with_nul_unchecked(bytes))
             } else {
                 (0, Default::default())
             };
 
-            match (self.entry_v100().launch_replay_ui)(enabled, cmd_text.as_ptr()) {
+            match (self.entry_v100().launch_replay_ui)(enabled, text.as_ptr()) {
                 0 => Err(()),
                 pid => Ok(pid),
             }
