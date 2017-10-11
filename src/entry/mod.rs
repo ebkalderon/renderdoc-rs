@@ -5,7 +5,7 @@ use std::path::Path;
 
 use shared_library::dynamic_library::DynamicLibrary;
 
-use super::{CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
+use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 
 pub mod version;
 

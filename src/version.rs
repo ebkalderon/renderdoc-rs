@@ -2,8 +2,8 @@
 
 #![allow(missing_docs)]
 
-use app::{CaptureOption, DevicePointer, OverlayBits, WindowHandle};
-use app::entry::{EntryV100, EntryV110};
+use {CaptureOption, DevicePointer, OverlayBits, WindowHandle};
+use entry::{EntryV100, EntryV110};
 
 use std::ffi::{CStr, CString};
 

@@ -1,6 +1,6 @@
 //! API versioning.
 
-use app::entry::{EntryV100, EntryV110};
+use entry::{EntryV100, EntryV110};
 
 /// Available versions of the RenderDoc API.
 #[repr(u32)]

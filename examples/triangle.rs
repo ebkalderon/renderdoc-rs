@@ -21,8 +21,8 @@ extern crate renderdoc;
 use gfx::traits::FactoryExt;
 use gfx::Device;
 use glutin::GlContext;
-use renderdoc::app::{self, RenderDoc, V110};
-use renderdoc::app::prelude::*;
+use renderdoc::{OverlayBits, RenderDoc, V110};
+use renderdoc::prelude::*;
 
 pub type ColorFormat = gfx::format::Rgba8;
 pub type DepthFormat = gfx::format::DepthStencil;
@@ -80,7 +80,7 @@ pub fn main() {
         out: main_color,
     };
 
-    rd.mask_overlay_bits(app::OverlayBits::DEFAULT, app::OverlayBits::DEFAULT);
+    rd.mask_overlay_bits(OverlayBits::DEFAULT, OverlayBits::DEFAULT);
 
     let mut running = true;
     while running {
