@@ -1,10 +1,13 @@
 # renderdoc-rs
 
-Rust bindings to [RenderDoc], a popular industry-grade graphics debugger.
+Rust bindings to [RenderDoc], a popular graphics debugger.
 
 [RenderDoc]: https://renderdoc.org/
 
-## Prerequisites
+RenderDoc is a free and open source graphics debugging tool. RenderDoc allows
+game developers to take frame captures of their applications, replay them,
+examine the graphics pipeline state, and potentially identify nasty graphics
+bugs.
 
 These bindings require that RenderDoc be installed on the target machine, with
 either `renderdoc.dll` or `librenderdoc.so` visible from your`PATH`.
