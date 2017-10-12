@@ -14,7 +14,7 @@ either `renderdoc.dll` or `librenderdoc.so` visible from your`PATH`.
 ```rust
 extern crate renderdoc;
 
-use renderdoc::{RenderDoc, V110};
+use renderdoc::{RenderDoc, V100, V110};
 use renderdoc::prelude::*;
 
 fn main() {
@@ -36,6 +36,12 @@ fn main() {
         Some(cap) => println!("ID: 0, Path: {}, Timestamp: {}", cap.0, cap.1),
         None => println!("No capture found with ID of 0!"),
     }
+
+    // Downgrade your effective API version at run-time like this.
+    let mut rd: RenderDoc<V100> = rd.into();
+
+    // Now this line will no longer compile!
+    // rd.trigger_multi_frame_capture(3);
 }
 ```
 
