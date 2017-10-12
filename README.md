@@ -1,4 +1,4 @@
-# RenderDoc
+# renderdoc-rs
 
 Rust bindings to [RenderDoc], a popular industry-grade graphics debugger.
 
