@@ -1,4 +1,4 @@
-//! Bindings to RenderDoc in-application API.
+//! RenderDoc application bindings for Rust
 
 #![deny(missing_docs)]
 
