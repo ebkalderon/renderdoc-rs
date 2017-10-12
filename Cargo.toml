@@ -4,10 +4,13 @@ version = "0.1.0"
 authors = ["Eyal Kalderon <ebkalderon@gmail.com>"]
 description = "RenderDoc application bindings for Rust"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/ebkalderon/renderdoc.rs"
-documentation = ""
+repository = "https://github.com/ebkalderon/renderdoc-rs"
+documentation = "https://docs.rs/renderdoc/"
 readme = "README.md"
 keywords = ["graphics", "profile", "renderdoc", "trace"]
+
+[features]
+default = ["winit"]
 
 [dependencies]
 bitflags = "1.0"

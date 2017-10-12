@@ -16,7 +16,7 @@ extern crate winapi;
 #[cfg(feature = "winit")]
 extern crate winit;
 
-pub use self::entry::version::{ApiVersion, V100, V110, V111};
+pub use self::entry::version::{ApiVersion, V100, V110};
 
 use std::os::raw::{c_ulonglong, c_void};
 use std::u32;
@@ -24,11 +24,11 @@ use std::u32;
 #[cfg(windows)]
 use winapi::guiddef::GUID;
 #[cfg(feature = "winit")]
-use winit::{self, VirtualKeyCode};
+use winit::VirtualKeyCode;
 
+pub mod api;
 pub mod entry;
 pub mod prelude;
-pub mod version;
 
 /// Magic value used for when applications pass a path where shader debug
 /// information can be found to match up with a stripped shader.
@@ -344,31 +344,19 @@ impl<V: ApiVersion> RenderDoc<V> {
     }
 }
 
-impl self::version::RenderDocV100 for RenderDoc<V100> {
+impl self::api::RenderDocV100 for RenderDoc<V100> {
     unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
         &self.0
     }
 }
 
-impl self::version::RenderDocV100 for RenderDoc<V110> {
+impl self::api::RenderDocV100 for RenderDoc<V110> {
     unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
         &self.0.entry_v100
     }
 }
 
-impl self::version::RenderDocV110 for RenderDoc<V110> {
-    unsafe fn entry_v110(&self) -> &self::entry::EntryV110 {
-        &self.0
-    }
-}
-
-impl self::version::RenderDocV100 for RenderDoc<V111> {
-    unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
-        &self.0.entry_v100
-    }
-}
-
-impl self::version::RenderDocV110 for RenderDoc<V111> {
+impl self::api::RenderDocV110 for RenderDoc<V110> {
     unsafe fn entry_v110(&self) -> &self::entry::EntryV110 {
         &self.0
     }
@@ -377,15 +365,7 @@ impl self::version::RenderDocV110 for RenderDoc<V111> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::version::*;
-
-    #[test]
-    fn get_api_version() {
-        let rd: RenderDoc<V110> = RenderDoc::new().expect("Failed to init");
-        let (major, minor, _) = rd.get_api_version();
-        assert!(major >= 1u32);
-        assert!(minor >= 1u32);
-    }
+    use super::api::*;
 
     #[test]
     fn get_set_capture_option_f32() {

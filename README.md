@@ -1,3 +1,52 @@
 # RenderDoc
 
-This crate is WIP
+Rust bindings to [RenderDoc], a popular industry-grade graphics debugger.
+
+[RenderDoc]: https://renderdoc.org/
+
+## Prerequisites
+
+These bindings require that RenderDoc be installed and accessible system-wide
+on the target workstation.
+
+## Example
+
+```rust
+extern crate renderdoc;
+
+use renderdoc::{RenderDoc, V110};
+use renderdoc::prelude::*;
+
+fn main() {
+    let mut rd: RenderDoc<V110> = RenderDoc::new().expect("Failed to init");
+
+    let (major, minor, patch) = rd.get_api_version();
+    assert_eq!(major, 1u32);
+    assert_eq!(minor, 1u32);
+
+    // When a certain key is pressed, trigger a single-frame capture like this.
+    rd.trigger_capture();
+
+    // If you specify version `V110` or newer, you can trigger a multi-frame
+    // capture like this.
+    rd.trigger_multi_frame_capture(3);
+
+    // Query the details of an existing capture like this.
+    match rd.get_capture(0) {
+        Some(cap) => println!("ID: 0, Path: {}, Timestamp: {}", cap.0, cap.1),
+        None => println!("No capture found with ID of 0!"),
+    }
+}
+```
+
+## License
+
+`renderdoc-rs` is free and open source software distributed under the terms of
+both the [MIT License][lm] and the [Apache License 2.0][la].
+
+[lm]: LICENSE-MIT
+[la]: LICENSE-APACHE
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
+dual licensed as above, without any additional terms or conditions.

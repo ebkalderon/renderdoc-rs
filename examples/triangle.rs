@@ -80,11 +80,12 @@ pub fn main() {
         out: main_color,
     };
 
+    rd.set_focus_toggle_keys(&[glutin::VirtualKeyCode::F]);
+    rd.set_capture_keys(&[glutin::VirtualKeyCode::C]);
     rd.mask_overlay_bits(OverlayBits::DEFAULT, OverlayBits::DEFAULT);
 
     let mut running = true;
     while running {
-        // fetch events
         events_loop.poll_events(|event| if let glutin::Event::WindowEvent {
             event, ..
         } = event
@@ -92,12 +93,17 @@ pub fn main() {
             match event {
                 glutin::WindowEvent::KeyboardInput {
                     input: glutin::KeyboardInput {
-                        virtual_keycode: Some(glutin::VirtualKeyCode::C),
+                        virtual_keycode: Some(glutin::VirtualKeyCode::R),
                         state: glutin::ElementState::Pressed,
                         ..
                     },
                     ..
-                } => rd.trigger_capture(),
+                } => {
+                    match rd.launch_replay_ui(None) {
+                        Ok(pid) => println!("Launched replay UI ({}).", pid),
+                        Err(err) => println!("{:?}", err),
+                    }
+                }
                 glutin::WindowEvent::KeyboardInput {
                     input: glutin::KeyboardInput {
                         virtual_keycode: Some(glutin::VirtualKeyCode::Escape), ..

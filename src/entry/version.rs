@@ -80,12 +80,3 @@ impl ApiVersion for V110 {
 
     type Entry = EntryV110;
 }
-
-/// Requests a minimum version number of 1.1.1.
-pub enum V111 {}
-
-impl ApiVersion for V111 {
-    const VERSION: Version = Version::V111;
-
-    type Entry = EntryV110;
-}
