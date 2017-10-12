@@ -6,8 +6,8 @@ Rust bindings to [RenderDoc], a popular industry-grade graphics debugger.
 
 ## Prerequisites
 
-These bindings require that RenderDoc be installed and accessible system-wide
-on the target workstation.
+These bindings require that RenderDoc be installed on the target machine, with
+either `renderdoc.dll` or `librenderdoc.so` visible from your`PATH`.
 
 ## Example
 
@@ -39,13 +39,12 @@ fn main() {
 }
 ```
 
+Working examples are available in the `examples` directory.
+
 ## License
 
 `renderdoc-rs` is free and open source software distributed under the terms of
-both the [MIT License][lm] and the [Apache License 2.0][la].
-
-[lm]: LICENSE-MIT
-[la]: LICENSE-APACHE
+both the [MIT](LICENSE-MIT) and the [Apache 2.0](LICENSE-APACHE) licenses.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be

@@ -344,19 +344,25 @@ impl<V: ApiVersion> RenderDoc<V> {
     }
 }
 
-impl self::api::RenderDocV100 for RenderDoc<V100> {
+impl From<RenderDoc<V110>> for RenderDoc<V100> {
+    fn from(newer: RenderDoc<V110>) -> RenderDoc<V100> {
+        RenderDoc(newer.0.entry_v100)
+    }
+}
+
+impl api::RenderDocV100 for RenderDoc<V100> {
     unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
         &self.0
     }
 }
 
-impl self::api::RenderDocV100 for RenderDoc<V110> {
+impl api::RenderDocV100 for RenderDoc<V110> {
     unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
         &self.0.entry_v100
     }
 }
 
-impl self::api::RenderDocV110 for RenderDoc<V110> {
+impl api::RenderDocV110 for RenderDoc<V110> {
     unsafe fn entry_v110(&self) -> &self::entry::EntryV110 {
         &self.0
     }
