@@ -200,16 +200,22 @@ pub trait RenderDocV100: Sized {
     }
 
     #[allow(missing_docs)]
-    fn set_active_window(&mut self, dev: DevicePointer, win: WindowHandle) {
+    fn set_active_window<D>(&mut self, dev: D, win: WindowHandle)
+    where
+        D: Into<DevicePointer>,
+    {
         unsafe {
-            (self.entry_v100().set_active_window)(dev, win);
+            (self.entry_v100().set_active_window)(dev.into(), win);
         }
     }
 
     #[allow(missing_docs)]
-    fn start_frame_capture(&mut self, dev: DevicePointer, win: WindowHandle) {
+    fn start_frame_capture<D>(&mut self, dev: D, win: WindowHandle)
+    where
+        D: Into<DevicePointer>,
+    {
         unsafe {
-            (self.entry_v100().start_frame_capture)(dev, win);
+            (self.entry_v100().start_frame_capture)(dev.into(), win);
         }
     }
 
@@ -235,9 +241,12 @@ pub trait RenderDocV100: Sized {
     }
 
     #[allow(missing_docs)]
-    fn end_frame_capture(&mut self, dev: DevicePointer, win: WindowHandle) {
+    fn end_frame_capture<D>(&mut self, dev: D, win: WindowHandle)
+    where
+        D: Into<DevicePointer>,
+    {
         unsafe {
-            (self.entry_v100().end_frame_capture)(dev, win);
+            (self.entry_v100().end_frame_capture)(dev.into(), win);
         }
     }
 }

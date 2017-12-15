@@ -1,6 +1,6 @@
 [package]
 name = "renderdoc"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Eyal Kalderon <ebkalderon@gmail.com>"]
 description = "RenderDoc application bindings for Rust"
 license = "MIT OR Apache-2.0"
@@ -10,19 +10,20 @@ readme = "README.md"
 keywords = ["graphics", "profile", "renderdoc", "trace"]
 
 [features]
-default = ["winit"]
+default = ["glutin"]
 
 [dependencies]
 bitflags = "1.0"
 lazy_static = "0.2.8"
-shared_library = "0.1.7"
+shared_library = "0.1.8"
 
-winit = { version = "0.8", optional = true }
+glutin = { version = "0.11", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 winapi = "0.2.8"
+wio = "0.1.2"
 
 [dev-dependencies]
-gfx = "0.16.1"
-gfx_window_glutin = "0.18"
-glutin = "0.10"
+gfx = "0.16.2"
+gfx_window_glutin = "0.19"
+glutin = "0.11"

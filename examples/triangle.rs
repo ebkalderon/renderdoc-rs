@@ -80,6 +80,7 @@ pub fn main() {
         out: main_color,
     };
 
+    rd.set_active_window(window.context(), ::std::ptr::null());
     rd.set_focus_toggle_keys(&[glutin::VirtualKeyCode::F]);
     rd.set_capture_keys(&[glutin::VirtualKeyCode::C]);
     rd.mask_overlay_bits(OverlayBits::DEFAULT, OverlayBits::DEFAULT);

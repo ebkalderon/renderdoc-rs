@@ -11,20 +11,25 @@ extern crate bitflags;
 extern crate lazy_static;
 extern crate shared_library;
 
+#[cfg(feature = "glutin")]
+extern crate glutin;
 #[cfg(target_os = "windows")]
 extern crate winapi;
-#[cfg(feature = "winit")]
-extern crate winit;
+#[cfg(target_os = "windows")]
+extern crate wio;
 
 pub use self::entry::version::{ApiVersion, V100, V110};
 
+use std::ops;
 use std::os::raw::{c_ulonglong, c_void};
 use std::u32;
 
+#[cfg(feature = "glutin")]
+use glutin::VirtualKeyCode;
 #[cfg(windows)]
 use winapi::guiddef::GUID;
-#[cfg(feature = "winit")]
-use winit::VirtualKeyCode;
+#[cfg(windows)]
+use wio::com::ComPtr;
 
 pub mod api;
 pub mod entry;
@@ -39,7 +44,7 @@ pub const SHADER_MAGIC_DEBUG_VALUE_STRUCT: GUID = GUID {
     Data1: 0xeab25520,
     Data2: 0x6670,
     Data3: 0x4865,
-    Data4: [0x84, 0x29, 0x6c, 0x8, 0x51, 0x00, 0xff],
+    Data4: [0x84, 0x29, 0x6c, 0x8, 0x51, 0x54, 0x00, 0xff],
 };
 
 /// Magic value used for when applications pass a path where shader debug
@@ -132,7 +137,88 @@ pub enum CaptureOption {
 ///
 /// For example, this could be a pointer to an `ID3D11Device`,
 /// `HGLRC`/`GLXContext`, `ID3D12Device`, etc.
-pub type DevicePointer = *const c_void;
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+pub struct DevicePointer(*const c_void);
+
+impl ops::Deref for DevicePointer {
+    type Target = *const c_void;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<*const c_void> for DevicePointer {
+    fn from(ptr: *const c_void) -> Self {
+        DevicePointer(ptr)
+    }
+}
+
+impl From<*mut c_void> for DevicePointer {
+    fn from(ptr: *mut c_void) -> Self {
+        DevicePointer(ptr)
+    }
+}
+
+#[cfg(windows)]
+impl From<winapi::windef::HGLRC> for DevicePointer {
+    fn from(ctx: winapi::windef::HGLRC) -> Self {
+        DevicePointer(ctx as *mut _ as *const c_void)
+    }
+}
+
+#[cfg(windows)]
+impl From<*mut winapi::ID3D11Device> for DevicePointer {
+    fn from(ctx: *mut winapi::ID3D11Device) -> Self {
+        DevicePointer(ctx as *mut _ as *const c_void)
+    }
+}
+
+#[cfg(windows)]
+impl From<ComPtr<winapi::ID3D11Device>> for DevicePointer {
+    fn from(ctx: ComPtr<winapi::ID3D11Device>) -> Self {
+        unsafe { DevicePointer(ctx.as_mut() as *mut _ as *const c_void) }
+    }
+}
+
+#[cfg(windows)]
+impl From<*mut winapi::ID3D12Device> for DevicePointer {
+    fn from(ctx: *mut winapi::ID3D12Device) -> Self {
+        DevicePointer(ctx as *mut _ as *const c_void)
+    }
+}
+
+#[cfg(windows)]
+impl From<ComPtr<winapi::ID3D12Device>> for DevicePointer {
+    fn from(ctx: ComPtr<winapi::ID3D12Device>) -> Self {
+        unsafe { DevicePointer(ctx.as_mut() as *mut _ as *const c_void) }
+    }
+}
+
+#[cfg(feature = "glutin")]
+impl<'a> From<&'a glutin::Context> for DevicePointer {
+    fn from(ctx: &'a glutin::Context) -> Self {
+        use glutin::os::GlContextExt;
+
+        #[cfg(unix)]
+        unsafe {
+            use glutin::os::unix::RawHandle;
+            match ctx.raw_handle() {
+                RawHandle::Glx(glx) => DevicePointer::from(glx),
+                _ => panic!("RenderDoc only supports GLX contexts on Unix!"),
+            }
+        }
+
+        #[cfg(windows)]
+        unsafe {
+            use glutin::os::windows::RawHandle;
+            match ctx.raw_handle() {
+                RawHandle::Wgl(wgl) => DevicePointer::from(wgl),
+                _ => panic!("RenderDoc only supports WGL contexts on Windows!"),
+            }
+        }
+    }
+}
 
 /// User input key codes.
 #[allow(missing_docs)]
@@ -228,9 +314,9 @@ pub enum InputButton {
     Max,
 }
 
-#[cfg(feature = "winit")]
-impl From<winit::VirtualKeyCode> for InputButton {
-    fn from(code: winit::VirtualKeyCode) -> InputButton {
+#[cfg(feature = "glutin")]
+impl From<glutin::VirtualKeyCode> for InputButton {
+    fn from(code: glutin::VirtualKeyCode) -> InputButton {
         match code {
             VirtualKeyCode::Key1 => InputButton::Key1,
             VirtualKeyCode::Key2 => InputButton::Key2,
