@@ -31,11 +31,18 @@ const char *CaptureFile::RecordedMachineIdent() {
     return this->inner->RecordedMachineIdent();
 }
 
-rdctype::pair<ReplayStatus, ReplayController> CaptureFile::OpenCapture(float *progress) {
+rdctype::pair<ReplayStatus, ReplayController*> CaptureFile::OpenCapture(
+    float *progress
+) {
     auto result = this->inner->OpenCapture(progress);
+
     if (result.first == ReplayStatus::Succeeded) {
-        
+        ReplayController *ctrl = new ReplayController;
+        ctrl->inner = result.second;
+        return { result.first, ctrl };
     }
+
+    return { result.first, NULL };
 }
 
 rdctype::array<byte> CaptureFile::GetThumbnail(FileType type, uint32_t maxsize) {

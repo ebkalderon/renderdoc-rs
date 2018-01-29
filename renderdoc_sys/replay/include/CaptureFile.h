@@ -5,9 +5,6 @@
 
 #include "../../renderdoc/renderdoc/api/replay/basic_types.h"
 
-typedef uint8_t byte;
-
-enum class FileType : uint32_t;
 class ReplayController;
 enum class ReplayStatus : uint32_t;
 enum class ReplaySupport : uint32_t;
@@ -24,7 +21,7 @@ public:
     const char *DriverName();
     const char *RecordedMachineIdent();
 
-    rdctype::pair<ReplayStatus, ReplayController> OpenCapture(float *progress);
+    rdctype::pair<ReplayStatus, ReplayController*> OpenCapture(float *progress);
     rdctype::array<byte> GetThumbnail(FileType type, uint32_t maxsize);
 
 private:

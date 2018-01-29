@@ -41,7 +41,6 @@ fn main() {
         .whitelist_type("pRENDERDOC_.*")
         .whitelist_type("ReplayStatus")
         .whitelist_type("Shader.*")
-        .whitelist_type("TargetControl.*")
         .whitelist_type("Texture.*")
         .whitelist_type("Window.*")
         .whitelist_type("XCBWindowData")
@@ -50,9 +49,11 @@ fn main() {
         // Custom wrapper types.
         .whitelist_type("Camera")
         .whitelist_type("CaptureFile")
+        .whitelist_type("RemoteServer")
         .whitelist_type("ReplayController")
+        .whitelist_type("ReplayOutput")
         .whitelist_type("TargetControl")
-        .opaque_type("Camera")
+        // .opaque_type("Camera")
         .generate_inline_functions(true)
         .generate()
         .expect("Unable to generate replay bindings!");
@@ -63,8 +64,12 @@ fn main() {
 
     cc::Build::new()
         .include("replay")
+        .include("renderdoc")
         .file("replay/src/Camera.cpp")
         .file("replay/src/CaptureFile.cpp")
+        .file("replay/src/RemoteServer.cpp")
+        .file("replay/src/ReplayController.cpp")
+        .file("replay/src/ReplayOutput.cpp")
         .file("replay/src/TargetControl.cpp")
         .define("RENDERDOC_PLATFORM_LINUX", None)
         .define("RENDERDOC_WINDOWING_XLIB", None)

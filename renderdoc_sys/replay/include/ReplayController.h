@@ -3,13 +3,6 @@
 
 #include <cstdint>
 
-#include "../../renderdoc/renderdoc/api/replay/basic_types.h"
-#include "../../renderdoc/renderdoc/api/replay/d3d11_pipestate.h"
-#include "../../renderdoc/renderdoc/api/replay/d3d12_pipestate.h"
-#include "../../renderdoc/renderdoc/api/replay/gl_pipestate.h"
-#include "../../renderdoc/renderdoc/api/replay/shader_types.h"
-#include "../../renderdoc/renderdoc/api/replay/vk_pipestate.h"
-
 class ReplayOutput;
 
 class ReplayController {
@@ -117,6 +110,9 @@ protected:
     ~ReplayController() = default;
 
 private:
+    friend class CaptureFile;
+    friend class RemoteServer;
+
     class IReplayController *inner;
 };
 

@@ -7,6 +7,8 @@ class TargetControlMessage;
 
 class TargetControl {
 public:
+    static uint32_t EnumerateRemoteTargets(const char *host, uint32_t nextIdent);
+
     TargetControl(const char *host, uint32_t ident, const char *clientName,
                   bool forceConnection);
     ~TargetControl();

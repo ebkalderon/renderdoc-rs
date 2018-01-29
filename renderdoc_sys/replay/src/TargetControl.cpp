@@ -52,6 +52,10 @@ TargetControlMessage TargetControl::ReceiveMessage() {
     return this->inner->ReceiveMessage();
 }
 
+uint32_t TargetControl::EnumerateRemoteTargets(const char *host, uint32_t nextIdent) {
+    return RENDERDOC_EnumerateRemoteTargets(host, nextIdent);
+}
+
 void TargetControl::Shutdown() {
     this->inner->Shutdown();
 }
