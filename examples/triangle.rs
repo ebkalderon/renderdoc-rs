@@ -87,36 +87,36 @@ pub fn main() {
 
     let mut running = true;
     while running {
-        events_loop.poll_events(|event| if let glutin::Event::WindowEvent {
-            event, ..
-        } = event
-        {
-            match event {
-                glutin::WindowEvent::KeyboardInput {
-                    input: glutin::KeyboardInput {
-                        virtual_keycode: Some(glutin::VirtualKeyCode::R),
-                        state: glutin::ElementState::Pressed,
+        events_loop.poll_events(|event| {
+            if let glutin::Event::WindowEvent { event, .. } = event {
+                match event {
+                    glutin::WindowEvent::KeyboardInput {
+                        input:
+                            glutin::KeyboardInput {
+                                virtual_keycode: Some(glutin::VirtualKeyCode::R),
+                                state: glutin::ElementState::Pressed,
+                                ..
+                            },
                         ..
-                    },
-                    ..
-                } => {
-                    match rd.launch_replay_ui(None) {
+                    } => match rd.launch_replay_ui(None) {
                         Ok(pid) => println!("Launched replay UI ({}).", pid),
                         Err(err) => println!("{:?}", err),
-                    }
-                }
-                glutin::WindowEvent::KeyboardInput {
-                    input: glutin::KeyboardInput {
-                        virtual_keycode: Some(glutin::VirtualKeyCode::Escape), ..
                     },
-                    ..
-                } |
-                glutin::WindowEvent::Closed => running = false,
-                glutin::WindowEvent::Resized(width, height) => {
-                    window.resize(width, height);
-                    gfx_window_glutin::update_views(&window, &mut data.out, &mut main_depth);
+                    glutin::WindowEvent::KeyboardInput {
+                        input:
+                            glutin::KeyboardInput {
+                                virtual_keycode: Some(glutin::VirtualKeyCode::Escape),
+                                ..
+                            },
+                        ..
+                    }
+                    | glutin::WindowEvent::Closed => running = false,
+                    glutin::WindowEvent::Resized(width, height) => {
+                        window.resize(width, height);
+                        gfx_window_glutin::update_views(&window, &mut data.out, &mut main_depth);
+                    }
+                    _ => (),
                 }
-                _ => (),
             }
         });
 

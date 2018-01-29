@@ -1,6 +1,6 @@
 //! Traits providing compile-time API functionality.
 
-use {CaptureOption, DevicePointer, OverlayBits, InputButton, WindowHandle};
+use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 use entry::{EntryV100, EntryV110};
 
 use std::ffi::{CStr, CString};

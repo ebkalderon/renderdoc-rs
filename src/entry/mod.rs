@@ -30,9 +30,8 @@ lazy_static! {
 /// requested by the user if it's backwards compatible. If a parameter is
 /// `std::ptr::null_mut()`, it will be ignored while the others will be filled
 /// out.
-pub type GetApiVersionFn = unsafe extern "C" fn(major: *mut c_int,
-                                                minor: *mut c_int,
-                                                patch: *mut c_int);
+pub type GetApiVersionFn =
+    unsafe extern "C" fn(major: *mut c_int, minor: *mut c_int, patch: *mut c_int);
 
 /// Sets the specified `CaptureOption` to the given `u32` value.
 ///
@@ -131,11 +130,9 @@ pub type GetNumCapturesFn = unsafe extern "C" fn() -> u32;
 ///
 /// Returns `1` if the capture index is valid. Otherwise, returns `0` and leaves
 /// the values of `log_file`, `path_len`, and `timestamp` all unchanged.
-pub type GetCaptureFn = unsafe extern "C" fn(idx: u32,
-                                             log_file: *mut c_char,
-                                             path_len: *mut u32,
-                                             timestamp: *mut u64)
-                                             -> u32;
+pub type GetCaptureFn =
+    unsafe extern "C" fn(idx: u32, log_file: *mut c_char, path_len: *mut u32, timestamp: *mut u64)
+        -> u32;
 
 /// Captures the next frame from the currently active window and API device.
 ///
@@ -162,9 +159,8 @@ pub type IsTargetControlConnectedFn = unsafe extern "C" fn() -> u32;
 /// `cmd_line` is `std::ptr::null()`, then the command line will be empty.
 ///
 /// Returns the PID of the replay UI if successful, otherwise returns `0`.
-pub type LaunchReplayUiFn = unsafe extern "C" fn(connect_target_control: u32,
-                                                 cmd_line: *const c_char)
-                                                 -> u32;
+pub type LaunchReplayUiFn =
+    unsafe extern "C" fn(connect_target_control: u32, cmd_line: *const c_char) -> u32;
 
 /// Activates the RenderDoc in-app overlay inside the given window handle
 /// `wnd_handle` and API device pointer `device`.
@@ -191,8 +187,8 @@ pub type SetActiveWindowFn = unsafe extern "C" fn(device: DevicePointer, wnd_han
 ///
 /// If two or more started captures overlap each other, then this will result
 /// in undefined behavior (including crashes).
-pub type StartFrameCaptureFn = unsafe extern "C" fn(device: DevicePointer,
-                                                    wnd_handle: WindowHandle);
+pub type StartFrameCaptureFn =
+    unsafe extern "C" fn(device: DevicePointer, wnd_handle: WindowHandle);
 
 /// Returns whether or not a frame capture is currently ongoing anywhere.
 pub type IsFrameCapturingFn = unsafe extern "C" fn() -> u32;
@@ -202,8 +198,8 @@ pub type IsFrameCapturingFn = unsafe extern "C" fn() -> u32;
 /// Data is saved to a capture log file at the location specified via the
 /// `SetLogFilePathTemplateFn` function call. Returns `1` if the capture
 /// succeeded, otherwise returns `0`.
-pub type EndFrameCaptureFn = unsafe extern "C" fn(device: DevicePointer, wnd_handle: WindowHandle)
-                                                  -> u32;
+pub type EndFrameCaptureFn =
+    unsafe extern "C" fn(device: DevicePointer, wnd_handle: WindowHandle) -> u32;
 
 /// Captures the next _n_ frames from the currently active window and API device.
 ///

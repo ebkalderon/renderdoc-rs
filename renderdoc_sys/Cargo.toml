@@ -1,0 +1,22 @@
+[package]
+name = "renderdoc_sys"
+version = "0.1.0"
+authors = ["Eyal Kalderon <ebkalderon@gmail.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ebkalderon/renderdoc-rs"
+documentation = "https://docs.rs/renderdoc_sys/"
+
+[features]
+default = ["app"]
+app = []
+replay = []
+
+[dependencies]
+
+[target.'cfg(windows)'.dependencies]
+winapi = "~0.2.8"
+wio = "~0.1.2"
+
+[build-dependencies]
+bindgen = "~0.32"
+cc = "~1.0"
