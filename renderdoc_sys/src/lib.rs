@@ -4,6 +4,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+#[cfg(feature = "app")]
 pub mod app;
 
 #[cfg(feature = "replay")]
