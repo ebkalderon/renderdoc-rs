@@ -2,14 +2,12 @@
 
 #include "../include/TargetControl.h"
 
-TargetControl::TargetControl(const char *host, uint32_t ident,
-                             const char *clientName, bool forceConnection)
-{
-    this->inner = RENDERDOC_CreateTargetControl(host, ident, clientName, forceConnection);
+TargetControl::TargetControl(ITargetControl *inner) {
+    this->inner = inner;
 }
 
-TargetControl::~TargetControl() {
-    this->Shutdown();
+void TargetControl::Shutdown() {
+    this->inner->Shutdown();
 }
 
 bool TargetControl::Connected() {
@@ -50,12 +48,4 @@ void TargetControl::DeleteCapture(uint32_t remoteID) {
 
 TargetControlMessage TargetControl::ReceiveMessage() {
     return this->inner->ReceiveMessage();
-}
-
-uint32_t TargetControl::EnumerateRemoteTargets(const char *host, uint32_t nextIdent) {
-    return RENDERDOC_EnumerateRemoteTargets(host, nextIdent);
-}
-
-void TargetControl::Shutdown() {
-    this->inner->Shutdown();
 }

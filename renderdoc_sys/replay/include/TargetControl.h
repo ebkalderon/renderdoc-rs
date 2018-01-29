@@ -3,15 +3,13 @@
 
 #include <cstdint>
 
+class ITargetControl;
 class TargetControlMessage;
 
 class TargetControl {
 public:
-    static uint32_t EnumerateRemoteTargets(const char *host, uint32_t nextIdent);
-
-    TargetControl(const char *host, uint32_t ident, const char *clientName,
-                  bool forceConnection);
-    ~TargetControl();
+    TargetControl(ITargetControl *inner);
+    void Shutdown();
 
     bool Connected();
 
@@ -27,10 +25,11 @@ public:
 
     TargetControlMessage ReceiveMessage();
 
-private:
-    void Shutdown();
+protected:
+    ~TargetControl() = default;
 
-    class ITargetControl *inner;
+private:
+    ITargetControl *inner;
 };
 
 #endif // TARGET_CONTROL_H

@@ -3,8 +3,8 @@
 #include "../include/CaptureFile.h"
 #include "../include/ReplayController.h"
 
-CaptureFile::CaptureFile(const char *logfile) {
-    this->inner = RENDERDOC_OpenCaptureFile(logfile);
+CaptureFile::CaptureFile(ICaptureFile *inner) {
+    this->inner = inner;
 }
 
 CaptureFile::~CaptureFile() {

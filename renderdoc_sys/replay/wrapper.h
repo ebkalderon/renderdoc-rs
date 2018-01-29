@@ -15,8 +15,7 @@
 #include "../renderdoc/renderdoc/api/replay/vk_pipestate.h"
 #include "../renderdoc/renderdoc/api/replay/version.h"
 
-/* #include "include/Extern.h" */
-
+#include "include/Api.h"
 #include "include/Camera.h"
 #include "include/CaptureFile.h"
 #include "include/RemoteServer.h"

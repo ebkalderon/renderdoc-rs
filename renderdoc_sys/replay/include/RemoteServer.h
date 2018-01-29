@@ -7,28 +7,14 @@
 
 struct CaptureOptions;
 struct EnvironmentModification;
+class IRemoteServer;
 struct PathEntry;
 class ReplayController;
 
 class RemoteServer {
 public:
-    static void BecomeRemoteServer(const char *listenhost, uint32_t port,
-                                   uint32_t *kill);
-
-    static uint32_t ExecuteAndInject(
-        const char *app,
-        const char *workingDir,
-        const char *cmdLine,
-        const rdctype::array<EnvironmentModification> &env,
-        const char *logfile,
-        const CaptureOptions &opts,
-        bool32 waitForExit
-    );
-
-    static uint32_t GetDefaultRemoteServerPort();
-
-    RemoteServer(const char *host, uint32_t port);
-    ~RemoteServer();
+    RemoteServer(IRemoteServer *inner);
+    void ShutdownServerAndConnection();
 
     void ShutdownConnection();
     bool Ping();
@@ -54,10 +40,11 @@ public:
 
     static const uint32_t NoPreference = ~0U;
 
-private:
-    void ShutdownServerAndConnection();
+protected:
+    ~RemoteServer() = default;
 
-    class IRemoteServer *inner;
+private:
+    IRemoteServer *inner;
 };
 
 #endif // REMOTE_SERVER_H

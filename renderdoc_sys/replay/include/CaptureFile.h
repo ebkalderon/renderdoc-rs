@@ -3,15 +3,14 @@
 
 #include <cstdint>
 
-#include "../../renderdoc/renderdoc/api/replay/basic_types.h"
+#include "../../renderdoc/renderdoc/api/replay/replay_enums.h"
 
 class ReplayController;
-enum class ReplayStatus : uint32_t;
-enum class ReplaySupport : uint32_t;
+class ICaptureFile;
 
 class CaptureFile {
 public:
-    CaptureFile(const char *logfile);
+    CaptureFile(ICaptureFile *inner);
     ~CaptureFile();
 
     ReplayStatus OpenStatus();
@@ -27,7 +26,7 @@ public:
 private:
     void Shutdown();
 
-    class ICaptureFile *inner;
+    ICaptureFile *inner;
 };
 
 #endif // CAPTURE_FILE_H

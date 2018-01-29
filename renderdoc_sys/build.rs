@@ -10,6 +10,7 @@ fn main() {
     let app = bindgen::Builder::default()
         .header("renderdoc/renderdoc/api/app/renderdoc_app.h")
         .whitelist_type("RENDERDOC_.*")
+        .blacklist_type("__.*")
         .generate()
         .expect("Unable to generate app bindings!");
 
@@ -39,7 +40,6 @@ fn main() {
         .whitelist_type("GlobalEnvironment")
         .whitelist_type("PathEntry")
         .whitelist_type("pRENDERDOC_.*")
-        .whitelist_type("ReplayStatus")
         .whitelist_type("Shader.*")
         .whitelist_type("Texture.*")
         .whitelist_type("Window.*")
@@ -47,6 +47,7 @@ fn main() {
         .whitelist_type("XlibWindowData")
         .blacklist_type(".*IterContainer_.*")
         // Custom wrapper types.
+        .whitelist_function("RENDERDOC::.*")
         .whitelist_type("Camera")
         .whitelist_type("CaptureFile")
         .whitelist_type("RemoteServer")
@@ -65,6 +66,7 @@ fn main() {
     cc::Build::new()
         .include("replay")
         .include("renderdoc")
+        .file("replay/src/Api.cpp")
         .file("replay/src/Camera.cpp")
         .file("replay/src/CaptureFile.cpp")
         .file("replay/src/RemoteServer.cpp")

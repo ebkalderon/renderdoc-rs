@@ -3,37 +3,11 @@
 #include "../include/RemoteServer.h"
 #include "../include/ReplayController.h"
 
-void RemoteServer::BecomeRemoteServer(
-    const char *listenhost,
-    uint32_t port,
-    uint32_t *killReplay
-) {
-    RENDERDOC_BecomeRemoteServer(listenhost, port, killReplay);
+RemoteServer::RemoteServer(IRemoteServer *inner) {
+    this->inner = inner;
 }
 
-uint32_t RemoteServer::ExecuteAndInject(
-    const char *app,
-    const char *workingDir,
-    const char *cmdLine,
-    const rdctype::array<EnvironmentModification> &env,
-    const char *logfile,
-    const CaptureOptions &opts,
-    bool32 waitForExit
-) {
-    return RENDERDOC_ExecuteAndInject(
-        app, workingDir, cmdLine, env, logfile, opts, waitForExit
-    );
-}
-
-uint32_t RemoteServer::GetDefaultRemoteServerPort() {
-    return RENDERDOC_GetDefaultRemoteServerPort();
-}
-
-RemoteServer::RemoteServer(const char *host, uint32_t port) {
-    RENDERDOC_CreateRemoteServerConnection(host, port, &this->inner);
-}
-
-RemoteServer::~RemoteServer() {
+void RemoteServer::ShutdownServerAndConnection() {
     this->inner->ShutdownServerAndConnection();
 }
 
@@ -97,8 +71,4 @@ rdctype::pair<ReplayStatus, ReplayController*> RemoteServer::OpenCapture(
 
 void RemoteServer::CloseCapture(ReplayController *ctrl) {
     this->inner->CloseCapture(ctrl->inner);
-}
-
-void RemoteServer::ShutdownServerAndConnection() {
-    this->inner->ShutdownServerAndConnection();
 }

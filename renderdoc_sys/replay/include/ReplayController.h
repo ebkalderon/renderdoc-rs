@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "../../renderdoc/renderdoc/api/replay/control_types.h"
+
 class ReplayOutput;
 
 class ReplayController {
@@ -56,7 +58,9 @@ public:
     FrameDescription GetFrameInfo();
     rdctype::array<DrawcallDescription> GetDrawcalls();
 
-    rdctype::array<CounterResult> FetchCounters(const rdctype::array<GPUCounter> &counters);
+    rdctype::array<CounterResult> FetchCounters(
+        const rdctype::array<GPUCounter> &counters
+    );
     rdctype::array<GPUCounter> EnumerateCounters();
     CounterDescription DescribeCounter(GPUCounter counterID);
 
@@ -106,7 +110,7 @@ public:
     static const uint32_t NoPreference = ~0U;
 
 protected:
-    ReplayController() = default;
+    ReplayController();
     ~ReplayController() = default;
 
 private:
