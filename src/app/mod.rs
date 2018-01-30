@@ -2,9 +2,9 @@
 
 pub use self::types::{CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 pub use self::version::{Version, V100, V110};
+pub use renderdoc_sys::app as ffi;
 
 pub mod api;
-pub mod ffi;
 pub mod prelude;
 pub mod version;
 

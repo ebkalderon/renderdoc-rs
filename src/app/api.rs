@@ -21,8 +21,8 @@ pub trait RenderDocV100: Sized {
     /// # Examples
     ///
     /// ```rust
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # use renderdoc::prelude::*;
+    /// # use renderdoc::app::{RenderDoc, V100};
+    /// # use renderdoc::app::prelude::*;
     /// # fn init() -> Result<(), String> {
     /// # let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// let (major, minor, patch) = renderdoc.get_api_version();
@@ -39,6 +39,46 @@ pub trait RenderDocV100: Sized {
         }
     }
 
+    /// Sets the specified `CaptureOption` to the given `f32` value.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the option and/or the value are invalid.
+    fn set_capture_option_f32(&mut self, opt: CaptureOption, val: f32) {
+        let raw = opt as u32;
+        let err = unsafe { (self.entry_v100().SetCaptureOptionF32.unwrap())(raw, val) };
+        assert_eq!(err, 1);
+    }
+
+    /// Sets the specified `CaptureOption` to the given `u32` value.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the option and/or the value are invalid.
+    fn set_capture_option_u32(&mut self, opt: CaptureOption, val: u32) {
+        let raw = opt as u32;
+        let err = unsafe { (self.entry_v100().SetCaptureOptionU32.unwrap())(raw, val) };
+        assert_eq!(err, 1);
+    }
+
+    #[allow(missing_docs)]
+    fn get_capture_option_f32(&self, opt: CaptureOption) -> f32 {
+        use std::f32::MAX;
+        let raw = opt as u32;
+        let val = unsafe { (self.entry_v100().GetCaptureOptionF32.unwrap())(raw) };
+        assert_ne!(val, -MAX);
+        val
+    }
+
+    #[allow(missing_docs)]
+    fn get_capture_option_u32(&self, opt: CaptureOption) -> u32 {
+        use std::u32::MAX;
+        let raw = opt as u32;
+        let val = unsafe { (self.entry_v100().GetCaptureOptionU32.unwrap())(raw) };
+        assert_ne!(val, MAX);
+        val
+    }
+
     /// Changes the key bindings in-application for triggering a capture on the
     /// current window.
     fn set_capture_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
@@ -49,7 +89,7 @@ pub trait RenderDocV100: Sized {
     }
 
     /// Changes the key bindings in-application for changing the focused window.
-    fn set_focus_toggle_keys<K, I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
+    fn set_focus_toggle_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
         unsafe {
             let mut k: Vec<_> = keys.iter().cloned().map(|k| k.into() as u32).collect();
             (self.entry_v100().SetFocusToggleKeys.unwrap())(k.as_mut_ptr(), k.len() as i32)
@@ -69,11 +109,159 @@ pub trait RenderDocV100: Sized {
     }
 
     #[allow(missing_docs)]
-    fn set_active_window<D: DevicePointer, W: WindowHandle>(&mut self, dev: D, win: W) {
+    fn unload_crash_handler(&mut self) {
         unsafe {
-            let device = dev.as_device_ptr();
-            let window = win.as_window_handle();
+            (self.entry_v100().UnloadCrashHandler.unwrap())();
+        }
+    }
+
+    #[allow(missing_docs)]
+    fn get_overlay_bits(&self) -> OverlayBits {
+        let bits = unsafe { (self.entry_v100().GetOverlayBits.unwrap())() };
+        OverlayBits::from_bits_truncate(bits)
+    }
+
+    #[allow(missing_docs)]
+    fn mask_overlay_bits(&mut self, and: OverlayBits, or: OverlayBits) {
+        unsafe {
+            (self.entry_v100().MaskOverlayBits.unwrap())(and.bits(), or.bits());
+        }
+    }
+
+    #[allow(missing_docs)]
+    fn get_log_file_path_template(&self) -> &str {
+        unsafe {
+            let raw = (self.entry_v100().GetLogFilePathTemplate.unwrap())();
+            CStr::from_ptr(raw).to_str().unwrap()
+        }
+    }
+
+    #[allow(missing_docs)]
+    fn set_log_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
+        unsafe {
+            let bytes = mem::transmute(path_template.as_ref().as_os_str());
+            let cstr = CStr::from_bytes_with_nul_unchecked(bytes);
+            (self.entry_v100().SetLogFilePathTemplate.unwrap())(cstr.as_ptr());
+        }
+    }
+
+    #[allow(missing_docs)]
+    fn get_num_captures(&self) -> u32 {
+        unsafe { (self.entry_v100().GetNumCaptures.unwrap())() }
+    }
+
+    #[allow(missing_docs)]
+    fn get_capture(&self, index: u32) -> Option<(String, u64)> {
+        unsafe {
+            let mut len = self.get_log_file_path_template().len() as u32 + 128;
+            let mut path = Vec::with_capacity(len as usize);
+            let mut time = 0u64;
+
+            if (self.entry_v100().GetCapture.unwrap())(index, path.as_mut_ptr(), &mut len, &mut time) == 1 {
+                let raw_path = CString::from_raw(path.as_mut_ptr());
+                let mut path = raw_path.into_string().unwrap();
+                path.shrink_to_fit();
+
+                Some((path, time))
+            } else {
+                None
+            }
+        }
+    }
+
+    /// Captures the next frame from the currently active window and API device.
+    ///
+    /// Data is saved to a capture log file at the location specified via
+    /// `set_log_file_path_template()`.
+    fn trigger_capture(&mut self) {
+        unsafe {
+            (self.entry_v100().TriggerCapture.unwrap())();
+        }
+    }
+
+    #[allow(missing_docs)]
+    fn is_target_control_connected(&self) -> bool {
+        unsafe { (self.entry_v100().IsRemoteAccessConnected.unwrap())() == 1 }
+    }
+
+    #[allow(missing_docs)]
+    fn launch_replay_ui<C>(&self, cmd_line: C) -> Result<u32, ()>
+    where
+        C: Into<Option<&'static str>>,
+    {
+        unsafe {
+            let with_cmd = cmd_line.into();
+            let (enabled, text) = if let Some(ref cmd) = with_cmd {
+                let bytes = cmd.as_bytes();
+                (1, CStr::from_bytes_with_nul_unchecked(bytes))
+            } else {
+                (0, Default::default())
+            };
+
+            match (self.entry_v100().LaunchReplayUI.unwrap())(enabled, text.as_ptr()) {
+                0 => Err(()),
+                pid => Ok(pid),
+            }
+        }
+    }
+
+    #[allow(missing_docs)]
+    fn set_active_window<D, W>(&mut self, device: D, window: W)
+    where
+        D: DevicePointer,
+        W: WindowHandle
+    {
+        unsafe {
+            let device = device.as_device_ptr();
+            let window = window.as_window_handle();
             (self.entry_v100().SetActiveWindow.unwrap())(device, window);
+        }
+    }
+
+    #[allow(missing_docs)]
+    fn start_frame_capture<D, W>(&mut self, device: D, window: W)
+    where
+        D: DevicePointer,
+        W: WindowHandle
+    {
+        unsafe {
+            let device = device.as_device_ptr();
+            let window = window.as_window_handle();
+            (self.entry_v100().StartFrameCapture.unwrap())(device, window);
+        }
+    }
+
+    /// Returns whether or not a frame capture is currently ongoing anywhere.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::app::{RenderDoc, V100};
+    /// # use renderdoc::app::prelude::*;
+    /// # fn init() -> Result<(), String> {
+    /// # let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    /// if renderdoc.is_frame_capturing() {
+    ///     println!("Frames are being captured.");
+    /// } else {
+    ///     println!("No frame capture is occurring.");
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn is_frame_capturing(&self) -> bool {
+        unsafe { (self.entry_v100().IsFrameCapturing.unwrap())() == 1 }
+    }
+
+    #[allow(missing_docs)]
+    fn end_frame_capture<D, W>(&mut self, device: D, window: W)
+    where
+        D: DevicePointer,
+        W: WindowHandle
+    {
+        unsafe {
+            let device = device.as_device_ptr();
+            let window = window.as_window_handle();
+            (self.entry_v100().EndFrameCapture.unwrap())(device, window);
         }
     }
 }

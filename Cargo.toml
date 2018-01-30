@@ -10,7 +10,9 @@ readme = "README.md"
 keywords = ["graphics", "profile", "renderdoc", "trace"]
 
 [features]
-default = ["glutin"]
+default = ["app", "replay", "glutin"]
+app = ["renderdoc_sys/app"]
+replay = ["renderdoc_sys/replay"]
 
 [dependencies]
 bitflags = "~1.0"

@@ -19,4 +19,8 @@ extern crate winapi;
 #[cfg(target_os = "windows")]
 extern crate wio;
 
+#[cfg(feature = "app")]
 pub mod app;
+
+#[cfg(feature = "replay")]
+pub mod replay;
