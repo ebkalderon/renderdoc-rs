@@ -14,18 +14,18 @@ default = ["glutin"]
 
 [dependencies]
 bitflags = "~1.0"
-lazy_static = "0.2.8"
-shared_library = "0.1.8"
-
 glutin = { version = "~0.12", optional = true }
+lazy_static = "0.2.8"
+renderdoc_sys = { version = "0.1", path = "renderdoc_sys" }
+shared_library = "0.1.8"
 
 [target.'cfg(windows)'.dependencies]
 winapi = "~0.2.8"
 wio = "~0.1.2"
 
 [dev-dependencies]
-gfx = "0.16.2"
-gfx_window_glutin = "0.19"
+gfx = "~0.17"
+gfx_window_glutin = "~0.20"
 glutin = "~0.12"
 
 [workspace]

@@ -2,11 +2,23 @@ extern crate bindgen;
 extern crate cc;
 
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 fn main() {
+    println!("cargo:rerun-if-changed=build.rs");
+
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
+    if cfg!(feature = "app") {
+        gen_app_bindings(&out_path);
+    }
+
+    if cfg!(feature = "replay") {
+        gen_replay_bindings(&out_path);
+    }
+}
+
+fn gen_app_bindings<P: AsRef<Path>>(out_path: P) {
     let app = bindgen::Builder::default()
         .header("renderdoc/renderdoc/api/app/renderdoc_app.h")
         .whitelist_type("RENDERDOC_.*")
@@ -14,9 +26,11 @@ fn main() {
         .generate()
         .expect("Unable to generate app bindings!");
 
-    app.write_to_file(out_path.join("app.rs"))
+    app.write_to_file(out_path.as_ref().join("app.rs"))
         .expect("Couldn't write app bindings!");
+}
 
+fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
     let replay = bindgen::Builder::default()
         .header("replay/wrapper.h")
         .clang_args(&[
@@ -54,13 +68,12 @@ fn main() {
         .whitelist_type("ReplayController")
         .whitelist_type("ReplayOutput")
         .whitelist_type("TargetControl")
-        // .opaque_type("Camera")
         .generate_inline_functions(true)
         .generate()
         .expect("Unable to generate replay bindings!");
 
     replay
-        .write_to_file(out_path.join("replay.rs"))
+        .write_to_file(out_path.as_ref().join("replay.rs"))
         .expect("Couldn't write replay bindings!");
 
     cc::Build::new()
@@ -75,7 +88,6 @@ fn main() {
         .file("replay/src/TargetControl.cpp")
         .define("RENDERDOC_PLATFORM_LINUX", None)
         .define("RENDERDOC_WINDOWING_XLIB", None)
-        .object("/usr/lib/librenderdoc.so")
         .pic(true)
         .cpp(true)
         .compile("librenderdoc.a");

@@ -21,8 +21,8 @@ extern crate renderdoc;
 use gfx::traits::FactoryExt;
 use gfx::Device;
 use glutin::GlContext;
-use renderdoc::{OverlayBits, RenderDoc, V110};
-use renderdoc::prelude::*;
+use renderdoc::app::{OverlayBits, RenderDoc, V100};
+use renderdoc::app::api::RenderDocV100;
 
 pub type ColorFormat = gfx::format::Rgba8;
 pub type DepthFormat = gfx::format::DepthStencil;
@@ -57,7 +57,7 @@ const TRIANGLE: [Vertex; 3] = [
 const CLEAR_COLOR: [f32; 4] = [0.1, 0.2, 0.3, 1.0];
 
 pub fn main() {
-    let mut rd: RenderDoc<V110> = RenderDoc::new().unwrap();
+    let mut rd: RenderDoc<V100> = RenderDoc::new().unwrap();
 
     let mut events_loop = glutin::EventsLoop::new();
     let window_config = glutin::WindowBuilder::new()
@@ -83,25 +83,24 @@ pub fn main() {
     rd.set_active_window(window.context(), ::std::ptr::null());
     rd.set_focus_toggle_keys(&[glutin::VirtualKeyCode::F]);
     rd.set_capture_keys(&[glutin::VirtualKeyCode::C]);
-    rd.mask_overlay_bits(OverlayBits::DEFAULT, OverlayBits::DEFAULT);
 
     let mut running = true;
     while running {
         events_loop.poll_events(|event| {
             if let glutin::Event::WindowEvent { event, .. } = event {
                 match event {
-                    glutin::WindowEvent::KeyboardInput {
-                        input:
-                            glutin::KeyboardInput {
-                                virtual_keycode: Some(glutin::VirtualKeyCode::R),
-                                state: glutin::ElementState::Pressed,
-                                ..
-                            },
-                        ..
-                    } => match rd.launch_replay_ui(None) {
-                        Ok(pid) => println!("Launched replay UI ({}).", pid),
-                        Err(err) => println!("{:?}", err),
-                    },
+                    // glutin::WindowEvent::KeyboardInput {
+                    //     input:
+                    //         glutin::KeyboardInput {
+                    //             virtual_keycode: Some(glutin::VirtualKeyCode::R),
+                    //             state: glutin::ElementState::Pressed,
+                    //             ..
+                    //         },
+                    //     ..
+                    // } => match rd.launch_replay_ui(None) {
+                    //     Ok(pid) => println!("Launched replay UI ({}).", pid),
+                    //     Err(err) => println!("{:?}", err),
+                    // },
                     glutin::WindowEvent::KeyboardInput {
                         input:
                             glutin::KeyboardInput {
