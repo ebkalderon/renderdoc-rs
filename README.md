@@ -17,8 +17,8 @@ either `renderdoc.dll` or `librenderdoc.so` visible from your`PATH`.
 ```rust
 extern crate renderdoc;
 
-use renderdoc::{RenderDoc, V100, V110};
-use renderdoc::prelude::*;
+use renderdoc::app::{RenderDoc, V100, V110};
+use renderdoc::app::prelude::*;
 
 fn main() {
     let mut rd: RenderDoc<V110> = RenderDoc::new().expect("Failed to init");
