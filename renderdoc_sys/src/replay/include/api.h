@@ -15,7 +15,7 @@ class TargetControl;
 typedef uint32_t bool32;
 
 namespace RENDERDOC {
-    extern "C" Camera InitCamera(CameraType type);
+    Camera InitCamera(CameraType type);
 
     CaptureFile OpenCaptureFile(const char *logfile);
 

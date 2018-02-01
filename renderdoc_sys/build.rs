@@ -28,7 +28,7 @@ fn main() {
 
 fn gen_app_bindings<P: AsRef<Path>>(out_path: P) {
     let app = bindgen::Builder::default()
-        .header("renderdoc/renderdoc/api/app/renderdoc_app.h")
+        .header("src/renderdoc/renderdoc/api/app/renderdoc_app.h")
         .whitelist_type("RENDERDOC_.*")
         .blacklist_type("__.*")
         .generate()
@@ -40,13 +40,16 @@ fn gen_app_bindings<P: AsRef<Path>>(out_path: P) {
 
 fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
     #[cfg(unix)]
-    let platform_args = ["-DRENDERDOC_PLATFORM_LINUX", "-DRENDERDOC_WINDOWING_XLIB"];
+    let platform_args = [
+        "-DRENDERDOC_PLATFORM_LINUX",
+        "-DRENDERDOC_WINDOWING_XLIB"
+    ];
 
     #[cfg(windows)]
     let platform_args = ["-DRENDERDOC_PLATFORM_WIN32"];
 
     let replay = bindgen::Builder::default()
-        .header("replay/wrapper.h")
+        .header("src/replay/wrapper.h")
         .clang_args(&[
             "-x",
             "c++",
@@ -100,15 +103,15 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
     build.define("RENDERDOC_PLATFORM_WINDOWS", None);
 
     build
-        .include("replay")
-        .include("renderdoc")
-        .file("replay/src/api.cpp")
-        .file("replay/src/camera.cpp")
-        .file("replay/src/capture_file.cpp")
-        .file("replay/src/remote_server.cpp")
-        .file("replay/src/replay_controller.cpp")
-        .file("replay/src/replay_output.cpp")
-        .file("replay/src/target_control.cpp")
+        .include("src/replay")
+        .include("src/renderdoc")
+        .file("src/replay/src/api.cpp")
+        .file("src/replay/src/camera.cpp")
+        .file("src/replay/src/capture_file.cpp")
+        .file("src/replay/src/remote_server.cpp")
+        .file("src/replay/src/replay_controller.cpp")
+        .file("src/replay/src/replay_output.cpp")
+        .file("src/replay/src/target_control.cpp")
         .object(library_path())
         .pic(true)
         .cpp(true)
