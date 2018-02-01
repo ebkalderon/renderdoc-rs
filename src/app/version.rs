@@ -13,7 +13,7 @@ fn get_path() -> &'static Path {
 
 #[cfg(unix)]
 fn get_path() -> &'static Path {
-    Path::new("librenderdoc.so")
+    Path::new("/home/ekalderon/renderdoc/build/bin/librenderdoc.so")
 }
 
 lazy_static! {
@@ -25,15 +25,27 @@ lazy_static! {
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum RawVersion {
     /// Version 1.0.0.
-    V100 = ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_0_0,
+    V100,
     /// Version 1.0.1.
-    V101 = ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_0_1,
+    V101,
     /// Version 1.0.2.
-    V102 = ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_0_2,
+    V102,
     /// Version 1.1.0.
-    V110 = ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_1_0,
+    V110,
     /// Version 1.1.1.
-    V111 = ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_1_1,
+    V111,
+}
+
+impl From<RawVersion> for ffi::RENDERDOC_Version {
+    fn from(ver: RawVersion) -> Self {
+        match ver {
+            RawVersion::V100 => ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_0_0,
+            RawVersion::V101 => ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_0_1,
+            RawVersion::V102 => ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_0_2,
+            RawVersion::V110 => ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_1_0,
+            RawVersion::V111 => ffi::RENDERDOC_Version_eRENDERDOC_API_Version_1_1_1,
+        }
+    }
 }
 
 /// Initializes a new instance of the RenderDoc API.
@@ -42,7 +54,7 @@ pub enum RawVersion {
 ///
 /// This function is not thread-safe and should not be called on multiple
 /// threads at once.
-type GetApiFn<T> = unsafe extern "C" fn(ver: RawVersion, out: *mut *mut T) -> i32;
+type GetApiFn<T> = unsafe extern "C" fn(ver: ffi::RENDERDOC_Version, out: *mut *mut T) -> i32;
 
 /// Entry point into the RenderDoc API.
 pub trait Version {
@@ -71,7 +83,7 @@ pub trait Version {
             }?;
 
             let mut obj = ptr::null_mut();
-            match get_api(Self::VERSION, &mut obj) {
+            match get_api(Self::VERSION.into(), &mut obj) {
                 1 => ptr::read(obj),
                 _ => Err("Compatible API version not available.")?,
             }

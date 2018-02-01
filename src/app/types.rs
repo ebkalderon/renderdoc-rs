@@ -11,45 +11,43 @@ use winapi;
 use wio::com::ComPtr;
 
 /// RenderDoc capture options.
-#[repr(u32)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum CaptureOption {
     /// Let the application enable vertical synchronization.
-    AllowVSync = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_AllowVSync,
+    AllowVSync,
     /// Let the application enter fullscreen mode.
-    AllowFullscreen = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_AllowFullscreen,
+    AllowFullscreen,
     /// Record API debugging events and messages.
     ///
     /// This option also goes by the deprecated name of `DebugDeviceMode`.
-    ApiValidation = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_DebugDeviceMode,
+    ApiValidation,
     /// Capture CPU callstacks for API events.
-    CaptureCallstacks = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_CaptureCallstacks,
+    CaptureCallstacks,
     /// When capturing CPU callstacks, only capture them from drawcalls.
     ///
     /// This option does nothing without the above option being enabled.
-    CaptureCallstacksOnlyDraws =
-        ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_CaptureCallstacksOnlyDraws,
+    CaptureCallstacksOnlyDraws,
     /// Specify a delay, measured in seconds, to wait for a debugger to attach
     /// to the application after being injected.
-    DelayForDebugger = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_DelayForDebugger,
+    DelayForDebugger,
     /// Verify any writes to mapped buffers by checking the memory after the
     /// bounds of the returned pointer to detect any modification.
-    VerifyMapWrites = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_VerifyMapWrites,
+    VerifyMapWrites,
     /// Hooks any system API calls that create child processes and injects
     /// RenderDoc into them recursively with the same options.
-    HookIntoChildren = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_HookIntoChildren,
+    HookIntoChildren,
     /// Reference all resources available at the time of capture.
     ///
     /// By default, RenderDoc only includes resources in the final capture file
     /// necessary for that frame. This option allows you to override that
     /// behavior.
-    RefAllResources = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_RefAllResources,
+    RefAllResources,
     /// Save the initial state for all resources, regardless of usage.
     ///
     /// By default, RenderDoc skips saving initial states for resources where
     /// the previous contents don't appear to be used (assuming that writes
     /// before reads indicate the previous contents aren't used).
-    SaveAllInitials = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_SaveAllInitials,
+    SaveAllInitials,
     /// Capture all command lists generated from the start of the application.
     ///
     /// In APIs that allow for recording of command lists to be replayed later,
@@ -63,103 +61,214 @@ pub enum CaptureOption {
     /// this option and always capture all command lists since they are heavily
     /// oriented around them and the associated overhead is mostly reduced due
     /// to superior API design.
-    CaptureAllCmdLists = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_CaptureAllCmdLists,
+    CaptureAllCmdLists,
     /// Mute API debug output when `CaptureOption::ApiValidation` is enabled.
-    DebugOutputMute = ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_DebugOutputMute,
+    DebugOutputMute,
+}
+
+impl From<CaptureOption> for ffi::RENDERDOC_CaptureOption {
+    fn from(opt: CaptureOption) -> Self {
+        match opt {
+            CaptureOption::AllowVSync => ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_AllowVSync,
+            CaptureOption::AllowFullscreen => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_AllowFullscreen
+            }
+            CaptureOption::ApiValidation => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_DebugDeviceMode
+            }
+            CaptureOption::CaptureCallstacks => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_CaptureCallstacks
+            }
+            CaptureOption::CaptureCallstacksOnlyDraws => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_CaptureCallstacksOnlyDraws
+            }
+            CaptureOption::DelayForDebugger => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_DelayForDebugger
+            }
+            CaptureOption::VerifyMapWrites => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_VerifyMapWrites
+            }
+            CaptureOption::HookIntoChildren => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_HookIntoChildren
+            }
+            CaptureOption::RefAllResources => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_RefAllResources
+            }
+            CaptureOption::SaveAllInitials => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_SaveAllInitials
+            }
+            CaptureOption::CaptureAllCmdLists => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_CaptureAllCmdLists
+            }
+            CaptureOption::DebugOutputMute => {
+                ffi::RENDERDOC_CaptureOption_eRENDERDOC_Option_DebugOutputMute
+            }
+        }
+    }
 }
 
 /// User input key codes.
 #[allow(missing_docs)]
-#[repr(u32)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum InputButton {
     /// The '0' key over the letters.
-    Key0 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_0,
+    Key0,
     /// The '1' key over the letters.
-    Key1 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_1,
+    Key1,
     /// The '2' key over the letters.
-    Key2 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_2,
+    Key2,
     /// The '3' key over the letters.
-    Key3 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_3,
+    Key3,
     /// The '4' key over the letters.
-    Key4 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_4,
+    Key4,
     /// The '5' key over the letters.
-    Key5 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_5,
+    Key5,
     /// The '6' key over the letters.
-    Key6 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_6,
+    Key6,
     /// The '7' key over the letters.
-    Key7 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_7,
+    Key7,
     /// The '8' key over the letters.
-    Key8 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_8,
+    Key8,
     /// The '9' key over the letters.
-    Key9 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_9,
+    Key9,
 
-    A = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_A,
-    B = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_B,
-    C = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_C,
-    D = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_D,
-    E = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_E,
-    F = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F,
-    G = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_G,
-    H = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_H,
-    I = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_I,
-    J = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_J,
-    K = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_K,
-    L = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_L,
-    M = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_M,
-    N = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_N,
-    O = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_O,
-    P = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_P,
-    Q = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Q,
-    R = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_R,
-    S = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_S,
-    T = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_T,
-    U = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_U,
-    V = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_V,
-    W = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_W,
-    X = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_X,
-    Y = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Y,
-    Z = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Z,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P,
+    Q,
+    R,
+    S,
+    T,
+    U,
+    V,
+    W,
+    X,
+    Y,
+    Z,
 
     /// Leave the rest of the ASCII range free, in case the RenderDoc developers
     /// decide to use it later.
-    NonPrintable = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_NonPrintable,
+    NonPrintable,
 
     /// Division key on the numpad.
-    Divide = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Divide,
+    Divide,
     /// Multiplication key on the numpad.
-    Multiply = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Multiply,
+    Multiply,
     /// Subtraction key on the numpad.
-    Subtract = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Subtract,
+    Subtract,
     /// Addition key on the numpad.
-    Plus = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Plus,
+    Plus,
 
-    F1 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F1,
-    F2 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F2,
-    F3 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F3,
-    F4 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F4,
-    F5 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F5,
-    F6 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F6,
-    F7 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F7,
-    F8 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F8,
-    F9 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F9,
-    F10 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F10,
-    F11 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F11,
-    F12 = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F12,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
+    F11,
+    F12,
 
-    Home = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Home,
-    End = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_End,
-    Insert = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Insert,
-    Delete = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Delete,
-    PageUp = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_PageUp,
-    PageDn = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_PageDn,
+    Home,
+    End,
+    Insert,
+    Delete,
+    PageUp,
+    PageDn,
 
-    Backspace = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Backspace,
-    Tab = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Tab,
-    PrtScrn = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_PrtScrn,
-    Pause = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Pause,
+    Backspace,
+    Tab,
+    PrtScrn,
+    Pause,
 
-    Max = ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Max,
+    Max,
+}
+
+impl From<InputButton> for ffi::RENDERDOC_InputButton {
+    fn from(button: InputButton) -> Self {
+        match button {
+            InputButton::Key0 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_0,
+            InputButton::Key1 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_1,
+            InputButton::Key2 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_2,
+            InputButton::Key3 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_3,
+            InputButton::Key4 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_4,
+            InputButton::Key5 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_5,
+            InputButton::Key6 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_6,
+            InputButton::Key7 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_7,
+            InputButton::Key8 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_8,
+            InputButton::Key9 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_9,
+            InputButton::A => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_A,
+            InputButton::B => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_B,
+            InputButton::C => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_C,
+            InputButton::D => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_D,
+            InputButton::E => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_E,
+            InputButton::F => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F,
+            InputButton::G => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_G,
+            InputButton::H => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_H,
+            InputButton::I => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_I,
+            InputButton::J => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_J,
+            InputButton::K => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_K,
+            InputButton::L => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_L,
+            InputButton::M => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_M,
+            InputButton::N => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_N,
+            InputButton::O => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_O,
+            InputButton::P => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_P,
+            InputButton::Q => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Q,
+            InputButton::R => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_R,
+            InputButton::S => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_S,
+            InputButton::T => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_T,
+            InputButton::U => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_U,
+            InputButton::V => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_V,
+            InputButton::W => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_W,
+            InputButton::X => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_X,
+            InputButton::Y => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Y,
+            InputButton::Z => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Z,
+            InputButton::NonPrintable => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_NonPrintable,
+            InputButton::Divide => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Divide,
+            InputButton::Multiply => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Multiply,
+            InputButton::Subtract => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Subtract,
+            InputButton::Plus => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Plus,
+            InputButton::F1 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F1,
+            InputButton::F2 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F2,
+            InputButton::F3 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F3,
+            InputButton::F4 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F4,
+            InputButton::F5 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F5,
+            InputButton::F6 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F6,
+            InputButton::F7 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F7,
+            InputButton::F8 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F8,
+            InputButton::F9 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F9,
+            InputButton::F10 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F10,
+            InputButton::F11 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F11,
+            InputButton::F12 => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_F12,
+            InputButton::Home => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Home,
+            InputButton::End => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_End,
+            InputButton::Insert => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Insert,
+            InputButton::Delete => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Delete,
+            InputButton::PageUp => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_PageUp,
+            InputButton::PageDn => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_PageDn,
+            InputButton::Backspace => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Backspace,
+            InputButton::Tab => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Tab,
+            InputButton::PrtScrn => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_PrtScrn,
+            InputButton::Pause => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Pause,
+            InputButton::Max => ffi::RENDERDOC_InputButton_eRENDERDOC_Key_Max,
+        }
+    }
 }
 
 #[cfg(feature = "glutin")]
@@ -235,7 +344,7 @@ impl From<glutin::VirtualKeyCode> for InputButton {
 
 bitflags! {
     /// Bit flags for customizing the RenderDoc overlay.
-    pub struct OverlayBits: u32 {
+    pub struct OverlayBits: ffi::RENDERDOC_OverlayBits {
         /// Controls whether the overlay is enabled or disabled globally.
         const ENABLED = ffi::RENDERDOC_OverlayBits_eRENDERDOC_Overlay_Enabled;
         /// Shows the average, minimum, and maximum sampled frame rate.
@@ -255,8 +364,10 @@ bitflags! {
 
 /// Root handle to a graphics device supported by RenderDoc.
 ///
-/// For example, this could be a pointer to an `ID3D11Device`,
-/// `HGLRC`/`GLXContext`, `ID3D12Device`, etc.
+/// For example, this could be a pointer to an `ID3D11Device`, `ID3D12Device`,
+/// `HGLRC`/`GLXContext`/`EGLContext`, etc.
+///
+/// TODO: Need to add Vulkan support.
 pub trait DevicePointer {
     /// Returns a raw pointer to the API's root handle.
     fn as_device_ptr(&self) -> *mut c_void;
@@ -275,35 +386,35 @@ impl DevicePointer for *mut c_void {
 }
 
 #[cfg(windows)]
-impl DevicePointer for winapi::windef::HGLRC {
+impl DevicePointer for winapi::shared::windef::HGLRC {
     fn as_device_ptr(&self) -> *mut c_void {
         *self as *mut _ as *mut c_void
     }
 }
 
 #[cfg(windows)]
-impl DevicePointer for *mut winapi::ID3D11Device {
+impl DevicePointer for *mut winapi::um::d3d11::ID3D11Device {
     fn as_device_ptr(&self) -> *mut c_void {
         *self as *mut _ as *mut c_void
     }
 }
 
 #[cfg(windows)]
-impl DevicePointer for ComPtr<winapi::ID3D11Device> {
+impl DevicePointer for ComPtr<winapi::um::d3d11::ID3D11Device> {
     fn as_device_ptr(&self) -> *mut c_void {
         unsafe { self.as_mut() as *mut _ as *mut c_void }
     }
 }
 
 #[cfg(windows)]
-impl DevicePointer for *mut winapi::ID3D12Device {
+impl DevicePointer for *mut winapi::um::d3d12::ID3D12Device {
     fn as_device_ptr(&self) -> *mut c_void {
         *self as *mut _ as *mut c_void
     }
 }
 
 #[cfg(windows)]
-impl DevicePointer for ComPtr<winapi::ID3D12Device> {
+impl DevicePointer for ComPtr<winapi::um::d3d12::ID3D12Device> {
     fn as_device_ptr(&self) -> *mut c_void {
         unsafe { self.as_mut() as *mut _ as *mut c_void }
     }
@@ -318,8 +429,8 @@ impl<'a> DevicePointer for &'a glutin::Context {
         unsafe {
             use glutin::os::unix::RawHandle;
             match self.raw_handle() {
-                RawHandle::Glx(glx) => return glx as *mut c_void,
-                _ => panic!("RenderDoc only supports GLX contexts on Unix!"),
+                RawHandle::Glx(ctx) => ctx as *mut c_void,
+                RawHandle::Egl(ctx) => ctx as *mut c_void,
             }
         }
 
@@ -327,8 +438,8 @@ impl<'a> DevicePointer for &'a glutin::Context {
         unsafe {
             use glutin::os::windows::RawHandle;
             match self.raw_handle() {
-                RawHandle::Wgl(wgl) => return wgl as *mut c_void,
-                _ => panic!("RenderDoc only supports WGL contexts on Windows!"),
+                RawHandle::Egl(ctx) => ctx as *mut c_void,
+                RawHandle::Wgl(ctx) => ctx as *mut c_void,
             }
         }
     }
@@ -336,7 +447,8 @@ impl<'a> DevicePointer for &'a glutin::Context {
 
 /// A window handle type supported by RenderDoc.
 ///
-/// TODO: Need to implement on supported window system types.
+/// For example, this could be a pointer to an `HWND`, Xlib `Window`,
+/// `xcb_window_t`, or `EGLSurface`.
 pub trait WindowHandle {
     /// Returns the raw pointer to the window handle.
     fn as_window_handle(&self) -> *mut c_void;
@@ -354,3 +466,33 @@ impl WindowHandle for *const c_void {
     }
 }
 
+#[cfg(windows)]
+impl WindowHandle for winapi::shared::windef::HWND {
+    fn as_window_handle(&self) -> *mut c_void {
+        *self as *mut _ as *mut c_void
+    }
+}
+
+#[cfg(feature = "glutin")]
+impl<'a> WindowHandle for &'a glutin::Window {
+    fn as_window_handle(&self) -> *mut c_void {
+        #[cfg(unix)]
+        {
+            use glutin::os::unix::WindowExt;
+            if let Some(id) = self.get_xlib_window() {
+                let ptr: *const u64 = &id;
+                return ptr as *mut c_void;
+            } else if let Some(id) = self.get_wayland_surface() {
+                return id as *mut c_void;
+            } else {
+                panic!("RenderDoc doesn't support this window handle type on Unix!");
+            }
+        }
+
+        #[cfg(windows)]
+        {
+            use glutin::os::windows::WindowExt;
+            self.get_hwnd() as *mut c_void
+        }
+    }
+}

@@ -1,6 +1,6 @@
 #include "../../renderdoc/renderdoc/api/replay/renderdoc_replay.h"
 
-#include "../include/Camera.h"
+#include "../include/camera.h"
 
 Camera::Camera(CameraType type) {
     this->inner = RENDERDOC_InitCamera(type);

@@ -1,7 +1,7 @@
 #include "../../renderdoc/renderdoc/api/replay/renderdoc_replay.h"
 
-#include "../include/CaptureFile.h"
-#include "../include/ReplayController.h"
+#include "../include/capture_file.h"
+#include "../include/replay_controller.h"
 
 CaptureFile::CaptureFile(ICaptureFile *inner) {
     this->inner = inner;

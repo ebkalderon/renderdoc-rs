@@ -1,7 +1,7 @@
 #include "../../renderdoc/renderdoc/api/replay/renderdoc_replay.h"
 
-#include "../include/ReplayController.h"
-#include "../include/ReplayOutput.h"
+#include "../include/replay_controller.h"
+#include "../include/replay_output.h"
 
 APIProperties ReplayController::GetAPIProperties() {
     return this->inner->GetAPIProperties();

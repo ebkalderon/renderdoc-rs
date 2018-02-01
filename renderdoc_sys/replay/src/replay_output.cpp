@@ -1,6 +1,6 @@
 #include "../../renderdoc/renderdoc/api/replay/renderdoc_replay.h"
 
-#include "../include/ReplayOutput.h"
+#include "../include/replay_output.h"
 
 void ReplayOutput::SetTextureDisplay(const TextureDisplay &o) {
     this->inner->SetTextureDisplay(o);

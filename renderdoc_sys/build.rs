@@ -9,12 +9,14 @@ fn main() {
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    if cfg!(feature = "app") {
-        gen_app_bindings(&out_path);
-    }
+    if cfg!(not(apple)) {
+        if cfg!(feature = "app") {
+            gen_app_bindings(&out_path);
+        }
 
-    if cfg!(feature = "replay") {
-        gen_replay_bindings(&out_path);
+        if cfg!(feature = "replay") {
+            gen_replay_bindings(&out_path);
+        }
     }
 }
 
@@ -31,15 +33,21 @@ fn gen_app_bindings<P: AsRef<Path>>(out_path: P) {
 }
 
 fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
+    #[cfg(unix)]
+    let platform_args = ["-DRENDERDOC_PLATFORM_LINUX", "-DRENDERDOC_WINDOWING_XLIB"];
+
+    #[cfg(windows)]
+    let platform_args = ["-DRENDERDOC_PLATFORM_WIN32"];
+
     let replay = bindgen::Builder::default()
         .header("replay/wrapper.h")
         .clang_args(&[
             "-x",
             "c++",
             "-std=c++11",
-            "-DRENDERDOC_PLATFORM_LINUX",
-            "-DRENDERDOC_WINDOWING_XLIB"
+            "-Irenderdoc"
         ])
+        .clang_args(&platform_args)
         .opaque_type("std::.*")
         .whitelist_function("GetNewUniqueId")
         .whitelist_function("RENDERDOC_.*")
@@ -76,19 +84,38 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
         .write_to_file(out_path.as_ref().join("replay.rs"))
         .expect("Couldn't write replay bindings!");
 
-    cc::Build::new()
+    let mut build = cc::Build::new();
+
+    #[cfg(unix)]
+    build
+        .define("RENDERDOC_PLATFORM_LINUX", None)
+        .define("RENDERDOC_WINDOWING_XLIB", None);
+
+    #[cfg(windows)]
+    build.define("RENDERDOC_PLATFORM_WINDOWS", None);
+
+    build
         .include("replay")
         .include("renderdoc")
-        .file("replay/src/Api.cpp")
-        .file("replay/src/Camera.cpp")
-        .file("replay/src/CaptureFile.cpp")
-        .file("replay/src/RemoteServer.cpp")
-        .file("replay/src/ReplayController.cpp")
-        .file("replay/src/ReplayOutput.cpp")
-        .file("replay/src/TargetControl.cpp")
-        .define("RENDERDOC_PLATFORM_LINUX", None)
-        .define("RENDERDOC_WINDOWING_XLIB", None)
+        .file("replay/src/api.cpp")
+        .file("replay/src/camera.cpp")
+        .file("replay/src/capture_file.cpp")
+        .file("replay/src/remote_server.cpp")
+        .file("replay/src/replay_controller.cpp")
+        .file("replay/src/replay_output.cpp")
+        .file("replay/src/target_control.cpp")
+        .object(library_path())
         .pic(true)
         .cpp(true)
         .compile("librenderdoc.a");
+}
+
+#[cfg(windows)]
+fn library_path() -> &'static Path {
+    Path::new("C:\\Program Files (x64)\\RenderDoc\\renderdoc.dll")
+}
+
+#[cfg(unix)]
+fn library_path() -> &'static Path {
+    Path::new("/usr/lib/librenderdoc.so")
 }

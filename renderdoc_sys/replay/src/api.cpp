@@ -1,13 +1,13 @@
 #include "../renderdoc/renderdoc/api/replay/renderdoc_replay.h"
 
-#include "../include/Api.h"
+#include "../include/api.h"
 
-#include "../include/Camera.h"
-#include "../include/CaptureFile.h"
-#include "../include/RemoteServer.h"
-#include "../include/ReplayController.h"
-#include "../include/ReplayOutput.h"
-#include "../include/TargetControl.h"
+#include "../include/camera.h"
+#include "../include/capture_file.h"
+#include "../include/remote_server.h"
+#include "../include/replay_controller.h"
+#include "../include/replay_output.h"
+#include "../include/target_control.h"
 
 Camera *RENDERDOC::InitCamera(CameraType type) {
     return new Camera(type);

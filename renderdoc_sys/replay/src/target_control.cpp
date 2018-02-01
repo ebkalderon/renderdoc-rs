@@ -1,6 +1,6 @@
 #include "../../renderdoc/renderdoc/api/replay/renderdoc_replay.h"
 
-#include "../include/TargetControl.h"
+#include "../include/target_control.h"
 
 TargetControl::TargetControl(ITargetControl *inner) {
     this->inner = inner;

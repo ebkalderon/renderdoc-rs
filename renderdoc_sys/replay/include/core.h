@@ -29,6 +29,7 @@ typedef uint32_t bool32;
         #define RENDERDOC_API __declspec(dllimport)
     #endif
     #define RENDERDOC_CC __cdecl
+
 #elif defined(RENDERDOC_PLATFORM_LINUX) || defined(RENDERDOC_PLATFORM_APPLE) || \
     defined(RENDERDOC_PLATFORM_ANDROID)
 

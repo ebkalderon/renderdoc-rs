@@ -45,8 +45,7 @@ pub trait RenderDocV100: Sized {
     ///
     /// This method will panic if the option and/or the value are invalid.
     fn set_capture_option_f32(&mut self, opt: CaptureOption, val: f32) {
-        let raw = opt as u32;
-        let err = unsafe { (self.entry_v100().SetCaptureOptionF32.unwrap())(raw, val) };
+        let err = unsafe { (self.entry_v100().SetCaptureOptionF32.unwrap())(opt.into(), val) };
         assert_eq!(err, 1);
     }
 
@@ -56,16 +55,14 @@ pub trait RenderDocV100: Sized {
     ///
     /// This method will panic if the option and/or the value are invalid.
     fn set_capture_option_u32(&mut self, opt: CaptureOption, val: u32) {
-        let raw = opt as u32;
-        let err = unsafe { (self.entry_v100().SetCaptureOptionU32.unwrap())(raw, val) };
+        let err = unsafe { (self.entry_v100().SetCaptureOptionU32.unwrap())(opt.into(), val) };
         assert_eq!(err, 1);
     }
 
     #[allow(missing_docs)]
     fn get_capture_option_f32(&self, opt: CaptureOption) -> f32 {
         use std::f32::MAX;
-        let raw = opt as u32;
-        let val = unsafe { (self.entry_v100().GetCaptureOptionF32.unwrap())(raw) };
+        let val = unsafe { (self.entry_v100().GetCaptureOptionF32.unwrap())(opt.into()) };
         assert_ne!(val, -MAX);
         val
     }
@@ -73,8 +70,7 @@ pub trait RenderDocV100: Sized {
     #[allow(missing_docs)]
     fn get_capture_option_u32(&self, opt: CaptureOption) -> u32 {
         use std::u32::MAX;
-        let raw = opt as u32;
-        let val = unsafe { (self.entry_v100().GetCaptureOptionU32.unwrap())(raw) };
+        let val = unsafe { (self.entry_v100().GetCaptureOptionU32.unwrap())(opt.into()) };
         assert_ne!(val, MAX);
         val
     }
@@ -83,16 +79,28 @@ pub trait RenderDocV100: Sized {
     /// current window.
     fn set_capture_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
         unsafe {
-            let mut k: Vec<_> = keys.iter().cloned().map(|k| k.into() as u32).collect();
-            (self.entry_v100().SetCaptureKeys.unwrap())(k.as_mut_ptr(), k.len() as i32)
+            let mut k: Vec<ffi::RENDERDOC_InputButton> = keys.iter()
+                .cloned()
+                .map(|k| k.into())
+                .map(|k| k.into())
+                .collect();
+
+            let (ptr, len) = (k.as_mut_ptr(), k.len() as i32);
+            (self.entry_v100().SetCaptureKeys.unwrap())(ptr, len)
         }
     }
 
     /// Changes the key bindings in-application for changing the focused window.
     fn set_focus_toggle_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
         unsafe {
-            let mut k: Vec<_> = keys.iter().cloned().map(|k| k.into() as u32).collect();
-            (self.entry_v100().SetFocusToggleKeys.unwrap())(k.as_mut_ptr(), k.len() as i32)
+            let mut k: Vec<ffi::RENDERDOC_InputButton> = keys.iter()
+                .cloned()
+                .map(|k| k.into())
+                .map(|k| k.into())
+                .collect();
+
+            let (ptr, len) = (k.as_mut_ptr(), k.len() as i32);
+            (self.entry_v100().SetFocusToggleKeys.unwrap())(ptr, len)
         }
     }
 
@@ -157,7 +165,13 @@ pub trait RenderDocV100: Sized {
             let mut path = Vec::with_capacity(len as usize);
             let mut time = 0u64;
 
-            if (self.entry_v100().GetCapture.unwrap())(index, path.as_mut_ptr(), &mut len, &mut time) == 1 {
+            if (self.entry_v100().GetCapture.unwrap())(
+                index,
+                path.as_mut_ptr(),
+                &mut len,
+                &mut time,
+            ) == 1
+            {
                 let raw_path = CString::from_raw(path.as_mut_ptr());
                 let mut path = raw_path.into_string().unwrap();
                 path.shrink_to_fit();
@@ -185,17 +199,18 @@ pub trait RenderDocV100: Sized {
     }
 
     #[allow(missing_docs)]
-    fn launch_replay_ui<C>(&self, cmd_line: C) -> Result<u32, ()>
+    fn launch_replay_ui<'a, C>(&self, connected: bool, cmd_line: C) -> Result<u32, ()>
     where
-        C: Into<Option<&'static str>>,
+        C: Into<Option<&'a str>>,
     {
         unsafe {
-            let with_cmd = cmd_line.into();
-            let (enabled, text) = if let Some(ref cmd) = with_cmd {
+            let enabled = connected as u32;
+            let cmd_line = cmd_line.into();
+            let text = if let Some(ref cmd) = cmd_line {
                 let bytes = cmd.as_bytes();
-                (1, CStr::from_bytes_with_nul_unchecked(bytes))
+                CStr::from_bytes_with_nul_unchecked(bytes)
             } else {
-                (0, Default::default())
+                Default::default()
             };
 
             match (self.entry_v100().LaunchReplayUI.unwrap())(enabled, text.as_ptr()) {
@@ -209,7 +224,7 @@ pub trait RenderDocV100: Sized {
     fn set_active_window<D, W>(&mut self, device: D, window: W)
     where
         D: DevicePointer,
-        W: WindowHandle
+        W: WindowHandle,
     {
         unsafe {
             let device = device.as_device_ptr();
@@ -222,7 +237,7 @@ pub trait RenderDocV100: Sized {
     fn start_frame_capture<D, W>(&mut self, device: D, window: W)
     where
         D: DevicePointer,
-        W: WindowHandle
+        W: WindowHandle,
     {
         unsafe {
             let device = device.as_device_ptr();
@@ -256,7 +271,7 @@ pub trait RenderDocV100: Sized {
     fn end_frame_capture<D, W>(&mut self, device: D, window: W)
     where
         D: DevicePointer,
-        W: WindowHandle
+        W: WindowHandle,
     {
         unsafe {
             let device = device.as_device_ptr();

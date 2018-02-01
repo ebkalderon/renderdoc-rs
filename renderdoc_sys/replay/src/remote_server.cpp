@@ -1,7 +1,7 @@
 #include "../../renderdoc/renderdoc/api/replay/renderdoc_replay.h"
 
-#include "../include/RemoteServer.h"
-#include "../include/ReplayController.h"
+#include "../include/remote_server.h"
+#include "../include/replay_controller.h"
 
 RemoteServer::RemoteServer(IRemoteServer *inner) {
     this->inner = inner;

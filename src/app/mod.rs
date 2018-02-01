@@ -1,7 +1,7 @@
 //! In-app API bindings.
 
 pub use self::types::{CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
-pub use self::version::{Version, V100, V110};
+pub use self::version::{V100, V110, Version};
 pub use renderdoc_sys::app as ffi;
 
 pub mod api;
@@ -14,7 +14,7 @@ use std::mem;
 use std::os::raw::c_ulonglong;
 
 #[cfg(windows)]
-use winapi::guiddef::GUID;
+use winapi::shared::guiddef::GUID;
 
 /// Magic value used for when applications pass a path where shader debug
 /// information can be found to match up with a stripped shader.
