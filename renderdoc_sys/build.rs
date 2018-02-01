@@ -4,8 +4,14 @@ extern crate cc;
 use std::env;
 use std::path::{Path, PathBuf};
 
+#[cfg(unix)]
+const SEARCH_PATH: &str = "/home/ekalderon/renderdoc/build/bin";
+#[cfg(windows)]
+const SEARCH_PATH: &str = "C:\\Program Files (x64)\\RenderDoc";
+
 fn main() {
-    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rustc-link-search=native={}", SEARCH_PATH);
+    println!("cargo:rustc-link-lib=dylib=renderdoc");
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
@@ -45,7 +51,6 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
             "-x",
             "c++",
             "-std=c++11",
-            "-Irenderdoc"
         ])
         .clang_args(&platform_args)
         .opaque_type("std::.*")
@@ -111,11 +116,11 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
 }
 
 #[cfg(windows)]
-fn library_path() -> &'static Path {
-    Path::new("C:\\Program Files (x64)\\RenderDoc\\renderdoc.dll")
+fn library_path() -> PathBuf {
+    Path::new(SEARCH_PATH).join("renderdoc.dll")
 }
 
 #[cfg(unix)]
-fn library_path() -> &'static Path {
-    Path::new("/usr/lib/librenderdoc.so")
+fn library_path() -> PathBuf {
+    Path::new(SEARCH_PATH).join("librenderdoc.so")
 }

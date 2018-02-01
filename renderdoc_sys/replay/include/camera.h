@@ -3,13 +3,15 @@
 
 #include <cstdint>
 
+class ICamera;
 enum class CameraType : uint32_t;
 struct FloatVector;
 
 class Camera {
 public:
-    Camera(CameraType type);
-    ~Camera();
+    Camera(ICamera *inner);
+
+    void Shutdown();
 
     void SetPosition(float x, float y, float z);
     void SetFPSRotation(float x, float y, float z);
@@ -24,9 +26,7 @@ public:
     FloatVector GetUp();
 
 private:
-    void Shutdown();
-
-    class ICamera *inner;
+    ICamera *inner;
 };
 
 #endif // CAMERA_H

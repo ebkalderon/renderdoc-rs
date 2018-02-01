@@ -53,7 +53,7 @@ void RemoteServer::CopyCaptureFromRemote(
     this->inner->CopyCaptureFromRemote(remotepath, localpath, progress);
 }
 
-rdctype::pair<ReplayStatus, ReplayController*> RemoteServer::OpenCapture(
+rdctype::pair<ReplayStatus, ReplayController> RemoteServer::OpenCapture(
     uint32_t proxyid,
     const char *logfile,
     float *progress
@@ -61,8 +61,7 @@ rdctype::pair<ReplayStatus, ReplayController*> RemoteServer::OpenCapture(
     auto result = this->inner->OpenCapture(proxyid, logfile, progress);
 
     if (result.first == ReplayStatus::Succeeded) {
-        ReplayController *ctrl = new ReplayController;
-        ctrl->inner = result.second;
+        ReplayController ctrl(result.second);
         return { result.first, ctrl };
     }
 

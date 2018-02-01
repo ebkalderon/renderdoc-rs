@@ -3,6 +3,14 @@
 #include "../include/replay_controller.h"
 #include "../include/replay_output.h"
 
+ReplayController::ReplayController(IReplayController *inner) {
+    this->inner = inner;
+}
+
+void ReplayController::Shutdown() {
+    this->inner->Shutdown();
+}
+
 APIProperties ReplayController::GetAPIProperties() {
     return this->inner->GetAPIProperties();
 }
@@ -18,10 +26,6 @@ ReplayOutput *ReplayController::CreateOutput(WindowingSystem system, void *data,
     ReplayOutput *out = new ReplayOutput;
     out->inner = inner_out;
     return out;
-}
-
-void ReplayController::Shutdown() {
-    this->inner->Shutdown();
 }
 
 void ReplayController::ShutdownOutput(ReplayOutput *output) {

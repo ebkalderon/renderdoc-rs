@@ -15,13 +15,13 @@ class TargetControl;
 typedef uint32_t bool32;
 
 namespace RENDERDOC {
-    Camera *InitCamera(CameraType type);
+    extern "C" Camera InitCamera(CameraType type);
 
-    CaptureFile *OpenCaptureFile(const char *logfile);
+    CaptureFile OpenCaptureFile(const char *logfile);
 
-    TargetControl *CreateTargetControl(const char *host, uint32_t ident,
-                                       const char *clientName,
-                                       bool32 forceConnection);
+    TargetControl CreateTargetControl(const char *host, uint32_t ident,
+                                      const char *clientName,
+                                      bool32 forceConnection);
 
     ReplayStatus CreateRemoteServerConnection(const char *host, uint32_t port,
                                               RemoteServer **rend);

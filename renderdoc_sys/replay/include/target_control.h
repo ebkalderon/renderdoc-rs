@@ -9,7 +9,7 @@ class TargetControlMessage;
 class TargetControl {
 public:
     TargetControl(ITargetControl *inner);
-    void Shutdown();
+    ~TargetControl();
 
     bool Connected();
 
@@ -25,10 +25,9 @@ public:
 
     TargetControlMessage ReceiveMessage();
 
-protected:
-    ~TargetControl() = default;
-
 private:
+    void Shutdown();
+
     ITargetControl *inner;
 };
 

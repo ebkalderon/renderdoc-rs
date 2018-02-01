@@ -5,17 +5,20 @@
 
 #include "../../renderdoc/renderdoc/api/replay/control_types.h"
 
+class IReplayController;
 class ReplayOutput;
 
 class ReplayController {
 public:
+    ReplayController(IReplayController *inner);
+    void Shutdown();
+
     APIProperties GetAPIProperties();
     rdctype::array<WindowingSystem> GetSupportedWindowSystems();
 
     ReplayOutput *CreateOutput(WindowingSystem system, void *data,
                                ReplayOutputType type);
 
-    void Shutdown();
     void ShutdownOutput(ReplayOutput *output);
 
     void ReplayLoop(WindowingSystem system, void *data, ResourceId texid);
@@ -109,15 +112,10 @@ public:
 
     static const uint32_t NoPreference = ~0U;
 
-protected:
-    ReplayController();
-    ~ReplayController() = default;
-
 private:
-    friend class CaptureFile;
     friend class RemoteServer;
 
-    class IReplayController *inner;
+    IReplayController *inner;
 };
 
 #endif // REPLAY_CONTROLLER_H

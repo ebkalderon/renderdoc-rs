@@ -7,8 +7,8 @@ CaptureFile::CaptureFile(ICaptureFile *inner) {
     this->inner = inner;
 }
 
-CaptureFile::~CaptureFile() {
-    this->Shutdown();
+void CaptureFile::Shutdown() {
+    this->inner->Shutdown();
 }
 
 ReplayStatus CaptureFile::OpenStatus() {
@@ -31,14 +31,13 @@ const char *CaptureFile::RecordedMachineIdent() {
     return this->inner->RecordedMachineIdent();
 }
 
-rdctype::pair<ReplayStatus, ReplayController*> CaptureFile::OpenCapture(
+rdctype::pair<ReplayStatus, ReplayController> CaptureFile::OpenCapture(
     float *progress
 ) {
     auto result = this->inner->OpenCapture(progress);
 
     if (result.first == ReplayStatus::Succeeded) {
-        ReplayController *ctrl = new ReplayController;
-        ctrl->inner = result.second;
+        ReplayController ctrl(result.second);
         return { result.first, ctrl };
     }
 
@@ -47,8 +46,4 @@ rdctype::pair<ReplayStatus, ReplayController*> CaptureFile::OpenCapture(
 
 rdctype::array<byte> CaptureFile::GetThumbnail(FileType type, uint32_t maxsize) {
     return this->inner->GetThumbnail(type, maxsize);
-}
-
-void CaptureFile::Shutdown() {
-    this->inner->Shutdown();
 }

@@ -6,8 +6,8 @@ TargetControl::TargetControl(ITargetControl *inner) {
     this->inner = inner;
 }
 
-void TargetControl::Shutdown() {
-    this->inner->Shutdown();
+TargetControl::~TargetControl() {
+    this->Shutdown();
 }
 
 bool TargetControl::Connected() {
@@ -48,4 +48,8 @@ void TargetControl::DeleteCapture(uint32_t remoteID) {
 
 TargetControlMessage TargetControl::ReceiveMessage() {
     return this->inner->ReceiveMessage();
+}
+
+void TargetControl::Shutdown() {
+    this->inner->Shutdown();
 }

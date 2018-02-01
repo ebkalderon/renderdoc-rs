@@ -2,12 +2,12 @@
 
 #include "../include/camera.h"
 
-Camera::Camera(CameraType type) {
-    this->inner = RENDERDOC_InitCamera(type);
+Camera::Camera(ICamera *inner) {
+    this->inner = inner;
 }
 
-Camera::~Camera() {
-    this->Shutdown();
+void Camera::Shutdown() {
+    this->inner->Shutdown();
 }
 
 void Camera::SetPosition(float x, float y, float z) {
@@ -44,8 +44,4 @@ FloatVector Camera::GetRight() {
 
 FloatVector Camera::GetUp() {
     return this->inner->GetUp();
-}
-
-void Camera::Shutdown() {
-    this->inner->Shutdown();
 }

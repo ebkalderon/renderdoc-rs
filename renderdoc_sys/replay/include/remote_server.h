@@ -30,7 +30,7 @@ public:
     void CopyCaptureFromRemote(const char *remotepath, const char *localpath,
                                float *progress);
 
-    rdctype::pair<ReplayStatus, ReplayController*> OpenCapture(
+    rdctype::pair<ReplayStatus, ReplayController> OpenCapture(
         uint32_t proxyid,
         const char *logfile,
         float *progress
@@ -39,9 +39,6 @@ public:
     void CloseCapture(ReplayController *ctrl);
 
     static const uint32_t NoPreference = ~0U;
-
-protected:
-    ~RemoteServer() = default;
 
 private:
     IRemoteServer *inner;

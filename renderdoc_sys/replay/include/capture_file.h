@@ -11,7 +11,7 @@ class ICaptureFile;
 class CaptureFile {
 public:
     CaptureFile(ICaptureFile *inner);
-    ~CaptureFile();
+    void Shutdown();
 
     ReplayStatus OpenStatus();
     const char *Filename();
@@ -20,12 +20,10 @@ public:
     const char *DriverName();
     const char *RecordedMachineIdent();
 
-    rdctype::pair<ReplayStatus, ReplayController*> OpenCapture(float *progress);
+    rdctype::pair<ReplayStatus, ReplayController> OpenCapture(float *progress);
     rdctype::array<byte> GetThumbnail(FileType type, uint32_t maxsize);
 
 private:
-    void Shutdown();
-
     ICaptureFile *inner;
 };
 
