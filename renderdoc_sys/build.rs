@@ -4,8 +4,9 @@ extern crate cc;
 use std::env;
 use std::path::{Path, PathBuf};
 
+// const SEARCH_PATH: &str = "/usr/lib";
 #[cfg(unix)]
-const SEARCH_PATH: &str = "/usr/lib";
+const SEARCH_PATH: &str = "/home/ekalderon/renderdoc/build/bin";
 #[cfg(windows)]
 const SEARCH_PATH: &str = "C:\\Program Files (x64)\\RenderDoc";
 
@@ -40,10 +41,7 @@ fn gen_app_bindings<P: AsRef<Path>>(out_path: P) {
 
 fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
     #[cfg(unix)]
-    let platform_args = [
-        "-DRENDERDOC_PLATFORM_LINUX",
-        "-DRENDERDOC_WINDOWING_XLIB"
-    ];
+    let platform_args = ["-DRENDERDOC_PLATFORM_LINUX", "-DRENDERDOC_WINDOWING_XLIB"];
 
     #[cfg(windows)]
     let platform_args = ["-DRENDERDOC_PLATFORM_WIN32"];
