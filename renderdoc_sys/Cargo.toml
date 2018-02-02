@@ -6,18 +6,21 @@ description = "Raw FFI bindings to the RenderDoc API"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ebkalderon/renderdoc-rs"
 documentation = "https://docs.rs/renderdoc_sys/"
+links = "renderdoc"
+build = "build.rs"
 
 [features]
-default = ["app"]
+default = ["app", "replay"]
 app = []
 replay = []
-
-[dependencies]
 
 [target.'cfg(windows)'.dependencies]
 winapi = "~0.2.8"
 wio = "~0.1.2"
 
+[dev-dependencies]
+assert_approx_eq = "~1"
+
 [build-dependencies]
 bindgen = "~0.32"
-cc = "~1.0"
+cc = "~1"

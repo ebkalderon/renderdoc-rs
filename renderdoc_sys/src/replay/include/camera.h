@@ -10,7 +10,6 @@ struct FloatVector;
 class Camera {
 public:
     Camera(ICamera *inner);
-
     void Shutdown();
 
     void SetPosition(float x, float y, float z);

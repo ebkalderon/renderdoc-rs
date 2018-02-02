@@ -84,6 +84,7 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
         .whitelist_type("ReplayController")
         .whitelist_type("ReplayOutput")
         .whitelist_type("TargetControl")
+        .link(format!("{}", library_path().display()))
         .generate_inline_functions(true)
         .generate()
         .expect("Unable to generate replay bindings!");
@@ -104,7 +105,7 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
 
     build
         .include("src/replay")
-        .include("src/renderdoc")
+        .include("src/renderdoc/renderdoc/api/replay")
         .file("src/replay/src/api.cpp")
         .file("src/replay/src/camera.cpp")
         .file("src/replay/src/capture_file.cpp")
@@ -113,7 +114,7 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
         .file("src/replay/src/replay_output.cpp")
         .file("src/replay/src/target_control.cpp")
         .object(library_path())
-        .flag_if_supported("-L/usr/lib")
+        .flag_if_supported(format!("-L{}", SEARCH_PATH).as_str())
         .flag_if_supported("-lrenderdoc")
         .pic(true)
         .cpp(true)

@@ -13,7 +13,8 @@ fn get_path() -> &'static Path {
 
 #[cfg(unix)]
 fn get_path() -> &'static Path {
-    Path::new("/home/ekalderon/renderdoc/build/bin/librenderdoc.so")
+    // Path::new("/home/ekalderon/renderdoc/build/bin/librenderdoc.so")
+    Path::new("librenderdoc.so")
 }
 
 lazy_static! {
