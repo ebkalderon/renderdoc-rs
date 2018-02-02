@@ -11,7 +11,7 @@ const SEARCH_PATH: &str = "C:\\Program Files (x64)\\RenderDoc";
 
 fn main() {
     println!("cargo:rustc-link-search=native={}", SEARCH_PATH);
-    println!("cargo:rustc-link-lib=renderdoc");
+    println!("cargo:rustc-link-lib=dylib=renderdoc");
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
@@ -84,7 +84,6 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
         .whitelist_type("ReplayController")
         .whitelist_type("ReplayOutput")
         .whitelist_type("TargetControl")
-        .link(format!("{}", library_path().display()))
         .generate_inline_functions(true)
         .generate()
         .expect("Unable to generate replay bindings!");
@@ -114,9 +113,8 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
         .file("src/replay/src/replay_output.cpp")
         .file("src/replay/src/target_control.cpp")
         .object(library_path())
-        .flag_if_supported(format!("-L{}", SEARCH_PATH).as_str())
-        .flag_if_supported("-lrenderdoc")
-        .pic(true)
+        .flag(format!("-L {}", SEARCH_PATH).as_str())
+        .flag("-l renderdoc")
         .cpp(true)
         .compile("librenderdoc_wrap.a");
 }
