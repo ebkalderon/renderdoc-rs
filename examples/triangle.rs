@@ -19,6 +19,8 @@ extern crate gfx_window_glutin;
 extern crate glutin;
 extern crate renderdoc;
 
+use std::ptr;
+
 use gfx::traits::FactoryExt;
 use gfx::Device;
 use glutin::GlContext;
@@ -98,7 +100,7 @@ pub fn main() {
         out: main_color,
     };
 
-    rd.set_active_window(window.context(), ::std::ptr::null());
+    rd.set_active_window(window.context(), ptr::null());
     rd.set_focus_toggle_keys(&[glutin::VirtualKeyCode::F]);
     rd.set_capture_keys(&[glutin::VirtualKeyCode::C]);
 
