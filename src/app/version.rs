@@ -74,13 +74,11 @@ pub trait Version {
         use std::{mem, ptr};
 
         let api = unsafe {
-            let get_api = match *RD_LIB {
-                Ok(ref lib) => {
-                    let f = lib.symbol::<()>("RENDERDOC_GetAPI")?;
-                    Ok(mem::transmute::<_, GetApiFn<Self::Entry>>(f))
-                }
-                Err(ref err) => Err(err.to_string()),
-            }?;
+            let get_api = RD_LIB
+                .as_ref()
+                .map_err(|err| err.to_string())
+                .and_then(|lib| lib.symbol::<()>("RENDERDOC_GetAPI"))
+                .map(|sym| mem::transmute::<_, GetApiFn<Self::Entry>>(sym))?;
 
             let mut obj = ptr::null_mut();
             match get_api(Self::VERSION.into(), &mut obj) {

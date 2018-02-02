@@ -44,7 +44,7 @@ mod tests {
             assert_eq!(up.z, 0.0);
             assert_eq!(up.w, 1.0);
 
-            cam.Shutdown();
+            // cam.Shutdown();
         }
     }
 }

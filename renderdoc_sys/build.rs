@@ -5,13 +5,13 @@ use std::env;
 use std::path::{Path, PathBuf};
 
 #[cfg(unix)]
-const SEARCH_PATH: &str = "/home/ekalderon/renderdoc/build/bin";
+const SEARCH_PATH: &str = "/usr/lib";
 #[cfg(windows)]
 const SEARCH_PATH: &str = "C:\\Program Files (x64)\\RenderDoc";
 
 fn main() {
     println!("cargo:rustc-link-search=native={}", SEARCH_PATH);
-    println!("cargo:rustc-link-lib=dylib=renderdoc");
+    println!("cargo:rustc-link-lib=renderdoc");
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
@@ -113,9 +113,11 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
         .file("src/replay/src/replay_output.cpp")
         .file("src/replay/src/target_control.cpp")
         .object(library_path())
+        .flag_if_supported("-L/usr/lib")
+        .flag_if_supported("-lrenderdoc")
         .pic(true)
         .cpp(true)
-        .compile("librenderdoc.a");
+        .compile("librenderdoc_wrap.a");
 }
 
 #[cfg(windows)]
