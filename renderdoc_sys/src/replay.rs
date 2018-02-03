@@ -101,10 +101,10 @@ mod replay {
             assert_eq!(ReplayStatus_FileIOFailed, file.OpenStatus());
 
             let filename = CStr::from_ptr(file.Filename());
-            assert_eq!("", filename.to_str().expect("Failed to convert"));
+            assert_eq!("", filename.to_str().expect("Failed to convert CStr"));
 
             let driver = CStr::from_ptr(file.DriverName());
-            assert_eq!("", driver.to_str().expect("Failed to convert"));
+            assert_eq!("", driver.to_str().expect("Failed to convert CStr"));
 
             file.Shutdown();
         }

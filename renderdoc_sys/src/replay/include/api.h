@@ -1,5 +1,5 @@
-#ifndef EXTERN_H
-#define EXTERN_H
+#ifndef API_H
+#define API_H
 
 #include <cstdint>
 
@@ -140,4 +140,4 @@ void RENDERDOC_CheckAndroidPackage(const char *host, const char *exe,
 bool RENDERDOC_AddLayerToAndroidPackage(const char *host, const char *exe,
                                         float *progress);
 
-#endif // EXTERN_H
+#endif // API_H

@@ -41,10 +41,9 @@ fn gen_app_bindings<P: AsRef<Path>>(out_path: P) {
 
 fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
     #[cfg(unix)]
-    let platform_args = ["-DRENDERDOC_PLATFORM_LINUX", "-DRENDERDOC_WINDOWING_XLIB"];
-
+    let defines = ["-DRENDERDOC_PLATFORM_LINUX", "-DRENDERDOC_WINDOWING_XLIB"];
     #[cfg(windows)]
-    let platform_args = ["-DRENDERDOC_PLATFORM_WIN32"];
+    let defines = ["-DRENDERDOC_PLATFORM_WIN32"];
 
     let replay = bindgen::Builder::default()
         .header("src/replay/wrapper.h")
@@ -53,7 +52,7 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
             "c++",
             "-std=c++11",
         ])
-        .clang_args(&platform_args)
+        .clang_args(&defines)
         .opaque_type("std::.*")
         .whitelist_function("GetNewUniqueId")
         .whitelist_function("RENDERDOC_.*")
@@ -92,13 +91,9 @@ fn gen_replay_bindings<P: AsRef<Path>>(out_path: P) {
 
     let mut build = cc::Build::new();
 
-    #[cfg(unix)]
-    build
-        .define("RENDERDOC_PLATFORM_LINUX", None)
-        .define("RENDERDOC_WINDOWING_XLIB", None);
-
-    #[cfg(windows)]
-    build.define("RENDERDOC_PLATFORM_WINDOWS", None);
+    for def in defines.iter().map(|d| d.trim_left_matches("-D")) {
+        build.define(def, None);
+    }
 
     build
         .include("src/replay")

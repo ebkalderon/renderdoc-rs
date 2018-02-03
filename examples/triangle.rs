@@ -19,6 +19,8 @@ extern crate gfx_window_glutin;
 extern crate glutin;
 extern crate renderdoc;
 
+use std::ptr;
+
 use gfx::traits::FactoryExt;
 use gfx::Device;
 use glutin::GlContext;
@@ -100,6 +102,8 @@ pub fn main() {
 
     rd.set_focus_toggle_keys(&[glutin::VirtualKeyCode::F]);
     rd.set_capture_keys(&[glutin::VirtualKeyCode::C]);
+    rd.start_frame_capture(window.context(), ptr::null());
+    rd.end_frame_capture(window.context(), ptr::null());
 
     let mut running = true;
     while running {
