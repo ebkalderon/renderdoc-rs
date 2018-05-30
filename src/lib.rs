@@ -27,7 +27,7 @@ use std::u32;
 #[cfg(feature = "glutin")]
 use glutin::VirtualKeyCode;
 #[cfg(windows)]
-use winapi::guiddef::GUID;
+use winapi::shared::guiddef::GUID;
 #[cfg(windows)]
 use wio::com::ComPtr;
 
@@ -161,37 +161,37 @@ impl From<*mut c_void> for DevicePointer {
 }
 
 #[cfg(windows)]
-impl From<winapi::windef::HGLRC> for DevicePointer {
-    fn from(ctx: winapi::windef::HGLRC) -> Self {
+impl From<winapi::shared::windef::HGLRC> for DevicePointer {
+    fn from(ctx: winapi::shared::windef::HGLRC) -> Self {
         DevicePointer(ctx as *mut _ as *const c_void)
     }
 }
 
 #[cfg(windows)]
-impl From<*mut winapi::ID3D11Device> for DevicePointer {
-    fn from(ctx: *mut winapi::ID3D11Device) -> Self {
+impl From<*mut winapi::um::d3d11::ID3D11Device> for DevicePointer {
+    fn from(ctx: *mut winapi::um::d3d11::ID3D11Device) -> Self {
         DevicePointer(ctx as *mut _ as *const c_void)
     }
 }
 
 #[cfg(windows)]
-impl From<ComPtr<winapi::ID3D11Device>> for DevicePointer {
-    fn from(ctx: ComPtr<winapi::ID3D11Device>) -> Self {
-        unsafe { DevicePointer(ctx.as_mut() as *mut _ as *const c_void) }
+impl From<ComPtr<winapi::um::d3d11::ID3D11Device>> for DevicePointer {
+    fn from(ctx: ComPtr<winapi::um::d3d11::ID3D11Device>) -> Self {
+        unsafe { DevicePointer(ctx.as_raw() as *mut _ as *const c_void) }
     }
 }
 
 #[cfg(windows)]
-impl From<*mut winapi::ID3D12Device> for DevicePointer {
-    fn from(ctx: *mut winapi::ID3D12Device) -> Self {
+impl From<*mut winapi::um::d3d12::ID3D12Device> for DevicePointer {
+    fn from(ctx: *mut winapi::um::d3d12::ID3D12Device) -> Self {
         DevicePointer(ctx as *mut _ as *const c_void)
     }
 }
 
 #[cfg(windows)]
-impl From<ComPtr<winapi::ID3D12Device>> for DevicePointer {
-    fn from(ctx: ComPtr<winapi::ID3D12Device>) -> Self {
-        unsafe { DevicePointer(ctx.as_mut() as *mut _ as *const c_void) }
+impl From<ComPtr<winapi::um::d3d12::ID3D12Device>> for DevicePointer {
+    fn from(ctx: ComPtr<winapi::um::d3d12::ID3D12Device>) -> Self {
+        unsafe { DevicePointer(ctx.as_raw() as *mut _ as *const c_void) }
     }
 }
 

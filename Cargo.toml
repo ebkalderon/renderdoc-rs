@@ -17,13 +17,13 @@ bitflags = "1.0"
 lazy_static = "0.2.8"
 shared_library = "0.1.8"
 
-glutin = { version = "0.11", optional = true }
+glutin = { version = "0.15", optional = true }
 
 [target.'cfg(windows)'.dependencies]
-winapi = "0.2.8"
-wio = "0.1.2"
+winapi = { version = "0.3", features = ["d3d12","d3d11"] }
+wio = "0.2"
 
 [dev-dependencies]
-gfx = "0.16.2"
-gfx_window_glutin = "0.19"
-glutin = "0.11"
+gfx = "0.17"
+gfx_window_glutin = "0.23"
+glutin = "0.15"
