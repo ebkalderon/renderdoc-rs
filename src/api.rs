@@ -1,7 +1,7 @@
 //! Traits providing compile-time API functionality.
 
-use {CaptureOption, DevicePointer, OverlayBits, InputButton, WindowHandle};
 use entry::{EntryV100, EntryV110};
+use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 
 use std::ffi::{CStr, CString};
 use std::mem;
@@ -34,7 +34,7 @@ pub trait RenderDocV100: Sized {
     fn get_api_version(&self) -> (u32, u32, u32) {
         unsafe {
             let (mut major, mut minor, mut patch) = (0, 0, 0);
-            (self.entry_v100().get_api_version)(&mut major, &mut minor, &mut patch);
+            (self.entry_v100().GetAPIVersion.unwrap())(&mut major, &mut minor, &mut patch);
             (major as u32, minor as u32, patch as u32)
         }
     }
@@ -45,7 +45,7 @@ pub trait RenderDocV100: Sized {
     ///
     /// This method will panic if the option and/or the value are invalid.
     fn set_capture_option_f32(&mut self, opt: CaptureOption, val: f32) {
-        let err = unsafe { (self.entry_v100().set_capture_option_f32)(opt, val) };
+        let err = unsafe { (self.entry_v100().SetCaptureOptionF32.unwrap())(opt as u32, val) };
         assert_eq!(err, 1);
     }
 
@@ -55,14 +55,14 @@ pub trait RenderDocV100: Sized {
     ///
     /// This method will panic if the option and/or the value are invalid.
     fn set_capture_option_u32(&mut self, opt: CaptureOption, val: u32) {
-        let err = unsafe { (self.entry_v100().set_capture_option_u32)(opt, val) };
+        let err = unsafe { (self.entry_v100().SetCaptureOptionU32.unwrap())(opt as u32, val) };
         assert_eq!(err, 1);
     }
 
     #[allow(missing_docs)]
     fn get_capture_option_f32(&self, opt: CaptureOption) -> f32 {
         use std::f32::MAX;
-        let val = unsafe { (self.entry_v100().get_capture_option_f32)(opt) };
+        let val = unsafe { (self.entry_v100().GetCaptureOptionF32.unwrap())(opt as u32) };
         assert_ne!(val, -MAX);
         val
     }
@@ -70,7 +70,7 @@ pub trait RenderDocV100: Sized {
     #[allow(missing_docs)]
     fn get_capture_option_u32(&self, opt: CaptureOption) -> u32 {
         use std::u32::MAX;
-        let val = unsafe { (self.entry_v100().get_capture_option_u32)(opt) };
+        let val = unsafe { (self.entry_v100().GetCaptureOptionU32.unwrap())(opt as u32) };
         assert_ne!(val, MAX);
         val
     }
@@ -78,16 +78,16 @@ pub trait RenderDocV100: Sized {
     #[allow(missing_docs)]
     fn set_capture_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
         unsafe {
-            let k: Vec<_> = keys.iter().cloned().map(|k| k.into()).collect();
-            (self.entry_v100().set_capture_keys)(k.as_ptr(), k.len() as i32)
+            let mut k: Vec<_> = keys.iter().cloned().map(|k| k.into() as u32).collect();
+            (self.entry_v100().SetCaptureKeys.unwrap())(k.as_mut_ptr(), k.len() as i32)
         }
     }
 
     #[allow(missing_docs)]
     fn set_focus_toggle_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
         unsafe {
-            let k: Vec<_> = keys.iter().cloned().map(|k| k.into()).collect();
-            (self.entry_v100().set_focus_toggle_keys)(k.as_ptr(), k.len() as i32)
+            let mut k: Vec<_> = keys.iter().cloned().map(|k| k.into() as u32).collect();
+            (self.entry_v100().SetFocusToggleKeys.unwrap())(k.as_mut_ptr(), k.len() as i32)
         }
     }
 
@@ -100,32 +100,37 @@ pub trait RenderDocV100: Sized {
     /// RenderDoc will remove its injected hooks and shut down. Behavior is
     /// undefined if this is called after any API functions have been called.
     unsafe fn shutdown(self) {
-        (self.entry_v100().shutdown)();
+        (self.entry_v100().Shutdown.unwrap())();
     }
 
     #[allow(missing_docs)]
     fn unload_crash_handler(&mut self) {
         unsafe {
-            (self.entry_v100().unload_crash_handler)();
+            (self.entry_v100().UnloadCrashHandler.unwrap())();
         }
     }
 
     #[allow(missing_docs)]
     fn get_overlay_bits(&self) -> OverlayBits {
-        unsafe { (self.entry_v100().get_overlay_bits)() }
+        let bits = unsafe { (self.entry_v100().GetOverlayBits.unwrap())() };
+        OverlayBits::from_bits_truncate(bits)
     }
 
     #[allow(missing_docs)]
     fn mask_overlay_bits(&mut self, and: OverlayBits, or: OverlayBits) {
         unsafe {
-            (self.entry_v100().mask_overlay_bits)(and, or);
+            (self.entry_v100().MaskOverlayBits.unwrap())(and.bits(), or.bits());
         }
     }
 
     #[allow(missing_docs)]
     fn get_log_file_path_template(&self) -> &str {
         unsafe {
-            let raw = (self.entry_v100().get_log_file_path_template)();
+            let raw = (self
+                .entry_v100()
+                .__bindgen_anon_2
+                .GetLogFilePathTemplate
+                .unwrap())();
             CStr::from_ptr(raw).to_str().unwrap()
         }
     }
@@ -135,13 +140,17 @@ pub trait RenderDocV100: Sized {
         unsafe {
             let bytes = mem::transmute(path_template.as_ref().as_os_str());
             let cstr = CStr::from_bytes_with_nul_unchecked(bytes);
-            (self.entry_v100().set_log_file_path_template)(cstr.as_ptr());
+            (self
+                .entry_v100()
+                .__bindgen_anon_1
+                .SetLogFilePathTemplate
+                .unwrap())(cstr.as_ptr());
         }
     }
 
     #[allow(missing_docs)]
     fn get_num_captures(&self) -> u32 {
-        unsafe { (self.entry_v100().get_num_captures)() }
+        unsafe { (self.entry_v100().GetNumCaptures.unwrap())() }
     }
 
     #[allow(missing_docs)]
@@ -151,7 +160,13 @@ pub trait RenderDocV100: Sized {
             let mut path = Vec::with_capacity(len as usize);
             let mut time = 0u64;
 
-            if (self.entry_v100().get_capture)(index, path.as_mut_ptr(), &mut len, &mut time) == 1 {
+            if (self.entry_v100().GetCapture.unwrap())(
+                index,
+                path.as_mut_ptr(),
+                &mut len,
+                &mut time,
+            ) == 1
+            {
                 let raw_path = CString::from_raw(path.as_mut_ptr());
                 let mut path = raw_path.into_string().unwrap();
                 path.shrink_to_fit();
@@ -169,13 +184,20 @@ pub trait RenderDocV100: Sized {
     /// `set_log_file_path_template()`.
     fn trigger_capture(&mut self) {
         unsafe {
-            (self.entry_v100().trigger_capture)();
+            (self.entry_v100().TriggerCapture.unwrap())();
         }
     }
 
     #[allow(missing_docs)]
     fn is_target_control_connected(&self) -> bool {
-        unsafe { (self.entry_v100().is_target_control_connected)() == 1 }
+        unsafe {
+            (self
+                .entry_v100()
+                .__bindgen_anon_3
+                .IsTargetControlConnected
+                .unwrap())()
+                == 1
+        }
     }
 
     #[allow(missing_docs)]
@@ -192,7 +214,7 @@ pub trait RenderDocV100: Sized {
                 (0, Default::default())
             };
 
-            match (self.entry_v100().launch_replay_ui)(enabled, text.as_ptr()) {
+            match (self.entry_v100().LaunchReplayUI.unwrap())(enabled, text.as_ptr()) {
                 0 => Err(()),
                 pid => Ok(pid),
             }
@@ -205,7 +227,8 @@ pub trait RenderDocV100: Sized {
         D: Into<DevicePointer>,
     {
         unsafe {
-            (self.entry_v100().set_active_window)(dev.into(), win);
+            let DevicePointer(dev) = dev.into();
+            (self.entry_v100().SetActiveWindow.unwrap())(dev as *mut _, win as *mut _);
         }
     }
 
@@ -215,7 +238,8 @@ pub trait RenderDocV100: Sized {
         D: Into<DevicePointer>,
     {
         unsafe {
-            (self.entry_v100().start_frame_capture)(dev.into(), win);
+            let DevicePointer(dev) = dev.into();
+            (self.entry_v100().StartFrameCapture.unwrap())(dev as *mut _, win as *mut _);
         }
     }
 
@@ -237,7 +261,7 @@ pub trait RenderDocV100: Sized {
     /// # }
     /// ```
     fn is_frame_capturing(&self) -> bool {
-        unsafe { (self.entry_v100().is_frame_capturing)() == 1 }
+        unsafe { (self.entry_v100().IsFrameCapturing.unwrap())() == 1 }
     }
 
     #[allow(missing_docs)]
@@ -246,7 +270,8 @@ pub trait RenderDocV100: Sized {
         D: Into<DevicePointer>,
     {
         unsafe {
-            (self.entry_v100().end_frame_capture)(dev.into(), win);
+            let DevicePointer(dev) = dev.into();
+            (self.entry_v100().EndFrameCapture.unwrap())(dev as *mut _, win as *mut _);
         }
     }
 }
@@ -263,7 +288,7 @@ pub trait RenderDocV110: RenderDocV100 {
     /// `set_log_file_path_template()`.
     fn trigger_multi_frame_capture(&self, num_frames: u32) {
         unsafe {
-            (self.entry_v110().trigger_multi_frame_capture)(num_frames);
+            (self.entry_v110().TriggerMultiFrameCapture.unwrap())(num_frames);
         }
     }
 }

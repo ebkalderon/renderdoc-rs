@@ -1,6 +1,27 @@
 //! API versioning.
 
-use entry::{EntryV100, EntryV110};
+pub use renderdoc_sys::RENDERDOC_API_1_0_0 as EntryV100;
+pub use renderdoc_sys::RENDERDOC_API_1_1_0 as EntryV110;
+pub use renderdoc_sys::RENDERDOC_API_1_2_0 as EntryV120;
+
+use std::io::Error as IoError;
+use std::path::Path;
+
+use libloading::{Library, Symbol};
+
+#[cfg(windows)]
+fn get_path() -> &'static Path {
+    Path::new("renderdoc.dll")
+}
+
+#[cfg(unix)]
+fn get_path() -> &'static Path {
+    Path::new("librenderdoc.so")
+}
+
+lazy_static! {
+    static ref RD_LIB: Result<Library, IoError> = Library::new(get_path());
+}
 
 /// Available versions of the RenderDoc API.
 #[repr(u32)]
@@ -16,6 +37,10 @@ pub enum Version {
     V110 = 10100,
     /// Version 1.1.1.
     V111 = 10101,
+    /// Version 1.1.2.
+    V112 = 10102,
+    /// Version 1.2.0.
+    V120 = 10200,
 }
 
 /// Initializes a new instance of the RenderDoc API.
@@ -41,16 +66,13 @@ pub trait ApiVersion {
     /// This function is not thread-safe and should not be called on multiple
     /// threads at once.
     fn load() -> Result<Self::Entry, String> {
-        use std::{mem, ptr};
+        use std::ptr;
 
         let api = unsafe {
-            let get_api = match *super::RD_LIB {
-                Ok(ref lib) => {
-                    let f = lib.symbol::<()>("RENDERDOC_GetAPI")?;
-                    Ok(mem::transmute::<_, GetApiFn<Self::Entry>>(f))
-                }
-                Err(ref err) => Err(err.to_string()),
-            }?;
+            let lib = RD_LIB.as_ref().map_err(|e| e.to_string())?;
+            let get_api: Symbol<GetApiFn<Self::Entry>> = lib
+                .get(b"RENDERDOC_GetAPI\0")
+                .map_err(|e| e.to_string())?;
 
             let mut obj = ptr::null_mut();
             match get_api(Self::VERSION, &mut obj) {
@@ -79,4 +101,13 @@ impl ApiVersion for V110 {
     const VERSION: Version = Version::V110;
 
     type Entry = EntryV110;
+}
+
+/// Requests a minimum version number of 1.2.0.
+pub enum V120 {}
+
+impl ApiVersion for V120 {
+    const VERSION: Version = Version::V120;
+
+    type Entry = EntryV120;
 }
