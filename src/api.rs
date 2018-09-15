@@ -1,4 +1,4 @@
-//! Traits providing compile-time API functionality.
+//! Traits providing statically guaranteed API version compatibility.
 
 use entry::{EntryV100, EntryV110, EntryV111, EntryV112};
 use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
