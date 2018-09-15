@@ -1,8 +1,6 @@
 # Build artifacts
-/target
-Cargo.lock
-/renderdoc-sys/target
-/renderdoc-sys/Cargo.lock
+**/target
+**/Cargo.lock
 
 # Backup files
 .DS_Store

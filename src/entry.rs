@@ -2,6 +2,8 @@
 
 pub use renderdoc_sys::RENDERDOC_API_1_0_0 as EntryV100;
 pub use renderdoc_sys::RENDERDOC_API_1_1_0 as EntryV110;
+pub use renderdoc_sys::RENDERDOC_API_1_1_1 as EntryV111;
+pub use renderdoc_sys::RENDERDOC_API_1_1_2 as EntryV112;
 pub use renderdoc_sys::RENDERDOC_API_1_2_0 as EntryV120;
 
 use std::io::Error as IoError;
@@ -101,6 +103,24 @@ impl ApiVersion for V110 {
     const VERSION: Version = Version::V110;
 
     type Entry = EntryV110;
+}
+
+/// Requests a minimum version number of 1.1.1.
+pub enum V111 {}
+
+impl ApiVersion for V111 {
+    const VERSION: Version = Version::V111;
+
+    type Entry = EntryV111;
+}
+
+/// Requests a minimum version number of 1.1.2.
+pub enum V112 {}
+
+impl ApiVersion for V112 {
+    const VERSION: Version = Version::V112;
+
+    type Entry = EntryV112;
 }
 
 /// Requests a minimum version number of 1.2.0.

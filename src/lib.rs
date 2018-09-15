@@ -10,6 +10,8 @@ extern crate bitflags;
 extern crate libloading;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate renderdoc_derive;
 extern crate renderdoc_sys;
 
 #[cfg(feature = "glutin")]
@@ -19,7 +21,7 @@ extern crate winapi;
 #[cfg(target_os = "windows")]
 extern crate wio;
 
-pub use self::entry::{ApiVersion, V100, V110};
+pub use self::entry::{ApiVersion, V100, V110, V111, V112};
 
 use std::os::raw::{c_ulonglong, c_void};
 use std::u32;
@@ -386,7 +388,8 @@ bitflags! {
 pub type WindowHandle = *const c_void;
 
 /// An instance of the RenderDoc API with baseline version `V`.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, RenderDoc)]
+#[renderdoc_convert(V100, V110, V111, V112)]
 pub struct RenderDoc<V: ApiVersion>(V::Entry);
 
 impl<V: ApiVersion> RenderDoc<V> {
@@ -404,30 +407,6 @@ impl<V: ApiVersion> RenderDoc<V> {
     /// provided by default with this library.
     pub unsafe fn raw_api(&self) -> V::Entry {
         self.0.clone()
-    }
-}
-
-impl From<RenderDoc<V110>> for RenderDoc<V100> {
-    fn from(newer: RenderDoc<V110>) -> RenderDoc<V100> {
-        RenderDoc(newer.0)
-    }
-}
-
-impl api::RenderDocV100 for RenderDoc<V100> {
-    unsafe fn entry_v100(&self) -> &renderdoc_sys::RENDERDOC_API_1_0_0 {
-        &self.0
-    }
-}
-
-impl api::RenderDocV100 for RenderDoc<V110> {
-    unsafe fn entry_v100(&self) -> &renderdoc_sys::RENDERDOC_API_1_0_0 {
-        &self.0
-    }
-}
-
-impl api::RenderDocV110 for RenderDoc<V110> {
-    unsafe fn entry_v110(&self) -> &renderdoc_sys::RENDERDOC_API_1_1_0 {
-        &self.0
     }
 }
 

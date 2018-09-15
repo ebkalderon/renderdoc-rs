@@ -16,7 +16,8 @@ default = ["glutin"]
 [dependencies]
 bitflags = "1.0"
 lazy_static = "1.0"
-renderdoc-sys = { version = "0.4.0", path = "./renderdoc-sys/" }
+renderdoc-derive = { version = "0.1.0", path = "./renderdoc-derive" }
+renderdoc-sys = { version = "0.4.0", path = "./renderdoc-sys" }
 libloading = "0.5.0"
 
 glutin = { version = "0.18", optional = true }

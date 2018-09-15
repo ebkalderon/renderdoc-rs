@@ -1,6 +1,6 @@
 //! Traits providing compile-time API functionality.
 
-use entry::{EntryV100, EntryV110};
+use entry::{EntryV100, EntryV110, EntryV111, EntryV112};
 use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 
 use std::ffi::{CStr, CString};
@@ -189,12 +189,12 @@ pub trait RenderDocV100: Sized {
     }
 
     #[allow(missing_docs)]
-    fn is_target_control_connected(&self) -> bool {
+    fn is_remote_access_connected(&self) -> bool {
         unsafe {
             (self
                 .entry_v100()
                 .__bindgen_anon_3
-                .IsTargetControlConnected
+                .IsRemoteAccessConnected
                 .unwrap())()
                 == 1
         }
@@ -289,6 +289,42 @@ pub trait RenderDocV110: RenderDocV100 {
     fn trigger_multi_frame_capture(&self, num_frames: u32) {
         unsafe {
             (self.entry_v110().TriggerMultiFrameCapture.unwrap())(num_frames);
+        }
+    }
+}
+
+/// Additional features for API version 1.1.1.
+pub trait RenderDocV111: RenderDocV110 {
+    /// Returns the raw `EntryV110` entry point struct.
+    unsafe fn entry_v111(&self) -> &EntryV111;
+
+    #[allow(missing_docs)]
+    fn is_remote_access_connected(&self) -> bool {
+        unsafe {
+            (self
+                .entry_v111()
+                .__bindgen_anon_3
+                .IsRemoteAccessConnected
+                .unwrap())()
+                == 1
+        }
+    }
+}
+
+/// Additional features for API version 1.1.1.
+pub trait RenderDocV112: RenderDocV111 {
+    /// Returns the raw `EntryV110` entry point struct.
+    unsafe fn entry_v112(&self) -> &EntryV112;
+
+    #[allow(missing_docs)]
+    fn is_remote_access_connected(&self) -> bool {
+        unsafe {
+            (self
+                .entry_v111()
+                .__bindgen_anon_3
+                .IsRemoteAccessConnected
+                .unwrap())()
+                == 1
         }
     }
 }
