@@ -1,4 +1,4 @@
-//! API versioning.
+//! Entry points for the RenderDoc API.
 
 use renderdoc_sys;
 
