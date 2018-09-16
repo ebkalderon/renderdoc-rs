@@ -63,7 +63,9 @@ pub fn main() {
     let window_config = glutin::WindowBuilder::new()
         .with_title("Triangle example".to_string())
         .with_dimensions((1024, 768).into());
-    let context = glutin::ContextBuilder::new().with_vsync(true).with_gl_profile(GlProfile::Core);
+    let context = glutin::ContextBuilder::new()
+        .with_vsync(true)
+        .with_gl_profile(GlProfile::Core);
     let (window, mut device, mut factory, main_color, mut main_depth) =
         gfx_window_glutin::init::<ColorFormat, DepthFormat>(window_config, context, &events_loop);
     let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();

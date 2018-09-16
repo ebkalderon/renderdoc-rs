@@ -4,8 +4,8 @@ use entry::{EntryV100, EntryV110, EntryV111, EntryV112, EntryV120};
 use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 
 use std::ffi::{CStr, CString};
-use std::{mem, ptr};
 use std::path::Path;
+use std::{mem, ptr};
 
 /// Base implementation of API version 1.0.0.
 pub trait RenderDocV100: Sized {
@@ -351,7 +351,7 @@ pub trait RenderDocV120: RenderDocV112 {
     fn set_capture_file_comments<P, C>(&self, path: P, comments: C)
     where
         P: Into<Option<&'static str>>,
-        C: AsRef<str>
+        C: AsRef<str>,
     {
         unsafe {
             let with_path = path.into();
