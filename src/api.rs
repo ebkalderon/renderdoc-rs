@@ -302,7 +302,7 @@ pub trait RenderDocV111: RenderDocV110 {
     fn is_target_control_connected(&self) -> bool {
         unsafe {
             (self
-                .entry_v112()
+                .entry_v111()
                 .__bindgen_anon_3
                 .IsTargetControlConnected
                 .unwrap())()
