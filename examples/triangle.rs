@@ -20,9 +20,9 @@ extern crate renderdoc;
 
 use gfx::traits::FactoryExt;
 use gfx::Device;
-use glutin::GlContext;
-use renderdoc::{OverlayBits, RenderDoc, V110};
+use glutin::{GlContext, GlProfile};
 use renderdoc::prelude::*;
+use renderdoc::{OverlayBits, RenderDoc, V110};
 
 pub type ColorFormat = gfx::format::Rgba8;
 pub type DepthFormat = gfx::format::DepthStencil;
@@ -62,8 +62,10 @@ pub fn main() {
     let mut events_loop = glutin::EventsLoop::new();
     let window_config = glutin::WindowBuilder::new()
         .with_title("Triangle example".to_string())
-        .with_dimensions(1024, 768);
-    let context = glutin::ContextBuilder::new().with_vsync(true);
+        .with_dimensions((1024, 768).into());
+    let context = glutin::ContextBuilder::new()
+        .with_vsync(true)
+        .with_gl_profile(GlProfile::Core);
     let (window, mut device, mut factory, main_color, mut main_depth) =
         gfx_window_glutin::init::<ColorFormat, DepthFormat>(window_config, context, &events_loop);
     let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
@@ -72,8 +74,7 @@ pub fn main() {
             include_bytes!("shader/triangle_150.glslv"),
             include_bytes!("shader/triangle_150.glslf"),
             pipe::new(),
-        )
-        .unwrap();
+        ).unwrap();
     let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&TRIANGLE, ());
     let mut data = pipe::Data {
         vbuf: vertex_buffer,
@@ -87,36 +88,37 @@ pub fn main() {
 
     let mut running = true;
     while running {
-        events_loop.poll_events(|event| if let glutin::Event::WindowEvent {
-            event, ..
-        } = event
-        {
-            match event {
-                glutin::WindowEvent::KeyboardInput {
-                    input: glutin::KeyboardInput {
-                        virtual_keycode: Some(glutin::VirtualKeyCode::R),
-                        state: glutin::ElementState::Pressed,
+        events_loop.poll_events(|event| {
+            if let glutin::Event::WindowEvent { event, .. } = event {
+                match event {
+                    glutin::WindowEvent::KeyboardInput {
+                        input:
+                            glutin::KeyboardInput {
+                                virtual_keycode: Some(glutin::VirtualKeyCode::R),
+                                state: glutin::ElementState::Pressed,
+                                ..
+                            },
                         ..
-                    },
-                    ..
-                } => {
-                    match rd.launch_replay_ui(None) {
+                    } => match rd.launch_replay_ui("thing") {
                         Ok(pid) => println!("Launched replay UI ({}).", pid),
-                        Err(err) => println!("{:?}", err),
-                    }
-                }
-                glutin::WindowEvent::KeyboardInput {
-                    input: glutin::KeyboardInput {
-                        virtual_keycode: Some(glutin::VirtualKeyCode::Escape), ..
+                        Err(err) => eprintln!("{:?}", err),
                     },
-                    ..
-                } |
-                glutin::WindowEvent::Closed => running = false,
-                glutin::WindowEvent::Resized(width, height) => {
-                    window.resize(width, height);
-                    gfx_window_glutin::update_views(&window, &mut data.out, &mut main_depth);
+                    glutin::WindowEvent::KeyboardInput {
+                        input:
+                            glutin::KeyboardInput {
+                                virtual_keycode: Some(glutin::VirtualKeyCode::Escape),
+                                ..
+                            },
+                        ..
+                    }
+                    | glutin::WindowEvent::CloseRequested => running = false,
+                    glutin::WindowEvent::Resized(logical_size) => {
+                        let dpi_factor = window.get_hidpi_factor();
+                        window.resize(logical_size.to_physical(dpi_factor));
+                        gfx_window_glutin::update_views(&window, &mut data.out, &mut main_depth);
+                    }
+                    _ => (),
                 }
-                _ => (),
             }
         });
 

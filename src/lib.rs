@@ -7,9 +7,12 @@ compile_error!("RenderDoc does not support this platform.");
 
 #[macro_use]
 extern crate bitflags;
+extern crate libloading;
 #[macro_use]
 extern crate lazy_static;
-extern crate shared_library;
+#[macro_use]
+extern crate renderdoc_derive;
+extern crate renderdoc_sys;
 
 #[cfg(feature = "glutin")]
 extern crate glutin;
@@ -18,9 +21,8 @@ extern crate winapi;
 #[cfg(target_os = "windows")]
 extern crate wio;
 
-pub use self::entry::version::{ApiVersion, V100, V110};
+pub use self::entry::{ApiVersion, V100, V110, V111, V112, V120};
 
-use std::ops;
 use std::os::raw::{c_ulonglong, c_void};
 use std::u32;
 
@@ -52,22 +54,7 @@ pub const SHADER_MAGIC_DEBUG_VALUE_STRUCT: GUID = GUID {
 ///
 /// Raw byte array representation (assuming x86 endianness).
 pub const SHADER_MAGIC_DEBUG_VALUE_BYTE_ARRAY: &[u8] = &[
-    0x20,
-    0x55,
-    0xb2,
-    0xea,
-    0x70,
-    0x66,
-    0x65,
-    0x48,
-    0x84,
-    0x29,
-    0x6c,
-    0x8,
-    0x51,
-    0x54,
-    0x00,
-    0xff,
+    0x20, 0x55, 0xb2, 0xea, 0x70, 0x66, 0x65, 0x48, 0x84, 0x29, 0x6c, 0x8, 0x51, 0x54, 0x00, 0xff,
 ];
 
 /// Magic value used for when applications pass a path where shader debug
@@ -138,15 +125,7 @@ pub enum CaptureOption {
 /// For example, this could be a pointer to an `ID3D11Device`,
 /// `HGLRC`/`GLXContext`, `ID3D12Device`, etc.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
-pub struct DevicePointer(*const c_void);
-
-impl ops::Deref for DevicePointer {
-    type Target = *const c_void;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+pub struct DevicePointer(pub(crate) *const c_void);
 
 impl From<*const c_void> for DevicePointer {
     fn from(ptr: *const c_void) -> Self {
@@ -409,7 +388,8 @@ bitflags! {
 pub type WindowHandle = *const c_void;
 
 /// An instance of the RenderDoc API with baseline version `V`.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, RenderDoc)]
+#[renderdoc_convert(V100, V110, V111, V112, V120)]
 pub struct RenderDoc<V: ApiVersion>(V::Entry);
 
 impl<V: ApiVersion> RenderDoc<V> {
@@ -430,34 +410,10 @@ impl<V: ApiVersion> RenderDoc<V> {
     }
 }
 
-impl From<RenderDoc<V110>> for RenderDoc<V100> {
-    fn from(newer: RenderDoc<V110>) -> RenderDoc<V100> {
-        RenderDoc(newer.0.entry_v100)
-    }
-}
-
-impl api::RenderDocV100 for RenderDoc<V100> {
-    unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
-        &self.0
-    }
-}
-
-impl api::RenderDocV100 for RenderDoc<V110> {
-    unsafe fn entry_v100(&self) -> &self::entry::EntryV100 {
-        &self.0.entry_v100
-    }
-}
-
-impl api::RenderDocV110 for RenderDoc<V110> {
-    unsafe fn entry_v110(&self) -> &self::entry::EntryV110 {
-        &self.0
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::api::*;
+    use super::*;
 
     #[test]
     fn get_set_capture_option_f32() {

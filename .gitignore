@@ -1,6 +1,6 @@
-# Unwanted files
-target
-Cargo.lock
+# Build artifacts
+**/target
+**/Cargo.lock
 
 # Backup files
 .DS_Store
