@@ -317,12 +317,12 @@ pub trait RenderDocV112: RenderDocV111 {
     unsafe fn entry_v112(&self) -> &EntryV112;
 
     #[allow(missing_docs)]
-    fn is_remote_access_connected(&self) -> bool {
+    fn is_target_control_connected(&self) -> bool {
         unsafe {
             (self
-                .entry_v111()
+                .entry_v112()
                 .__bindgen_anon_3
-                .IsRemoteAccessConnected
+                .IsTargetControlConnected
                 .unwrap())()
                 == 1
         }
