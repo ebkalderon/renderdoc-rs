@@ -458,7 +458,7 @@ mod tests {
         assert_eq!(ref_all, 0u32);
 
         let intls = rd.get_capture_option_u32(CaptureOption::SaveAllInitials);
-        assert_eq!(intls, 1u32);
+        assert_eq!(intls, 0u32);
 
         let cmds = rd.get_capture_option_u32(CaptureOption::CaptureAllCmdLists);
         assert_eq!(cmds, 0u32);
