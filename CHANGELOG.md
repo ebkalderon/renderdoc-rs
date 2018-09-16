@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.4.0] - 2018-09-16
 ### Added
 * Create `renderdoc-sys` crate for raw FFI bindings.
+* Create `renderdoc-derive` crate for internal codegen.
 * Add support for RenderDoc API 1.1.1, 1.1.2, and 1.2.0.
 
 ### Changed

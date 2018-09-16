@@ -8,6 +8,7 @@ homepage = "https://github.com/ebkalderon/renderdoc-rs"
 repository = "https://github.com/ebkalderon/renderdoc-rs"
 documentation = "https://docs.rs/renderdoc/"
 readme = "README.md"
+categories = ["rendering"]
 keywords = ["graphics", "profile", "renderdoc", "trace"]
 
 [features]
