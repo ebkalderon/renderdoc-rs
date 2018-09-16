@@ -6,11 +6,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.4.0] - 2018-09-16
+### Added
+* Create `renderdoc-sys` crate for raw FFI bindings.
+* Add support for RenderDoc API 1.1.1 and 1.1.2.
+
+### Changed
+* Switch to `libloading` from `shared_library`.
+* Update `triangle` example to the latest `glutin` API.
+* Bump dependencies.
+
+## [0.3.0] - 2018-06-01
+### Changed
+* Update existing dependencies (PR #3).
+
 ## [0.2.0] - 2017-12-15
 ### Added
 * Convenient conversions for `glutin::Context`, `winapi::D3D11Device`,
-  `winapi::D3D12Device`, and `winapi::windef::HGLRC` into
-  RenderDoc `DevicePointer`.
+  `winapi::D3D12Device`, and `winapi::windef::HGLRC` into RenderDoc
+  `DevicePointer`.
 
 ### Changed
 * Update existing dependencies.
@@ -27,5 +41,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Type-safe version requests and downgrading.
 * Convenient conversions for `winit::VirtualKeyCode` into RenderDoc `InputButton`.
 
-[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.1.0...v0.2.0

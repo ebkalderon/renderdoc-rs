@@ -1,10 +1,10 @@
 //! Traits providing statically guaranteed API version compatibility.
 
-use entry::{EntryV100, EntryV110, EntryV111, EntryV112};
+use entry::{EntryV100, EntryV110, EntryV111, EntryV112, EntryV120};
 use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 
 use std::ffi::{CStr, CString};
-use std::mem;
+use std::{mem, ptr};
 use std::path::Path;
 
 /// Base implementation of API version 1.0.0.
@@ -211,7 +211,7 @@ pub trait RenderDocV100: Sized {
                 let bytes = cmd.as_bytes();
                 (1, CStr::from_bytes_with_nul_unchecked(bytes))
             } else {
-                (0, Default::default())
+                (0, CStr::from_ptr(ptr::null()))
             };
 
             match (self.entry_v100().LaunchReplayUI.unwrap())(enabled, text.as_ptr()) {
@@ -325,6 +325,36 @@ pub trait RenderDocV112: RenderDocV111 {
                 .IsRemoteAccessConnected
                 .unwrap())()
                 == 1
+        }
+    }
+}
+
+/// Additional features for API version 1.2.0.
+pub trait RenderDocV120: RenderDocV112 {
+    /// Returns the raw `EntryV110` entry point struct.
+    unsafe fn entry_v120(&self) -> &EntryV120;
+
+    #[allow(missing_docs)]
+    fn set_capture_file_comments<P, C>(&self, path: P, comments: C)
+    where
+        P: Into<Option<&'static str>>,
+        C: AsRef<str>
+    {
+        unsafe {
+            let with_path = path.into();
+            let path = if let Some(ref path) = with_path {
+                let bytes = path.as_bytes();
+                CStr::from_bytes_with_nul_unchecked(bytes)
+            } else {
+                CStr::from_ptr(ptr::null())
+            };
+
+            let comments = {
+                let bytes = comments.as_ref().as_bytes();
+                CStr::from_bytes_with_nul_unchecked(bytes)
+            };
+
+            (self.entry_v120().SetCaptureFileComments.unwrap())(path.as_ptr(), comments.as_ptr());
         }
     }
 }

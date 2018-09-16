@@ -21,7 +21,7 @@ extern crate winapi;
 #[cfg(target_os = "windows")]
 extern crate wio;
 
-pub use self::entry::{ApiVersion, V100, V110, V111, V112};
+pub use self::entry::{ApiVersion, V100, V110, V111, V112, V120};
 
 use std::os::raw::{c_ulonglong, c_void};
 use std::u32;
@@ -389,7 +389,7 @@ pub type WindowHandle = *const c_void;
 
 /// An instance of the RenderDoc API with baseline version `V`.
 #[derive(Clone, Debug, RenderDoc)]
-#[renderdoc_convert(V100, V110, V111, V112)]
+#[renderdoc_convert(V100, V110, V111, V112, V120)]
 pub struct RenderDoc<V: ApiVersion>(V::Entry);
 
 impl<V: ApiVersion> RenderDoc<V> {

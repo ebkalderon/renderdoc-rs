@@ -97,7 +97,7 @@ pub fn main() {
                                 ..
                             },
                         ..
-                    } => match rd.launch_replay_ui("") {
+                    } => match rd.launch_replay_ui("thing") {
                         Ok(pid) => println!("Launched replay UI ({}).", pid),
                         Err(err) => eprintln!("{:?}", err),
                     },
