@@ -299,12 +299,12 @@ pub trait RenderDocV111: RenderDocV110 {
     unsafe fn entry_v111(&self) -> &EntryV111;
 
     #[allow(missing_docs)]
-    fn is_remote_access_connected(&self) -> bool {
+    fn is_target_control_connected(&self) -> bool {
         unsafe {
             (self
-                .entry_v111()
+                .entry_v112()
                 .__bindgen_anon_3
-                .IsRemoteAccessConnected
+                .IsTargetControlConnected
                 .unwrap())()
                 == 1
         }
@@ -317,14 +317,27 @@ pub trait RenderDocV112: RenderDocV111 {
     unsafe fn entry_v112(&self) -> &EntryV112;
 
     #[allow(missing_docs)]
-    fn is_target_control_connected(&self) -> bool {
+    fn get_capture_file_path_template(&self) -> &str {
         unsafe {
+            let raw = (self
+                .entry_v112()
+                .__bindgen_anon_2
+                .GetCaptureFilePathTemplate
+                .unwrap())();
+            CStr::from_ptr(raw).to_str().unwrap()
+        }
+    }
+
+    #[allow(missing_docs)]
+    fn set_capture_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
+        unsafe {
+            let bytes = mem::transmute(path_template.as_ref().as_os_str());
+            let cstr = CStr::from_bytes_with_nul_unchecked(bytes);
             (self
                 .entry_v112()
-                .__bindgen_anon_3
-                .IsTargetControlConnected
-                .unwrap())()
-                == 1
+                .__bindgen_anon_1
+                .SetCaptureFilePathTemplate
+                .unwrap())(cstr.as_ptr());
         }
     }
 }
