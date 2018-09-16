@@ -1,10 +1,17 @@
 //! API versioning.
 
-pub use renderdoc_sys::RENDERDOC_API_1_0_0 as EntryV100;
-pub use renderdoc_sys::RENDERDOC_API_1_1_0 as EntryV110;
-pub use renderdoc_sys::RENDERDOC_API_1_1_1 as EntryV111;
-pub use renderdoc_sys::RENDERDOC_API_1_1_2 as EntryV112;
-pub use renderdoc_sys::RENDERDOC_API_1_2_0 as EntryV120;
+use renderdoc_sys;
+
+/// Entry point for RenderDoc API version 1.0.0.
+pub type EntryV100 = renderdoc_sys::RENDERDOC_API_1_0_0;
+/// Entry point for RenderDoc API version 1.1.0.
+pub type EntryV110 =  renderdoc_sys::RENDERDOC_API_1_1_0;
+/// Entry point for RenderDoc API version 1.1.1.
+pub type EntryV111 =  renderdoc_sys::RENDERDOC_API_1_1_1;
+/// Entry point for RenderDoc API version 1.1.2.
+pub type EntryV112 =  renderdoc_sys::RENDERDOC_API_1_1_2;
+/// Entry point for RenderDoc API version 1.2.0.
+pub type EntryV120 =  renderdoc_sys::RENDERDOC_API_1_2_0;
 
 use std::io::Error as IoError;
 use std::path::Path;
