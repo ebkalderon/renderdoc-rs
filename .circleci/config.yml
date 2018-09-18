@@ -20,18 +20,19 @@ jobs:
       - run:
           name: Nightly Build
           command: |
+            rustup toolchain add nightly
             rustup run nightly rustc --version --verbose
             rustup run nightly cargo --version --verbose
             rustup run nightly cargo build
       - run:
           name: Stable Build
           command: |
-            rustup run stable rustc --version --verbose
-            rustup run stable cargo --version --verbose
-            rustup run stable cargo build
+            rustc --version --verbose
+            cargo --version --verbose
+            cargo build
       - run:
           name: Test
-          command: rustup run stable cargo test --no-run
+          command: cargo test --no-run
       - save_cache:
           key: project-cache
           paths:
