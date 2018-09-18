@@ -15,8 +15,8 @@ jobs:
       - run:
           name: Check formatting
           command: |
-            rustup component add rustfmt-preview --toolchain stable
-            cargo fmt -- --write-mode=diff
+            rustup component add rustfmt-preview
+            cargo fmt --check
       - run:
           name: Nightly Build
           command: |
