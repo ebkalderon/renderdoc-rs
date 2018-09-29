@@ -10,6 +10,9 @@ documentation = "https://docs.rs/renderdoc-derive/"
 categories = ["development-tools::build-utils"]
 keywords = ["derive", "renderdoc"]
 
+[badges]
+circle-ci = { repository = "ebkalderon/renderdoc-rs" }
+
 [lib]
 proc-macro = true
 

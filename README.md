@@ -1,5 +1,14 @@
 # renderdoc-rs
 
+[![Build Status][s1]][cc] [![Crates.io][s2]][ci] [![Documentation][s3]][docs]
+
+[s1]: https://circleci.com/gh/ebkalderon/renderdoc-rs.svg?style=shield
+[cc]: https://circleci.com/gh/ebkalderon/renderdoc-rs
+[s2]: https://img.shields.io/crates/v/renderdoc.svg
+[ci]: https://crates.io/crates/renderdoc
+[s3]: https://img.shields.io/badge/docs-master-blue.svg
+[docs]: https://docs.rs/renderdoc
+
 Rust bindings to [RenderDoc], a popular graphics debugger.
 
 [RenderDoc]: https://renderdoc.org/
