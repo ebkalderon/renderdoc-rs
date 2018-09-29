@@ -11,6 +11,9 @@ readme = "README.md"
 categories = ["rendering"]
 keywords = ["graphics", "profile", "renderdoc", "trace"]
 
+[badges]
+circle-ci = { repository = "ebkalderon/renderdoc-rs" }
+
 [features]
 default = ["glutin"]
 

@@ -9,4 +9,7 @@ repository = "https://github.com/ebkalderon/renderdoc-rs"
 documentation = "https://docs.rs/renderdoc-sys/"
 keywords = ["ffi", "renderdoc"]
 
+[badges]
+circle-ci = { repository = "ebkalderon/renderdoc-rs" }
+
 [dependencies]
