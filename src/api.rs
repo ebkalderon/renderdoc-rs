@@ -1,11 +1,11 @@
 //! Traits providing statically guaranteed API version compatibility.
 
-use entry::{EntryV100, EntryV110, EntryV111, EntryV112, EntryV120};
-use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
-
 use std::ffi::{CStr, CString};
 use std::path::Path;
 use std::{mem, ptr};
+
+use entry::{EntryV100, EntryV110, EntryV111, EntryV112, EntryV120};
+use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 
 /// Base implementation of API version 1.0.0.
 pub trait RenderDocV100: Sized {

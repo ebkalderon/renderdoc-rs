@@ -27,7 +27,7 @@ use renderdoc::{OverlayBits, RenderDoc, V110};
 pub type ColorFormat = gfx::format::Rgba8;
 pub type DepthFormat = gfx::format::DepthStencil;
 
-gfx_defines!{
+gfx_defines! {
     vertex Vertex {
         pos: [f32; 2] = "a_Pos",
         color: [f32; 3] = "a_Color",
@@ -74,7 +74,8 @@ pub fn main() {
             include_bytes!("shader/triangle_150.glslv"),
             include_bytes!("shader/triangle_150.glslf"),
             pipe::new(),
-        ).unwrap();
+        )
+        .unwrap();
     let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&TRIANGLE, ());
     let mut data = pipe::Data {
         vbuf: vertex_buffer,

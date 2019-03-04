@@ -1,5 +1,9 @@
 //! Entry points for the RenderDoc API.
 
+use std::io::Error as IoError;
+use std::path::Path;
+
+use libloading::{Library, Symbol};
 use renderdoc_sys;
 
 /// Entry point for RenderDoc API version 1.0.0.
@@ -12,11 +16,6 @@ pub type EntryV111 = renderdoc_sys::RENDERDOC_API_1_1_1;
 pub type EntryV112 = renderdoc_sys::RENDERDOC_API_1_1_2;
 /// Entry point for RenderDoc API version 1.2.0.
 pub type EntryV120 = renderdoc_sys::RENDERDOC_API_1_2_0;
-
-use std::io::Error as IoError;
-use std::path::Path;
-
-use libloading::{Library, Symbol};
 
 #[cfg(windows)]
 fn get_path() -> &'static Path {
