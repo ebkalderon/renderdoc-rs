@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 * Minor code formatting tweaks.
+* Switch to Circle CI Rust 1.33.0 image.
 
 ## [0.4.0] - 2018-09-16
 ### Added

@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/rust:1.29.0
+      - image: circleci/rust:1.33.0
 
     environment:
       TZ: "/usr/share/zoneinfo/Asia/Singapore"
