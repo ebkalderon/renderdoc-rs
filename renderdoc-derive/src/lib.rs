@@ -66,7 +66,8 @@ fn build_api_list(attrs: &[Attribute]) -> Vec<Ident> {
             .flat_map(|elem| match elem {
                 NestedMeta::Meta(Meta::Word(ident)) => Some(ident),
                 _ => None,
-            }).collect(),
+            })
+            .collect(),
         _ => panic!("Expected list attribute `#[renderdoc_convert(...)]`"),
     };
 
@@ -122,7 +123,8 @@ fn gen_from_impls(name: &Ident, apis: &[Ident], tokens: TokenStream2) -> TokenSt
                     }
                 }
             }
-        }).collect();
+        })
+        .collect();
 
     gen_from_impls(
         name,
@@ -194,7 +196,8 @@ fn gen_renderdoc_impls(name: &Ident, apis: &[Ident], tokens: TokenStream2) -> To
                     }
                 }
             }
-        }).collect();
+        })
+        .collect();
 
     gen_renderdoc_impls(
         name,
