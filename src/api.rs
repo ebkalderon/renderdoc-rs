@@ -14,8 +14,8 @@ pub trait RenderDocV100: Sized {
 
     /// Returns the major, minor, and patch version numbers of the RenderDoc API currently in use.
     ///
-    /// Note that RenderDoc will usually provide a higher API version than the
-    /// one requested by the user if it's backwards compatible.
+    /// Note that RenderDoc will usually provide a higher API version than the one requested by
+    /// the user if it's backwards compatible.
     ///
     /// # Examples
     ///
@@ -102,10 +102,10 @@ pub trait RenderDocV100: Sized {
     ///
     /// # Safety
     ///
-    /// Note that this will work correctly if done _immediately_ after the
-    /// dynamic library is loaded, before any API work happens. At that point,
-    /// RenderDoc will remove its injected hooks and shut down. Behavior is
-    /// undefined if this is called after any API functions have been called.
+    /// Note that this will work correctly if done _immediately_ after the dynamic library is
+    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
+    /// hooks and shut down. Behavior is undefined if this is called after any API functions have
+    /// been called.
     unsafe fn shutdown(self) {
         (self.entry_v100().Shutdown.unwrap())();
     }
@@ -287,8 +287,7 @@ pub trait RenderDocV110: RenderDocV100 {
     /// Returns the raw `EntryV110` entry point struct.
     unsafe fn entry_v110(&self) -> &EntryV110;
 
-    /// Captures the next _n_ frames from the currently active window and API
-    /// device.
+    /// Captures the next _n_ frames from the currently active window and API device.
     ///
     /// Data is saved to a capture log file at the location specified via
     /// `set_log_file_path_template()`.
