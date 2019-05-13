@@ -12,8 +12,7 @@ pub trait RenderDocV100: Sized {
     /// Returns the raw `EntryV100` entry point struct.
     unsafe fn entry_v100(&self) -> &EntryV100;
 
-    /// Provides the major, minor, and patch version numbers of the RenderDoc
-    /// API given to the application.
+    /// Returns the major, minor, and patch version numbers of the RenderDoc API currently in use.
     ///
     /// Note that RenderDoc will usually provide a higher API version than the
     /// one requested by the user if it's backwards compatible.
@@ -59,7 +58,11 @@ pub trait RenderDocV100: Sized {
         assert_eq!(err, 1);
     }
 
-    #[allow(missing_docs)]
+    /// Returns the value of the given `CaptureOption` as an `f32` value.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the option is invalid.
     fn get_capture_option_f32(&self, opt: CaptureOption) -> f32 {
         use std::f32::MAX;
         let val = unsafe { (self.entry_v100().GetCaptureOptionF32.unwrap())(opt as u32) };
@@ -67,7 +70,11 @@ pub trait RenderDocV100: Sized {
         val
     }
 
-    #[allow(missing_docs)]
+    /// Returns the value of the given `CaptureOption` as a `u32` value.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the option is invalid.
     fn get_capture_option_u32(&self, opt: CaptureOption) -> u32 {
         use std::u32::MAX;
         let val = unsafe { (self.entry_v100().GetCaptureOptionU32.unwrap())(opt as u32) };
@@ -201,20 +208,19 @@ pub trait RenderDocV100: Sized {
     }
 
     #[allow(missing_docs)]
-    fn launch_replay_ui<C>(&self, cmd_line: C) -> Result<u32, ()>
+    fn launch_replay_ui<'a, O>(&self, connect_immediately: bool, extra_opts: O) -> Result<u32, ()>
     where
-        C: Into<Option<&'static str>>,
+        O: Into<Option<&'a str>>,
     {
-        unsafe {
-            let with_cmd = cmd_line.into();
-            let (enabled, text) = if let Some(ref cmd) = with_cmd {
-                let bytes = cmd.as_bytes();
-                (1, CStr::from_bytes_with_nul_unchecked(bytes))
-            } else {
-                (0, CStr::from_ptr(ptr::null()))
-            };
+        let extra_opts = extra_opts.into().and_then(|s| CString::new(s).ok());
+        let should_connect = connect_immediately as u32;
+        let command_str = extra_opts
+            .as_ref()
+            .map(|s| s.as_ptr())
+            .unwrap_or_else(|| ptr::null());
 
-            match (self.entry_v100().LaunchReplayUI.unwrap())(enabled, text.as_ptr()) {
+        unsafe {
+            match (self.entry_v100().LaunchReplayUI.unwrap())(should_connect, command_str) {
                 0 => Err(()),
                 pid => Ok(pid),
             }

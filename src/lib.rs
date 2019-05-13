@@ -38,8 +38,8 @@ pub mod api;
 pub mod entry;
 pub mod prelude;
 
-/// Magic value used for when applications pass a path where shader debug
-/// information can be found to match up with a stripped shader.
+/// Magic value used for when applications pass a path where shader debug information can be found
+/// to match up with a stripped shader.
 ///
 /// Windows GUID representation intended for consumption by D3D.
 #[cfg(windows)]
@@ -50,16 +50,16 @@ pub const SHADER_MAGIC_DEBUG_VALUE_STRUCT: GUID = GUID {
     Data4: [0x84, 0x29, 0x6c, 0x8, 0x51, 0x54, 0x00, 0xff],
 };
 
-/// Magic value used for when applications pass a path where shader debug
-/// information can be found to match up with a stripped shader.
+/// Magic value used for when applications pass a path where shader debug information can be found
+/// to match up with a stripped shader.
 ///
 /// Raw byte array representation (assuming x86 endianness).
 pub const SHADER_MAGIC_DEBUG_VALUE_BYTE_ARRAY: &[u8] = &[
     0x20, 0x55, 0xb2, 0xea, 0x70, 0x66, 0x65, 0x48, 0x84, 0x29, 0x6c, 0x8, 0x51, 0x54, 0x00, 0xff,
 ];
 
-/// Magic value used for when applications pass a path where shader debug
-/// information can be found to match up with a stripped shader.
+/// Magic value used for when applications pass a path where shader debug information can be found
+/// to match up with a stripped shader.
 ///
 /// Truncated version when only a `uint64_t` is available (e.g. Vulkan tags).
 pub const SHADER_MAGIC_DEBUG_VALUE_TRUNCATED: c_ulonglong = 0x4856670eab25520;
@@ -82,49 +82,49 @@ pub enum CaptureOption {
     ///
     /// This option does nothing without the above option being enabled.
     CaptureCallstacksOnlyDraws = 4,
-    /// Specify a delay, measured in seconds, to wait for a debugger to attach
-    /// to the application after being injected.
+    /// Specify a delay, measured in seconds, to wait for a debugger to attach to the application
+    /// after being injected.
     DelayForDebugger = 5,
-    /// Verify any writes to mapped buffers by checking the memory after the
-    /// bounds of the returned pointer to detect any modification.
+    /// Verify any writes to mapped buffers by checking the memory after the bounds of the
+    /// returned pointer to detect any modification.
     VerifyMapWrites = 6,
-    /// Hooks any system API calls that create child processes and injects
-    /// RenderDoc into them recursively with the same options.
+    /// Hooks any system API calls that create child processes and injects RenderDoc into them
+    /// recursively with the same options.
     HookIntoChildren = 7,
     /// Reference all resources available at the time of capture.
     ///
-    /// By default, RenderDoc only includes resources in the final capture file
-    /// necessary for that frame. This option allows you to override that
-    /// behavior.
+    /// By default, RenderDoc only includes resources in the final capture file necessary for that
+    /// frame. This option allows you to override that behavior.
     RefAllResources = 8,
     /// Save the initial state for all resources, regardless of usage.
     ///
-    /// By default, RenderDoc skips saving initial states for resources where
-    /// the previous contents don't appear to be used (assuming that writes
-    /// before reads indicate the previous contents aren't used).
+    /// By default, RenderDoc skips saving initial states for resources where the previous
+    /// contents don't appear to be used (assuming that writes before reads indicate the previous
+    /// contents aren't used).
     SaveAllInitials = 9,
     /// Capture all command lists generated from the start of the application.
     ///
-    /// In APIs that allow for recording of command lists to be replayed later,
-    /// RenderDoc may choose to not capture command lists before a frame capture
-    /// is triggered to reduce overhead. This means any command lists that are
-    /// recorded one and replayed many times will not be available, potentially
-    /// causing a failure to capture.
+    /// In APIs that allow for recording of command lists to be replayed later, RenderDoc may
+    /// choose to not capture command lists before a frame capture is triggered to reduce
+    /// overhead. This means any command lists that are recorded one and replayed many times will
+    /// not be available, potentially causing a failure to capture.
     ///
-    /// Note that this is only true for APIs where multithreading is difficult
-    /// or otherwise discouraged. Newer APIs, e.g. Vulkan and D3D12, will ignore
-    /// this option and always capture all command lists since they are heavily
-    /// oriented around them and the associated overhead is mostly reduced due
-    /// to superior API design.
+    /// Note that this is only true for APIs where multithreading is difficult or otherwise
+    /// discouraged. Newer APIs, e.g. Vulkan and D3D12, will ignore this option and always capture
+    /// all command lists since they are heavily oriented around them and the associated overhead
+    /// is mostly reduced due to superior API design.
     CaptureAllCmdLists = 10,
     /// Mute API debug output when `CaptureOption::ApiValidation` is enabled.
     DebugOutputMute = 11,
+    /// Allow all vendor extensions to be used, even when they may be incompatible with RenderDoc
+    /// and could potentially cause corrupted replays or crashes.
+    AllowUnsupportedVendorExtensions = 12,
 }
 
 /// Raw mutable pointer to the API's root handle.
 ///
-/// For example, this could be a pointer to an `ID3D11Device`,
-/// `HGLRC`/`GLXContext`, `ID3D12Device`, etc.
+/// For example, this could be a pointer to an `ID3D11Device`, `HGLRC`/`GLXContext`,
+/// `ID3D12Device`, etc.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct DevicePointer(pub(crate) *const c_void);
 
@@ -176,9 +176,9 @@ impl From<ComPtr<winapi::um::d3d12::ID3D12Device>> for DevicePointer {
 }
 
 #[cfg(feature = "glutin")]
-impl<'a> From<&'a glutin::Context> for DevicePointer {
-    fn from(ctx: &'a glutin::Context) -> Self {
-        use glutin::os::GlContextExt;
+impl<'a, T: glutin::ContextCurrentState> From<&'a glutin::Context<T>> for DevicePointer {
+    fn from(ctx: &'a glutin::Context<T>) -> Self {
+        use glutin::os::ContextTraitExt;
 
         #[cfg(unix)]
         unsafe {
@@ -253,8 +253,8 @@ pub enum InputButton {
     Y = 0x59,
     Z = 0x5A,
 
-    /// Leave the rest of the ASCII range free, in case the RenderDoc developers
-    /// decide to use it later.
+    /// Leave the rest of the ASCII range free, in case the RenderDoc developers decide to use it
+    /// later.
     NonPrintable = 0x100,
 
     /// Division key on the numpad.
@@ -404,8 +404,8 @@ impl<V: ApiVersion> RenderDoc<V> {
     ///
     /// # Safety
     ///
-    /// Using the entry point structure directly will discard any thread safety
-    /// provided by default with this library.
+    /// Using the entry point structure directly will discard any thread safety provided by
+    /// default with this library.
     pub unsafe fn raw_api(&self) -> V::Entry {
         self.0.clone()
     }
@@ -459,7 +459,7 @@ mod tests {
         assert_eq!(ref_all, 0u32);
 
         let intls = rd.get_capture_option_u32(CaptureOption::SaveAllInitials);
-        assert_eq!(intls, 0u32);
+        assert_eq!(intls, 1u32);
 
         let cmds = rd.get_capture_option_u32(CaptureOption::CaptureAllCmdLists);
         assert_eq!(cmds, 0u32);

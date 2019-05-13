@@ -1,6 +1,7 @@
 //! Entry points for the RenderDoc API.
 
 use std::io::Error as IoError;
+use std::os::raw::c_void;
 use std::path::Path;
 
 use libloading::{Library, Symbol};
@@ -55,9 +56,8 @@ pub enum Version {
 ///
 /// # Safety
 ///
-/// This function is not thread-safe and should not be called on multiple
-/// threads at once.
-type GetApiFn<T> = unsafe extern "C" fn(ver: Version, out: *mut *mut T) -> i32;
+/// This function is not thread-safe and should not be called on multiple threads at once.
+type GetApiFn = unsafe extern "C" fn(ver: Version, out: *mut *mut c_void) -> i32;
 
 /// Entry point into the RenderDoc API.
 pub trait ApiVersion {
@@ -71,24 +71,21 @@ pub trait ApiVersion {
     ///
     /// # Safety
     ///
-    /// This function is not thread-safe and should not be called on multiple
-    /// threads at once.
+    /// This function is not thread-safe and should not be called on multiple threads at once.
     fn load() -> Result<Self::Entry, String> {
         use std::ptr;
 
-        let api = unsafe {
+        unsafe {
             let lib = RD_LIB.as_ref().map_err(|e| e.to_string())?;
-            let get_api: Symbol<GetApiFn<Self::Entry>> =
+            let get_api: Symbol<GetApiFn> =
                 lib.get(b"RENDERDOC_GetAPI\0").map_err(|e| e.to_string())?;
 
             let mut obj = ptr::null_mut();
             match get_api(Self::VERSION, &mut obj) {
-                1 => ptr::read(obj),
-                _ => Err("Compatible API version not available.")?,
+                1 => Ok(ptr::read(obj as *mut Self::Entry)),
+                _ => Err("Compatible API version not available.".into()),
             }
-        };
-
-        Ok(api)
+        }
     }
 }
 
