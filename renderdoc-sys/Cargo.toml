@@ -13,3 +13,4 @@ keywords = ["ffi", "renderdoc"]
 circle-ci = { repository = "ebkalderon/renderdoc-rs" }
 
 [dependencies]
+lazy_static = "1.3.0"

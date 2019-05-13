@@ -353,26 +353,21 @@ pub trait RenderDocV120: RenderDocV112 {
     unsafe fn entry_v120(&self) -> &EntryV120;
 
     #[allow(missing_docs)]
-    fn set_capture_file_comments<P, C>(&self, path: P, comments: C)
+    fn set_capture_file_comments<'a, P, C>(&self, path: P, comments: C)
     where
-        P: Into<Option<&'static str>>,
+        P: Into<Option<&'a str>>,
         C: AsRef<str>,
     {
+        let path_str = path.into().and_then(|s| CString::new(s).ok());
+        let path = path_str
+            .as_ref()
+            .map(|s| s.as_ptr())
+            .unwrap_or_else(|| ptr::null());
+
+        let comments = CString::new(comments.as_ref()).expect("string contains extra null bytes");
+
         unsafe {
-            let with_path = path.into();
-            let path = if let Some(ref path) = with_path {
-                let bytes = path.as_bytes();
-                CStr::from_bytes_with_nul_unchecked(bytes)
-            } else {
-                CStr::from_ptr(ptr::null())
-            };
-
-            let comments = {
-                let bytes = comments.as_ref().as_bytes();
-                CStr::from_bytes_with_nul_unchecked(bytes)
-            };
-
-            (self.entry_v120().SetCaptureFileComments.unwrap())(path.as_ptr(), comments.as_ptr());
+            (self.entry_v120().SetCaptureFileComments.unwrap())(path, comments.as_ptr());
         }
     }
 }
