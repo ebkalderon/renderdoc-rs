@@ -8,6 +8,4 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 
-pub use self::app::*;
-
-mod app;
+include!("./bindings.rs");
