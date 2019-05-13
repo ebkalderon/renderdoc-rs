@@ -54,15 +54,14 @@ fn impl_renderdoc(ast: &DeriveInput) -> TokenStream {
 /// Each API version in this list is a unique identifier of the form `V100`, `V110`, `V120`, etc.
 fn build_api_list(attrs: &[Attribute]) -> Vec<Ident> {
     let meta = attrs
-        .iter()
+        .into_iter()
         .flat_map(|attr| attr.interpret_meta())
         .find(|meta| meta.name() == "renderdoc_convert")
         .expect("Missing required attribute `#[renderdoc_convert(...)]`");
 
     let mut apis: Vec<Ident> = match meta {
-        Meta::List(MetaList { ref nested, .. }) => nested
-            .iter()
-            .cloned()
+        Meta::List(MetaList { nested, .. }) => nested
+            .into_iter()
             .flat_map(|elem| match elem {
                 NestedMeta::Meta(Meta::Word(ident)) => Some(ident),
                 _ => None,
@@ -188,7 +187,7 @@ fn gen_renderdoc_impls(name: &Ident, apis: &[Ident], tokens: TokenStream2) -> To
                 &format!("entry_{}", api.to_string().to_lowercase()),
                 span.clone(),
             );
-            let ret_val = Ident::new(&format!("Entry{}", api), span.clone());
+            let ret_val = Ident::new(&format!("Entry{}", api), span);
 
             quote! {
                 impl ::api::#trait_name for #name<#version> {
