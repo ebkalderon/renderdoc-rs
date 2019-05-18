@@ -1,6 +1,11 @@
-//! RenderDoc application bindings for Rust
+//! RenderDoc application bindings for Rust.
+//!
+//! Refer to the [In-Application API] documentation for more details.
+//!
+//! [api]: https://renderdoc.org/docs/in_application_api.html
 
 #![deny(missing_docs)]
+#![deny(missing_debug_implementations)]
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 compile_error!("RenderDoc does not support this platform.");
