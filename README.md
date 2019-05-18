@@ -21,8 +21,8 @@ bugs.
 These bindings require that RenderDoc be installed on the target machine, with
 either `renderdoc.dll` or `librenderdoc.so` visible from your`PATH`.
 
-For more details on how to use this API to integrate with the RenderDoc
-profiler, see the [in-application API][in-app] Documentation.
+For more details on how to use this API to integrate your game or renderer with
+the RenderDoc profiler, consult the [in-application API][in-app] documentation.
 
 [in-app]: https://renderdoc.org/docs/in_application_api.html
 
