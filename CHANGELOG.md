@@ -22,13 +22,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Switch to Circle CI Rust 1.34.1 image.
 
 ### Fixed
-* Fix erroneous doc comments (PR #24).
+* Switch `set_capture_file_comments()` and `trigger_multi_frame_capture()` to
+  take `&mut self` (PR #32).
 * Unimplement `Clone`, `Send`, and `Sync` for `RenderDoc` struct (PR #29).
 * Correct default setting in the `get_set_capture_option()` unit test.
 * Fix improperly designed `launch_replay_ui()` method, update `triangle` example
   to match.
 * Set correct RenderDoc library path for Android clients.
 * Add missing trait re-exports to `prelude` module (PR #31).
+* Fix erroneous doc comments (PR #24).
 
 ## [0.4.0] - 2018-09-16
 ### Added
