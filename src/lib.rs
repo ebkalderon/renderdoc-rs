@@ -125,7 +125,7 @@ pub enum CaptureOption {
 ///
 /// For example, this could be a pointer to an `ID3D11Device`, `HGLRC`/`GLXContext`,
 /// `ID3D12Device`, etc.
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DevicePointer(pub(crate) *const c_void);
 
 impl From<*const c_void> for DevicePointer {
