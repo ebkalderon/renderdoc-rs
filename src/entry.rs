@@ -23,9 +23,14 @@ fn get_path() -> &'static Path {
     Path::new("renderdoc.dll")
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "android")))]
 fn get_path() -> &'static Path {
     Path::new("librenderdoc.so")
+}
+
+#[cfg(target_os = "android")]
+fn get_path() -> &'static Path {
+    Path::new("libVkLayer_GLES_RenderDoc.so")
 }
 
 lazy_static! {
