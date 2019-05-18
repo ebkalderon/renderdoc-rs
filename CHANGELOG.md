@@ -8,14 +8,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 * Add CI and documentation badges.
+* Implement support for API versions 1.3.0 and 1.4.0.
+* Allow string slices with lifetimes in `set_capture_file_comments()`.
 
 ### Changed
+* Bump `glutin` dependency to 0.21.
+* Bump `gfx` dev-dependency to 0.18.1.
+* Bump `gfx_window_glutin` dev-dependency to 0.31.
+* Upgrade CircleCI Rust image to 1.34.1.
+* Convert top-level crate to workspace.
+* Clean up `renderdoc-sys` crate layout.
 * Minor code formatting tweaks.
-* Switch to Circle CI Rust 1.33.0 image.
+* Switch to Circle CI Rust 1.34.1 image.
 
 ### Fixed
 * Fix erroneous doc comments (PR #24).
-* Unimplement `Clone`, `Send`, and `Sync` for `RenderDoc` (PR #29).
+* Unimplement `Clone`, `Send`, and `Sync` for `RenderDoc` struct (PR #29).
+* Correct default setting in the `get_set_capture_option()` unit test.
+* Fix improperly designed `launch_replay_ui()` method, update `triangle` example
+  to match.
+* Set correct RenderDoc library path for Android clients.
 
 ## [0.4.0] - 2018-09-16
 ### Added
