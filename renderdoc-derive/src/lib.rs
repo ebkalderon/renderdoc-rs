@@ -119,7 +119,8 @@ fn gen_from_impls(name: &Ident, apis: &[Ident], tokens: TokenStream2) -> TokenSt
             quote! {
                 impl From<#name<#newer>> for #name<#older> {
                     fn from(newer: #name<#newer>) -> Self {
-                        #name(newer.0.into())
+                        let #name(entry, phantom) = newer;
+                        #name(entry.into(), phantom)
                     }
                 }
             }

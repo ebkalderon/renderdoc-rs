@@ -23,6 +23,7 @@ extern crate wio;
 
 pub use self::entry::{ApiVersion, V100, V110, V111, V112, V120};
 
+use std::marker::PhantomData;
 use std::os::raw::{c_ulonglong, c_void};
 use std::u32;
 
@@ -388,15 +389,15 @@ bitflags! {
 pub type WindowHandle = *const c_void;
 
 /// An instance of the RenderDoc API with baseline version `V`.
-#[derive(Clone, Debug, RenderDoc)]
+#[derive(Debug, RenderDoc)]
 #[renderdoc_convert(V100, V110, V111, V112, V120)]
-pub struct RenderDoc<V: ApiVersion>(V::Entry);
+pub struct RenderDoc<V: ApiVersion>(V::Entry, PhantomData<*mut ()>);
 
 impl<V: ApiVersion> RenderDoc<V> {
     /// Initializes a new instance of the RenderDoc API.
     pub fn new() -> Result<RenderDoc<V>, String> {
         let api = V::load()?;
-        Ok(RenderDoc(api))
+        Ok(RenderDoc(api, PhantomData))
     }
 
     /// Returns the raw entry point of the API.
