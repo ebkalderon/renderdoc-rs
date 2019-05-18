@@ -295,7 +295,7 @@ pub trait RenderDocV110: RenderDocV100 {
 
 /// Additional features for API version 1.1.1.
 pub trait RenderDocV111: RenderDocV110 {
-    /// Returns the raw `EntryV110` entry point struct.
+    /// Returns the raw `EntryV111` entry point struct.
     unsafe fn entry_v111(&self) -> &EntryV111;
 
     #[allow(missing_docs)]
@@ -311,9 +311,9 @@ pub trait RenderDocV111: RenderDocV110 {
     }
 }
 
-/// Additional features for API version 1.1.1.
+/// Additional features for API version 1.1.2.
 pub trait RenderDocV112: RenderDocV111 {
-    /// Returns the raw `EntryV110` entry point struct.
+    /// Returns the raw `EntryV112` entry point struct.
     unsafe fn entry_v112(&self) -> &EntryV112;
 
     #[allow(missing_docs)]
@@ -344,7 +344,7 @@ pub trait RenderDocV112: RenderDocV111 {
 
 /// Additional features for API version 1.2.0.
 pub trait RenderDocV120: RenderDocV112 {
-    /// Returns the raw `EntryV110` entry point struct.
+    /// Returns the raw `EntryV210` entry point struct.
     unsafe fn entry_v120(&self) -> &EntryV120;
 
     #[allow(missing_docs)]
