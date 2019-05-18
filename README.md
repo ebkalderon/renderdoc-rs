@@ -32,7 +32,6 @@ profiler, see the [in-application API][in-app] Documentation.
 extern crate renderdoc;
 
 use renderdoc::{RenderDoc, V100, V110};
-use renderdoc::prelude::*;
 
 fn main() {
     let mut rd: RenderDoc<V110> = RenderDoc::new().expect("Failed to init");
