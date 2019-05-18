@@ -4,7 +4,7 @@ use std::ffi::{CStr, CString};
 use std::path::Path;
 use std::{mem, ptr};
 
-use entry::{EntryV100, EntryV110, EntryV111, EntryV112, EntryV120};
+use entry::{EntryV100, EntryV110, EntryV111, EntryV112, EntryV120, EntryV130, EntryV140};
 use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 
 /// Base implementation of API version 1.0.0.
@@ -349,7 +349,7 @@ pub trait RenderDocV112: RenderDocV111 {
 
 /// Additional features for API version 1.2.0.
 pub trait RenderDocV120: RenderDocV112 {
-    /// Returns the raw `EntryV210` entry point struct.
+    /// Returns the raw `EntryV120` entry point struct.
     unsafe fn entry_v120(&self) -> &EntryV120;
 
     #[allow(missing_docs)]
@@ -368,6 +368,31 @@ pub trait RenderDocV120: RenderDocV112 {
 
         unsafe {
             (self.entry_v120().SetCaptureFileComments.unwrap())(path, comments.as_ptr());
+        }
+    }
+}
+
+/// Additional features for API version 1.3.0.
+pub trait RenderDocV130: RenderDocV120 {
+    /// Returns the raw `EntryV130` entry point struct.
+    unsafe fn entry_v130(&self) -> &EntryV130;
+}
+
+/// Additional features for API version 1.4.0.
+pub trait RenderDocV140: RenderDocV130 {
+    /// Returns the raw `EntryV140` entry point struct.
+    unsafe fn entry_v140(&self) -> &EntryV140;
+
+    /// Ends capturing immediately and discard any data without saving to disk.
+    ///
+    /// Returns `true` if the capture was discarded, or `false` if no capture is in progress.
+    fn discard_frame_capture<D>(&mut self, dev: D, win: WindowHandle) -> bool
+    where
+        D: Into<DevicePointer>,
+    {
+        let DevicePointer(dev) = dev.into();
+        unsafe {
+            (self.entry_v140().DiscardFrameCapture.unwrap())(dev as *mut _, win as *mut _) == 1
         }
     }
 }
