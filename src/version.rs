@@ -5,22 +5,10 @@ use std::os::raw::c_void;
 use std::path::Path;
 
 use libloading::{Library, Symbol};
-use renderdoc_sys;
+use renderdoc_sys::RENDERDOC_API_1_4_0;
 
-/// Entry point for RenderDoc API version 1.0.0.
-pub type EntryV100 = renderdoc_sys::RENDERDOC_API_1_0_0;
-/// Entry point for RenderDoc API version 1.1.0.
-pub type EntryV110 = renderdoc_sys::RENDERDOC_API_1_1_0;
-/// Entry point for RenderDoc API version 1.1.1.
-pub type EntryV111 = renderdoc_sys::RENDERDOC_API_1_1_1;
-/// Entry point for RenderDoc API version 1.1.2.
-pub type EntryV112 = renderdoc_sys::RENDERDOC_API_1_1_2;
-/// Entry point for RenderDoc API version 1.2.0.
-pub type EntryV120 = renderdoc_sys::RENDERDOC_API_1_2_0;
-/// Entry point for RenderDoc API version 1.3.0.
-pub type EntryV130 = renderdoc_sys::RENDERDOC_API_1_3_0;
-/// Entry point for RenderDoc API version 1.4.0.
-pub type EntryV140 = renderdoc_sys::RENDERDOC_API_1_4_0;
+/// Entry point for the RenderDoc API.
+pub type Entry = RENDERDOC_API_1_4_0;
 
 #[cfg(windows)]
 fn get_path() -> &'static Path {
@@ -44,7 +32,7 @@ lazy_static! {
 /// Available versions of the RenderDoc API.
 #[repr(u32)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum Version {
+pub enum VersionCode {
     /// Version 1.0.0.
     V100 = 10000,
     /// Version 1.0.1.
@@ -70,22 +58,19 @@ pub enum Version {
 /// # Safety
 ///
 /// This function is not thread-safe and should not be called on multiple threads at once.
-type GetApiFn = unsafe extern "C" fn(ver: Version, out: *mut *mut c_void) -> i32;
+type GetApiFn = unsafe extern "C" fn(ver: VersionCode, out: *mut *mut c_void) -> i32;
 
 /// Entry point into the RenderDoc API.
-pub trait ApiVersion {
+pub trait Version {
     /// Minimum compatible version number.
-    const VERSION: Version;
-
-    /// Entry point struct.
-    type Entry: Clone;
+    const VERSION: VersionCode;
 
     /// Initializes a new instance of the RenderDoc API.
     ///
     /// # Safety
     ///
     /// This function is not thread-safe and should not be called on multiple threads at once.
-    fn load() -> Result<Self::Entry, String> {
+    fn load() -> Result<*mut Entry, String> {
         use std::ptr;
 
         unsafe {
@@ -95,72 +80,95 @@ pub trait ApiVersion {
 
             let mut obj = ptr::null_mut();
             match get_api(Self::VERSION, &mut obj) {
-                1 => Ok(ptr::read(obj as *mut Self::Entry)),
+                1 => Ok(obj as *mut Entry),
                 _ => Err("Compatible API version not available.".into()),
             }
         }
     }
 }
 
+/// Trait for statically enforcing backwards compatibility.
+pub trait HasPrevious: Version {
+    /// API version which immediately precedes this one.
+    type Previous: Version;
+}
+
 /// Requests a minimum version number of 1.0.0.
+#[derive(Debug)]
 pub enum V100 {}
 
-impl ApiVersion for V100 {
-    const VERSION: Version = Version::V100;
-
-    type Entry = EntryV100;
+impl Version for V100 {
+    const VERSION: VersionCode = VersionCode::V100;
 }
 
 /// Requests a minimum version number of 1.1.0.
+#[derive(Debug)]
 pub enum V110 {}
 
-impl ApiVersion for V110 {
-    const VERSION: Version = Version::V110;
+impl Version for V110 {
+    const VERSION: VersionCode = VersionCode::V110;
+}
 
-    type Entry = EntryV110;
+impl HasPrevious for V110 {
+    type Previous = V100;
 }
 
 /// Requests a minimum version number of 1.1.1.
+#[derive(Debug)]
 pub enum V111 {}
 
-impl ApiVersion for V111 {
-    const VERSION: Version = Version::V111;
+impl Version for V111 {
+    const VERSION: VersionCode = VersionCode::V111;
+}
 
-    type Entry = EntryV111;
+impl HasPrevious for V111 {
+    type Previous = V110;
 }
 
 /// Requests a minimum version number of 1.1.2.
+#[derive(Debug)]
 pub enum V112 {}
 
-impl ApiVersion for V112 {
-    const VERSION: Version = Version::V112;
+impl Version for V112 {
+    const VERSION: VersionCode = VersionCode::V112;
+}
 
-    type Entry = EntryV112;
+impl HasPrevious for V112 {
+    type Previous = V111;
 }
 
 /// Requests a minimum version number of 1.2.0.
+#[derive(Debug)]
 pub enum V120 {}
 
-impl ApiVersion for V120 {
-    const VERSION: Version = Version::V120;
+impl Version for V120 {
+    const VERSION: VersionCode = VersionCode::V120;
+}
 
-    type Entry = EntryV120;
+impl HasPrevious for V120 {
+    type Previous = V112;
 }
 
 /// Requests a minimum version number of 1.3.0.
+#[derive(Debug)]
 pub enum V130 {}
 
-impl ApiVersion for V130 {
-    const VERSION: Version = Version::V130;
+impl Version for V130 {
+    const VERSION: VersionCode = VersionCode::V130;
+}
 
-    type Entry = EntryV130;
+impl HasPrevious for V130 {
+    type Previous = V120;
 }
 
 /// Requests a minimum version number of 1.4.0.
+#[derive(Debug)]
 pub enum V140 {}
 
-impl ApiVersion for V140 {
-    const VERSION: Version = Version::V140;
+impl Version for V140 {
+    const VERSION: VersionCode = VersionCode::V140;
+}
 
-    type Entry = EntryV140;
+impl HasPrevious for V140 {
+    type Previous = V130;
 }

@@ -8,7 +8,7 @@ extern crate quote;
 extern crate syn;
 
 use proc_macro::TokenStream;
-use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
+use proc_macro2::{Ident, TokenStream as TokenStream2};
 use syn::{Attribute, DeriveInput, Meta, MetaList, NestedMeta};
 
 /// Generates API boilerplate for the `renderdoc` crate.
@@ -18,9 +18,9 @@ use syn::{Attribute, DeriveInput, Meta, MetaList, NestedMeta};
 /// This macro expects a tuple struct of the form:
 ///
 /// ```rust,ignore
-/// use renderdoc::ApiVersion;
+/// use renderdoc::Version;
 ///
-/// struct Foo<T: ApiVersion>(T::Entry);
+/// struct Foo<T: Version>(Entry, PhantomData<T>);
 /// ```
 ///
 /// Given the data structure above, this macro generates the following implementations:
@@ -37,13 +37,10 @@ pub fn renderdoc(input: TokenStream) -> TokenStream {
 fn impl_renderdoc(ast: &DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let apis = build_api_list(&ast.attrs);
-
     let from_impls = gen_from_impls(&name, &apis, TokenStream2::new());
-    let rd_impls = gen_renderdoc_impls(&name, &apis, TokenStream2::new());
 
     let expanded = quote! {
         #from_impls
-        #rd_impls
     };
 
     expanded.into()
@@ -74,7 +71,9 @@ fn build_api_list(attrs: &[Attribute]) -> Vec<Ident> {
     apis
 }
 
-/// Generates `From` implementations that permit downgrading of API versions.
+/// Generates `From` implementations that permit downgrading of API versions. Unlike the
+/// `downgrade()` method, these `From` implementations let any version to downgrade to any other
+/// older backwards-compatible API version in a clean way.
 ///
 /// This function takes a list of API versions sorted in ascending order and recursively generates
 /// `From` implementations for them. For instance, given the following three API versions
@@ -83,13 +82,19 @@ fn build_api_list(attrs: &[Attribute]) -> Vec<Ident> {
 /// ```rust,ignore
 /// // V200 -> V110, V100
 ///
-/// impl From<#name<V200>> for #name<V110> {
+/// impl From<#name<V200>> for #name<V110>
+/// where
+///     Self: Sized,
+/// {
 ///     fn from(newer: #name<V200>) -> Self {
 ///         // ...
 ///     }
 /// }
 ///
-/// impl From<#name<V200>> for #name<V100> {
+/// impl From<#name<V200>> for #name<V100>
+/// where
+///     Self: Sized,
+/// {
 ///     fn from(newer: #name<V200>) -> Self {
 ///         // ...
 ///     }
@@ -97,7 +102,10 @@ fn build_api_list(attrs: &[Attribute]) -> Vec<Ident> {
 ///
 /// // V110 -> V100
 ///
-/// impl From<#name<V110>> for #name<V100> {
+/// impl From<#name<V110>> for #name<V100>
+/// where
+///     Self: Sized,
+/// {
 ///     fn from(newer: #name<V200>) -> Self {
 ///         // ...
 ///     }
@@ -116,10 +124,13 @@ fn gen_from_impls(name: &Ident, apis: &[Ident], tokens: TokenStream2) -> TokenSt
         .iter()
         .map(|older| {
             quote! {
-                impl From<#name<#newer>> for #name<#older> {
+                impl From<#name<#newer>> for #name<#older>
+                where
+                    Self: Sized,
+                {
                     fn from(newer: #name<#newer>) -> Self {
-                        let #name(entry, phantom) = newer;
-                        #name(entry.into(), phantom)
+                        let #name(entry, _) = newer;
+                        #name(entry, PhantomData)
                     }
                 }
             }
@@ -127,79 +138,6 @@ fn gen_from_impls(name: &Ident, apis: &[Ident], tokens: TokenStream2) -> TokenSt
         .collect();
 
     gen_from_impls(
-        name,
-        &apis[0..last_idx],
-        tokens.into_iter().chain(impls).collect(),
-    )
-}
-
-/// Generates `RenderDocV###` implementations for statically typing the RenderDoc API.
-///
-/// This function takes a list of API versions sorted in ascending order and recursively generates
-/// `RenderDocV###` implementations for them. For instance, given the following three API versions
-/// `[V100, V110, V200]`, these trait implementations will be generated:
-///
-/// ```rust,ignore
-/// // V200 -> Trait methods from V200 down.
-///
-/// impl RenderDocV200 for #name<V200> {
-///     // ...
-/// }
-///
-/// impl RenderDocV110 for #name<V200> {
-///     // ...
-/// }
-///
-/// impl RenderDocV100 for #name<V200> {
-///     // ...
-/// }
-///
-/// // V110 -> Trait methods from V110 down.
-///
-/// impl RenderDocV110 for #name<V110> {
-///     // ...
-/// }
-///
-/// impl RenderDocV100 for #name<V110> {
-///     // ...
-/// }
-///
-/// // V100 -> Trait methods from V100 down.
-///
-/// impl RenderDocV100 for #name<V100> {
-///     // ...
-/// }
-/// ```
-fn gen_renderdoc_impls(name: &Ident, apis: &[Ident], tokens: TokenStream2) -> TokenStream2 {
-    if apis.len() == 0 {
-        return tokens;
-    }
-
-    let last_idx = apis.len() - 1;
-    let version = &apis[last_idx];
-    let impls: TokenStream2 = apis[0..=last_idx]
-        .iter()
-        .map(|api| {
-            let span = Span::call_site();
-
-            let trait_name = Ident::new(&format!("RenderDoc{}", api), span.clone());
-            let method = Ident::new(
-                &format!("entry_{}", api.to_string().to_lowercase()),
-                span.clone(),
-            );
-            let ret_val = Ident::new(&format!("Entry{}", api), span);
-
-            quote! {
-                impl ::api::#trait_name for #name<#version> {
-                    unsafe fn #method(&self) -> &::entry::#ret_val {
-                        &self.0
-                    }
-                }
-            }
-        })
-        .collect();
-
-    gen_renderdoc_impls(
         name,
         &apis[0..last_idx],
         tokens.into_iter().chain(impls).collect(),
