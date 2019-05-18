@@ -17,6 +17,10 @@ pub type EntryV111 = renderdoc_sys::RENDERDOC_API_1_1_1;
 pub type EntryV112 = renderdoc_sys::RENDERDOC_API_1_1_2;
 /// Entry point for RenderDoc API version 1.2.0.
 pub type EntryV120 = renderdoc_sys::RENDERDOC_API_1_2_0;
+/// Entry point for RenderDoc API version 1.3.0.
+pub type EntryV130 = renderdoc_sys::RENDERDOC_API_1_3_0;
+/// Entry point for RenderDoc API version 1.4.0.
+pub type EntryV140 = renderdoc_sys::RENDERDOC_API_1_4_0;
 
 #[cfg(windows)]
 fn get_path() -> &'static Path {
@@ -55,6 +59,10 @@ pub enum Version {
     V112 = 10102,
     /// Version 1.2.0.
     V120 = 10200,
+    /// Version 1.3.0.
+    V130 = 10300,
+    /// Version 1.4.0.
+    V140 = 10400,
 }
 
 /// Initializes a new instance of the RenderDoc API.
@@ -137,4 +145,22 @@ impl ApiVersion for V120 {
     const VERSION: Version = Version::V120;
 
     type Entry = EntryV120;
+}
+
+/// Requests a minimum version number of 1.3.0.
+pub enum V130 {}
+
+impl ApiVersion for V130 {
+    const VERSION: Version = Version::V130;
+
+    type Entry = EntryV130;
+}
+
+/// Requests a minimum version number of 1.4.0.
+pub enum V140 {}
+
+impl ApiVersion for V140 {
+    const VERSION: Version = Version::V140;
+
+    type Entry = EntryV140;
 }

@@ -21,7 +21,7 @@ extern crate winapi;
 #[cfg(target_os = "windows")]
 extern crate wio;
 
-pub use self::entry::{ApiVersion, V100, V110, V111, V112, V120};
+pub use self::entry::{ApiVersion, V100, V110, V111, V112, V120, V130, V140};
 
 use std::marker::PhantomData;
 use std::os::raw::{c_ulonglong, c_void};
