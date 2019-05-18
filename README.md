@@ -21,6 +21,11 @@ bugs.
 These bindings require that RenderDoc be installed on the target machine, with
 either `renderdoc.dll` or `librenderdoc.so` visible from your`PATH`.
 
+For more details on how to use this API to integrate with the RenderDoc
+profiler, see the [in-application API][in-app] Documentation.
+
+[in-app]: https://renderdoc.org/docs/in_application_api.html
+
 ## Example
 
 ```rust
