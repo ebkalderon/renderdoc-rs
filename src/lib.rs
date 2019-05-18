@@ -1,8 +1,18 @@
-//! RenderDoc application bindings for Rust.
+//! Rust bindings to [RenderDoc], a popular graphics debugger.
 //!
-//! Refer to the [In-Application API] documentation for more details.
+//! [RenderDoc]: https://renderdoc.org/
 //!
-//! [api]: https://renderdoc.org/docs/in_application_api.html
+//! RenderDoc is a free and open source graphics debugging tool. RenderDoc allows game developers
+//! to take frame captures of their applications, replay them, examine the graphics pipeline state,
+//! and potentially identify nasty graphics bugs.
+//!
+//! These bindings require that RenderDoc be installed on the target machine, with either
+//! `renderdoc.dll` or `librenderdoc.so` visible from your`PATH`.
+//!
+//! For more details on how to use this API to integrate your game or renderer with the RenderDoc
+//! profiler, consult the upstream [in-application API][in-app] documentation.
+//!
+//! [in-app]: https://renderdoc.org/docs/in_application_api.html
 
 #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
