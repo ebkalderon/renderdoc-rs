@@ -1,4 +1,8 @@
-//! RenderDoc application bindings for Rust
+//! RenderDoc application bindings for Rust.
+//!
+//! Refer to the [In-Application API] documentation for more details.
+//!
+//! [api]: https://renderdoc.org/docs/in_application_api.html
 
 #![deny(missing_docs)]
 
