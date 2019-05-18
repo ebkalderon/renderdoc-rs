@@ -4,7 +4,7 @@ use std::ffi::{CStr, CString};
 use std::path::Path;
 use std::{mem, ptr};
 
-use entry::{EntryV100, EntryV110, EntryV111, EntryV112, EntryV120};
+use entry::{EntryV100, EntryV110, EntryV111, EntryV112, EntryV120, EntryV130, EntryV140};
 use {CaptureOption, DevicePointer, InputButton, OverlayBits, WindowHandle};
 
 /// Base implementation of API version 1.0.0.
@@ -12,11 +12,10 @@ pub trait RenderDocV100: Sized {
     /// Returns the raw `EntryV100` entry point struct.
     unsafe fn entry_v100(&self) -> &EntryV100;
 
-    /// Provides the major, minor, and patch version numbers of the RenderDoc
-    /// API given to the application.
+    /// Returns the major, minor, and patch version numbers of the RenderDoc API currently in use.
     ///
-    /// Note that RenderDoc will usually provide a higher API version than the
-    /// one requested by the user if it's backwards compatible.
+    /// Note that RenderDoc will usually provide a higher API version than the one requested by
+    /// the user if it's backwards compatible.
     ///
     /// # Examples
     ///
@@ -59,7 +58,11 @@ pub trait RenderDocV100: Sized {
         assert_eq!(err, 1);
     }
 
-    #[allow(missing_docs)]
+    /// Returns the value of the given `CaptureOption` as an `f32` value.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the option is invalid.
     fn get_capture_option_f32(&self, opt: CaptureOption) -> f32 {
         use std::f32::MAX;
         let val = unsafe { (self.entry_v100().GetCaptureOptionF32.unwrap())(opt as u32) };
@@ -67,7 +70,11 @@ pub trait RenderDocV100: Sized {
         val
     }
 
-    #[allow(missing_docs)]
+    /// Returns the value of the given `CaptureOption` as a `u32` value.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the option is invalid.
     fn get_capture_option_u32(&self, opt: CaptureOption) -> u32 {
         use std::u32::MAX;
         let val = unsafe { (self.entry_v100().GetCaptureOptionU32.unwrap())(opt as u32) };
@@ -95,10 +102,10 @@ pub trait RenderDocV100: Sized {
     ///
     /// # Safety
     ///
-    /// Note that this will work correctly if done _immediately_ after the
-    /// dynamic library is loaded, before any API work happens. At that point,
-    /// RenderDoc will remove its injected hooks and shut down. Behavior is
-    /// undefined if this is called after any API functions have been called.
+    /// Note that this will work correctly if done _immediately_ after the dynamic library is
+    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
+    /// hooks and shut down. Behavior is undefined if this is called after any API functions have
+    /// been called.
     unsafe fn shutdown(self) {
         (self.entry_v100().Shutdown.unwrap())();
     }
@@ -201,20 +208,19 @@ pub trait RenderDocV100: Sized {
     }
 
     #[allow(missing_docs)]
-    fn launch_replay_ui<C>(&self, cmd_line: C) -> Result<u32, ()>
+    fn launch_replay_ui<'a, O>(&self, connect_immediately: bool, extra_opts: O) -> Result<u32, ()>
     where
-        C: Into<Option<&'static str>>,
+        O: Into<Option<&'a str>>,
     {
-        unsafe {
-            let with_cmd = cmd_line.into();
-            let (enabled, text) = if let Some(ref cmd) = with_cmd {
-                let bytes = cmd.as_bytes();
-                (1, CStr::from_bytes_with_nul_unchecked(bytes))
-            } else {
-                (0, CStr::from_ptr(ptr::null()))
-            };
+        let extra_opts = extra_opts.into().and_then(|s| CString::new(s).ok());
+        let should_connect = connect_immediately as u32;
+        let command_str = extra_opts
+            .as_ref()
+            .map(|s| s.as_ptr())
+            .unwrap_or_else(|| ptr::null());
 
-            match (self.entry_v100().LaunchReplayUI.unwrap())(enabled, text.as_ptr()) {
+        unsafe {
+            match (self.entry_v100().LaunchReplayUI.unwrap())(should_connect, command_str) {
                 0 => Err(()),
                 pid => Ok(pid),
             }
@@ -281,8 +287,7 @@ pub trait RenderDocV110: RenderDocV100 {
     /// Returns the raw `EntryV110` entry point struct.
     unsafe fn entry_v110(&self) -> &EntryV110;
 
-    /// Captures the next _n_ frames from the currently active window and API
-    /// device.
+    /// Captures the next _n_ frames from the currently active window and API device.
     ///
     /// Data is saved to a capture log file at the location specified via
     /// `set_log_file_path_template()`.
@@ -344,30 +349,50 @@ pub trait RenderDocV112: RenderDocV111 {
 
 /// Additional features for API version 1.2.0.
 pub trait RenderDocV120: RenderDocV112 {
-    /// Returns the raw `EntryV210` entry point struct.
+    /// Returns the raw `EntryV120` entry point struct.
     unsafe fn entry_v120(&self) -> &EntryV120;
 
     #[allow(missing_docs)]
-    fn set_capture_file_comments<P, C>(&self, path: P, comments: C)
+    fn set_capture_file_comments<'a, P, C>(&self, path: P, comments: C)
     where
-        P: Into<Option<&'static str>>,
+        P: Into<Option<&'a str>>,
         C: AsRef<str>,
     {
+        let path_str = path.into().and_then(|s| CString::new(s).ok());
+        let path = path_str
+            .as_ref()
+            .map(|s| s.as_ptr())
+            .unwrap_or_else(|| ptr::null());
+
+        let comments = CString::new(comments.as_ref()).expect("string contains extra null bytes");
+
         unsafe {
-            let with_path = path.into();
-            let path = if let Some(ref path) = with_path {
-                let bytes = path.as_bytes();
-                CStr::from_bytes_with_nul_unchecked(bytes)
-            } else {
-                CStr::from_ptr(ptr::null())
-            };
+            (self.entry_v120().SetCaptureFileComments.unwrap())(path, comments.as_ptr());
+        }
+    }
+}
 
-            let comments = {
-                let bytes = comments.as_ref().as_bytes();
-                CStr::from_bytes_with_nul_unchecked(bytes)
-            };
+/// Additional features for API version 1.3.0.
+pub trait RenderDocV130: RenderDocV120 {
+    /// Returns the raw `EntryV130` entry point struct.
+    unsafe fn entry_v130(&self) -> &EntryV130;
+}
 
-            (self.entry_v120().SetCaptureFileComments.unwrap())(path.as_ptr(), comments.as_ptr());
+/// Additional features for API version 1.4.0.
+pub trait RenderDocV140: RenderDocV130 {
+    /// Returns the raw `EntryV140` entry point struct.
+    unsafe fn entry_v140(&self) -> &EntryV140;
+
+    /// Ends capturing immediately and discard any data without saving to disk.
+    ///
+    /// Returns `true` if the capture was discarded, or `false` if no capture is in progress.
+    fn discard_frame_capture<D>(&mut self, dev: D, win: WindowHandle) -> bool
+    where
+        D: Into<DevicePointer>,
+    {
+        let DevicePointer(dev) = dev.into();
+        unsafe {
+            (self.entry_v140().DiscardFrameCapture.unwrap())(dev as *mut _, win as *mut _) == 1
         }
     }
 }

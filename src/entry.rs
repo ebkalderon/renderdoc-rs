@@ -1,6 +1,7 @@
 //! Entry points for the RenderDoc API.
 
 use std::io::Error as IoError;
+use std::os::raw::c_void;
 use std::path::Path;
 
 use libloading::{Library, Symbol};
@@ -16,15 +17,24 @@ pub type EntryV111 = renderdoc_sys::RENDERDOC_API_1_1_1;
 pub type EntryV112 = renderdoc_sys::RENDERDOC_API_1_1_2;
 /// Entry point for RenderDoc API version 1.2.0.
 pub type EntryV120 = renderdoc_sys::RENDERDOC_API_1_2_0;
+/// Entry point for RenderDoc API version 1.3.0.
+pub type EntryV130 = renderdoc_sys::RENDERDOC_API_1_3_0;
+/// Entry point for RenderDoc API version 1.4.0.
+pub type EntryV140 = renderdoc_sys::RENDERDOC_API_1_4_0;
 
 #[cfg(windows)]
 fn get_path() -> &'static Path {
     Path::new("renderdoc.dll")
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "android")))]
 fn get_path() -> &'static Path {
     Path::new("librenderdoc.so")
+}
+
+#[cfg(target_os = "android")]
+fn get_path() -> &'static Path {
+    Path::new("libVkLayer_GLES_RenderDoc.so")
 }
 
 lazy_static! {
@@ -49,15 +59,18 @@ pub enum Version {
     V112 = 10102,
     /// Version 1.2.0.
     V120 = 10200,
+    /// Version 1.3.0.
+    V130 = 10300,
+    /// Version 1.4.0.
+    V140 = 10400,
 }
 
 /// Initializes a new instance of the RenderDoc API.
 ///
 /// # Safety
 ///
-/// This function is not thread-safe and should not be called on multiple
-/// threads at once.
-type GetApiFn<T> = unsafe extern "C" fn(ver: Version, out: *mut *mut T) -> i32;
+/// This function is not thread-safe and should not be called on multiple threads at once.
+type GetApiFn = unsafe extern "C" fn(ver: Version, out: *mut *mut c_void) -> i32;
 
 /// Entry point into the RenderDoc API.
 pub trait ApiVersion {
@@ -71,24 +84,21 @@ pub trait ApiVersion {
     ///
     /// # Safety
     ///
-    /// This function is not thread-safe and should not be called on multiple
-    /// threads at once.
+    /// This function is not thread-safe and should not be called on multiple threads at once.
     fn load() -> Result<Self::Entry, String> {
         use std::ptr;
 
-        let api = unsafe {
+        unsafe {
             let lib = RD_LIB.as_ref().map_err(|e| e.to_string())?;
-            let get_api: Symbol<GetApiFn<Self::Entry>> =
+            let get_api: Symbol<GetApiFn> =
                 lib.get(b"RENDERDOC_GetAPI\0").map_err(|e| e.to_string())?;
 
             let mut obj = ptr::null_mut();
             match get_api(Self::VERSION, &mut obj) {
-                1 => ptr::read(obj),
-                _ => Err("Compatible API version not available.")?,
+                1 => Ok(ptr::read(obj as *mut Self::Entry)),
+                _ => Err("Compatible API version not available.".into()),
             }
-        };
-
-        Ok(api)
+        }
     }
 }
 
@@ -135,4 +145,22 @@ impl ApiVersion for V120 {
     const VERSION: Version = Version::V120;
 
     type Entry = EntryV120;
+}
+
+/// Requests a minimum version number of 1.3.0.
+pub enum V130 {}
+
+impl ApiVersion for V130 {
+    const VERSION: Version = Version::V130;
+
+    type Entry = EntryV130;
+}
+
+/// Requests a minimum version number of 1.4.0.
+pub enum V140 {}
+
+impl ApiVersion for V140 {
+    const VERSION: Version = Version::V140;
+
+    type Entry = EntryV140;
 }
