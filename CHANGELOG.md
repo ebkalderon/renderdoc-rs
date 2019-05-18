@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fix improperly designed `launch_replay_ui()` method, update `triangle` example
   to match.
 * Set correct RenderDoc library path for Android clients.
+* Add missing trait re-exports to `prelude` module (PR #31).
 
 ## [0.4.0] - 2018-09-16
 ### Added
