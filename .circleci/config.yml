@@ -32,7 +32,9 @@ jobs:
             cargo build
       - run:
           name: Test
-          command: cargo test --no-run
+          command: |
+            cargo test --no-run
+            cargo test -p renderdoc-sys
       - save_cache:
           key: project-cache
           paths:
