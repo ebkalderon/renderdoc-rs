@@ -291,7 +291,7 @@ pub trait RenderDocV110: RenderDocV100 {
     ///
     /// Data is saved to a capture log file at the location specified via
     /// `set_log_file_path_template()`.
-    fn trigger_multi_frame_capture(&self, num_frames: u32) {
+    fn trigger_multi_frame_capture(&mut self, num_frames: u32) {
         unsafe {
             (self.entry_v110().TriggerMultiFrameCapture.unwrap())(num_frames);
         }
@@ -353,7 +353,7 @@ pub trait RenderDocV120: RenderDocV112 {
     unsafe fn entry_v120(&self) -> &EntryV120;
 
     #[allow(missing_docs)]
-    fn set_capture_file_comments<'a, P, C>(&self, path: P, comments: C)
+    fn set_capture_file_comments<'a, P, C>(&mut self, path: P, comments: C)
     where
         P: Into<Option<&'a str>>,
         C: AsRef<str>,
