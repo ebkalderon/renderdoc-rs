@@ -94,7 +94,7 @@ pub trait HasPrevious: Version {
 }
 
 /// Requests a minimum version number of 1.0.0.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum V100 {}
 
 impl Version for V100 {
@@ -102,7 +102,7 @@ impl Version for V100 {
 }
 
 /// Requests a minimum version number of 1.1.0.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum V110 {}
 
 impl Version for V110 {
@@ -114,7 +114,7 @@ impl HasPrevious for V110 {
 }
 
 /// Requests a minimum version number of 1.1.1.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum V111 {}
 
 impl Version for V111 {
@@ -126,7 +126,7 @@ impl HasPrevious for V111 {
 }
 
 /// Requests a minimum version number of 1.1.2.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum V112 {}
 
 impl Version for V112 {
@@ -138,7 +138,7 @@ impl HasPrevious for V112 {
 }
 
 /// Requests a minimum version number of 1.2.0.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum V120 {}
 
 impl Version for V120 {
@@ -150,7 +150,7 @@ impl HasPrevious for V120 {
 }
 
 /// Requests a minimum version number of 1.3.0.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum V130 {}
 
 impl Version for V130 {
@@ -162,7 +162,7 @@ impl HasPrevious for V130 {
 }
 
 /// Requests a minimum version number of 1.4.0.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum V140 {}
 
 impl Version for V140 {
