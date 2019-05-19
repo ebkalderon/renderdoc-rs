@@ -303,7 +303,7 @@ impl RenderDoc<V100> {
 
         unsafe {
             match ((*self.0).LaunchReplayUI.unwrap())(should_connect, extra_opts) {
-                0 => Err(format!("unable to launch replay UI with 'connect_immediately={}' and 'extra_opts={:?}'", connect_immediately, utf8)),
+                0 => Err("unable to launch replay UI".into()),
                 pid => Ok(pid),
             }
         }
