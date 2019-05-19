@@ -263,7 +263,7 @@ impl RenderDoc<V100> {
         let command_str = extra_opts
             .as_ref()
             .map(|s| s.as_ptr())
-            .unwrap_or_else(|| ptr::null());
+            .unwrap_or_else(ptr::null);
 
         unsafe {
             match ((*self.0).LaunchReplayUI.unwrap())(should_connect, command_str) {
@@ -390,7 +390,7 @@ impl RenderDoc<V120> {
         let path = path_str
             .as_ref()
             .map(|s| s.as_ptr())
-            .unwrap_or_else(|| ptr::null());
+            .unwrap_or_else(ptr::null);
 
         let comments = CString::new(comments.as_ref()).expect("string contains extra null bytes");
 
