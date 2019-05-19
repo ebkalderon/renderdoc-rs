@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/rust:1.31.0
+      - image: ebkalderon/renderdoc-rs-circleci:1.31.0
 
     environment:
       TZ: "/usr/share/zoneinfo/Asia/Singapore"
@@ -23,18 +23,17 @@ jobs:
             rustup toolchain add nightly
             rustup run nightly rustc --version --verbose
             rustup run nightly cargo --version --verbose
-            rustup run nightly cargo build
+            rustup run nightly cargo build --all
       - run:
           name: Stable Build
           command: |
             rustc --version --verbose
             cargo --version --verbose
-            cargo build
+            cargo build --all
       - run:
           name: Test
           command: |
-            cargo test --no-run
-            cargo test -p renderdoc-sys
+            cargo test --all
       - save_cache:
           key: project-cache
           paths:
