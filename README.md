@@ -38,7 +38,7 @@ fn main() {
 
     let (major, minor, patch) = rd.get_api_version();
     assert_eq!(major, 1u32);
-    assert_eq!(minor, 1u32);
+    assert!(minor >= 1u32);
 
     // When a certain key is pressed, trigger a single-frame capture like this.
     rd.trigger_capture();
