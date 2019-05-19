@@ -96,7 +96,6 @@ impl RenderDoc<V100> {
     ///
     /// ```rust
     /// # use renderdoc::{RenderDoc, V100};
-    /// # use renderdoc::prelude::*;
     /// # fn init() -> Result<(), String> {
     /// # let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// let (major, minor, patch) = renderdoc.get_api_version();
@@ -298,7 +297,6 @@ impl RenderDoc<V100> {
     ///
     /// ```rust
     /// # use renderdoc::{RenderDoc, V100};
-    /// # use renderdoc::prelude::*;
     /// # fn init() -> Result<(), String> {
     /// # let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// if renderdoc.is_frame_capturing() {
