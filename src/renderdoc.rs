@@ -227,11 +227,11 @@ impl RenderDoc<V100> {
 
     #[allow(missing_docs)]
     pub fn get_capture(&self, index: u32) -> Option<(String, u64)> {
-        unsafe {
-            let mut len = self.get_log_file_path_template().len() as u32 + 128;
-            let mut path = Vec::with_capacity(len as usize);
-            let mut time = 0u64;
+        let mut len = self.get_log_file_path_template().len() as u32 + 128;
+        let mut path = Vec::with_capacity(len as usize);
+        let mut time = 0u64;
 
+        unsafe {
             if ((*self.0).GetCapture.unwrap())(index, path.as_mut_ptr(), &mut len, &mut time) == 1 {
                 let raw_path = CString::from_raw(path.as_mut_ptr());
                 let mut path = raw_path.into_string().unwrap();
