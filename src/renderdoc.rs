@@ -50,7 +50,19 @@ impl<V: Version> RenderDoc<V> {
 }
 
 impl<V: HasPrevious> RenderDoc<V> {
-    /// Downgrades the current version of RenderDoc to the immediate previous one.
+    /// Downgrades the current API version to the version immediately preceding it.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use renderdoc::{RenderDoc, V100, V111, V112};
+    /// # fn main() -> Result<(), String> {
+    /// let current: RenderDoc<V112> = RenderDoc::new()?;
+    /// let previous: RenderDoc<V111> = current.downgrade();
+    /// // let older: RenderDoc<V100> = previous.downgrade(); // This line does not compile
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn downgrade(self) -> RenderDoc<V::Previous> {
         let RenderDoc(entry, _) = self;
         RenderDoc(entry, PhantomData)
@@ -96,11 +108,10 @@ impl RenderDoc<V100> {
     ///
     /// ```rust
     /// # use renderdoc::{RenderDoc, V100};
-    /// # fn init() -> Result<(), String> {
-    /// # let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    /// # fn main() -> Result<(), String> {
+    /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// let (major, minor, patch) = renderdoc.get_api_version();
-    /// assert_eq!(major, 1u32);
-    /// assert_eq!(minor, 0u32);
+    /// assert_eq!(major, 1);
     /// # Ok(())
     /// # }
     /// ```
@@ -243,17 +254,46 @@ impl RenderDoc<V100> {
         }
     }
 
-    #[allow(missing_docs)]
+    /// Returns whether the RenderDoc UI is connected to this application.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::{RenderDoc, V100};
+    /// # fn main() -> Result<(), String> {
+    /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    /// assert!(!renderdoc.is_remote_access_connected());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn is_remote_access_connected(&self) -> bool {
         unsafe { ((*self.0).__bindgen_anon_3.IsRemoteAccessConnected.unwrap())() == 1 }
     }
 
-    #[allow(missing_docs)]
+    /// Launches the replay UI associated with the RenderDoc library injected into the running
+    /// application.
+    ///
+    /// If `connect_immediately` is `true`, the replay window will automatically connect to this
+    /// application once opened, ready to capture frames right away. Optional command-line
+    /// arguments to the RenderDoc replay UI can be specified via the `extra_opts` parameter.
+    ///
+    /// Returns the PID of the RenderDoc replay process on success.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// # use renderdoc::{RenderDoc, V100};
+    /// # fn main() -> Result<(), String> {
+    /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    /// let pid = renderdoc.launch_replay_ui(true, None)?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn launch_replay_ui<'a, O>(
         &self,
         connect_immediately: bool,
         extra_opts: O,
-    ) -> Result<u32, ()>
+    ) -> Result<u32, String>
     where
         O: Into<Option<&'a str>>,
     {
@@ -263,7 +303,7 @@ impl RenderDoc<V100> {
 
         unsafe {
             match ((*self.0).LaunchReplayUI.unwrap())(should_connect, extra_opts) {
-                0 => Err(()),
+                0 => Err(format!("unable to launch replay UI with 'connect_immediately={}' and 'extra_opts={:?}'", connect_immediately, utf8)),
                 pid => Ok(pid),
             }
         }
@@ -295,10 +335,10 @@ impl RenderDoc<V100> {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```rust,no_run
     /// # use renderdoc::{RenderDoc, V100};
-    /// # fn init() -> Result<(), String> {
-    /// # let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    /// # fn main() -> Result<(), String> {
+    /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// if renderdoc.is_frame_capturing() {
     ///     println!("Frames are being captured.");
     /// } else {
@@ -336,14 +376,25 @@ impl RenderDoc<V110> {
 }
 
 impl RenderDoc<V111> {
-    #[allow(missing_docs)]
+    /// Returns whether the RenderDoc UI is connected to this application.
     #[deprecated(since = "1.1.1", note = "renamed to `is_target_control_connected()`")]
     pub fn is_remote_access_connected(&self) -> bool {
         let v1: &RenderDoc<V100> = self.deref();
         v1.is_remote_access_connected()
     }
 
-    #[allow(missing_docs)]
+    /// Returns whether the RenderDoc UI is connected to this application.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::{RenderDoc, V111};
+    /// # fn main() -> Result<(), String> {
+    /// let renderdoc: RenderDoc<V111> = RenderDoc::new()?;
+    /// assert!(!renderdoc.is_target_control_connected());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn is_target_control_connected(&self) -> bool {
         unsafe { ((*self.0).__bindgen_anon_3.IsTargetControlConnected.unwrap())() == 1 }
     }
