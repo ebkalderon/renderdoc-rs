@@ -22,7 +22,7 @@ extern crate renderdoc;
 use gfx::traits::FactoryExt;
 use gfx::Device;
 use glutin::GlProfile;
-use renderdoc::{RenderDoc, V100, V110};
+use renderdoc::{RenderDoc, V110};
 
 pub type ColorFormat = gfx::format::Rgba8;
 pub type DepthFormat = gfx::format::DepthStencil;

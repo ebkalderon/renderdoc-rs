@@ -340,6 +340,13 @@ impl RenderDoc<V110> {
 
 impl RenderDoc<V111> {
     #[allow(missing_docs)]
+    #[deprecated(since = "1.1.1", note = "renamed to `is_target_control_connected()`")]
+    pub fn is_remote_access_connected(&self) -> bool {
+        let v1: &RenderDoc<V100> = self.deref();
+        v1.is_remote_access_connected()
+    }
+
+    #[allow(missing_docs)]
     pub fn is_target_control_connected(&self) -> bool {
         unsafe { ((*self.0).__bindgen_anon_3.IsTargetControlConnected.unwrap())() == 1 }
     }
