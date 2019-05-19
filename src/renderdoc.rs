@@ -1,6 +1,7 @@
 //! Type-safe wrapper around the RenderDoc API.
 
 use std::ffi::{CStr, CString};
+use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
@@ -12,7 +13,7 @@ use version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V
 
 /// An instance of the RenderDoc API with baseline version `V`.
 #[repr(C)]
-#[derive(Debug, RenderDoc)]
+#[derive(Eq, Hash, PartialEq, RenderDoc)]
 #[renderdoc_convert(V100, V110, V111, V112, V120, V130, V140)]
 pub struct RenderDoc<V>(*mut Entry, PhantomData<V>);
 
@@ -71,6 +72,15 @@ impl<V: HasPrevious> DerefMut for RenderDoc<V> {
         // the RenderDoc API is the exact same structure. This call only serves to recursively
         // expose the methods in a statically guaranteed and backwards-compatible way.
         unsafe { mem::transmute(self) }
+    }
+}
+
+impl<V: Version> Debug for RenderDoc<V> {
+    fn fmt(&self, fmt: &mut Formatter) -> FmtResult {
+        fmt.debug_tuple(stringify!(RenderDoc))
+            .field(&self.0)
+            .field(&V::VERSION)
+            .finish()
     }
 }
 
