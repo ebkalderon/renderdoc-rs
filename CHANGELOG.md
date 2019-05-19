@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.0] - 2019-05-19
+### Added
+* Redesign crate to use inherent impls over traits (PR #35).
+* Add `HasPrevious` trait to recursively determine version compatibility at
+  compile-time.
+
+### Changed
+* Rename `Version` enum to `VersionCode` and `ApiVersion` trait to `Version`.
+* Use a single `Entry` type, since the aliases point to the same struct.
+* Update crate metadata and improve documentation.
+* Manually implement `Debug`, derive `Eq`, `Hash`, `PartialEq` for most types
+  (PR #41).
+* Apply Clippy suggestions (PR #43).
+
+### Deprecated
+* Mark `is_remote_access_connected()` as deprecated for all RenderDoc API
+  versions after 1.1.1 (PR #42).
+
+### Removed
+* Remove `prelude` module.
+* Remove `RenderDocV###` traits.
+* Remove `RenderDocV###` trait boilerplate code from `renderdoc-derive`.
+* Remove unused `__uint32_t` and `__uint64_t` type aliases from `renderdoc-sys`
+  (PR #39).
+
 ## [0.5.0] - 2019-05-19
 ### Added
 * Add CI and documentation badges.
@@ -70,7 +95,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Type-safe version requests and downgrading.
 * Convenient conversions for `winit::VirtualKeyCode` into RenderDoc `InputButton`.
 
-[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.2.0...v0.3.0
