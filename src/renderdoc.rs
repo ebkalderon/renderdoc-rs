@@ -52,7 +52,7 @@ impl<V: Version> RenderDoc<V> {
 impl<V: HasPrevious> RenderDoc<V> {
     /// Downgrades the current API version to the version immediately preceding it.
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```rust
     /// # use renderdoc::{RenderDoc, V100, V111, V112};
