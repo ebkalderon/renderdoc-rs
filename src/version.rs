@@ -74,7 +74,7 @@ pub trait Version {
         use std::ptr;
 
         unsafe {
-            let lib = RD_LIB.as_ref().map_err(|e| e.to_string())?;
+            let lib = RD_LIB.as_ref().map_err(ToString::to_string)?;
             let get_api: Symbol<GetApiFn> =
                 lib.get(b"RENDERDOC_GetAPI\0").map_err(|e| e.to_string())?;
 

@@ -5,7 +5,9 @@ use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
-use std::{mem, ptr};
+use std::ptr;
+
+use float_cmp::ApproxEq;
 
 use handles::{DevicePointer, WindowHandle};
 use settings::{CaptureOption, InputButton, OverlayBits};
@@ -62,7 +64,7 @@ impl<V: HasPrevious> Deref for RenderDoc<V> {
         // NOTE: This transmutation is actually safe because the underlying entry point exposed by
         // the RenderDoc API is the exact same structure. This call only serves to recursively
         // expose the methods in a statically guaranteed and backwards-compatible way.
-        unsafe { mem::transmute(self) }
+        unsafe { &*(self as *const RenderDoc<V> as *const RenderDoc<<V as HasPrevious>::Previous>) }
     }
 }
 
@@ -71,7 +73,7 @@ impl<V: HasPrevious> DerefMut for RenderDoc<V> {
         // NOTE: This transmutation is actually safe because the underlying entry point exposed by
         // the RenderDoc API is the exact same structure. This call only serves to recursively
         // expose the methods in a statically guaranteed and backwards-compatible way.
-        unsafe { mem::transmute(self) }
+        unsafe { &mut *(self as *mut RenderDoc<V> as *mut RenderDoc<<V as HasPrevious>::Previous>) }
     }
 }
 
@@ -139,7 +141,7 @@ impl RenderDoc<V100> {
     pub fn get_capture_option_f32(&self, opt: CaptureOption) -> f32 {
         use std::f32::MAX;
         let val = unsafe { ((*self.0).GetCaptureOptionF32.unwrap())(opt as u32) };
-        assert_ne!(val, -MAX);
+        assert!(val.approx_ne(&-MAX, std::f32::EPSILON, 2));
         val
     }
 
@@ -202,9 +204,9 @@ impl RenderDoc<V100> {
     #[allow(missing_docs)]
     pub fn set_log_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
         unsafe {
-            let bytes = mem::transmute(path_template.as_ref().as_os_str());
-            let cstr = CStr::from_bytes_with_nul_unchecked(bytes);
-            ((*self.0).__bindgen_anon_1.SetLogFilePathTemplate.unwrap())(cstr.as_ptr());
+            let utf8 = path_template.as_ref().to_str();
+            let path = utf8.and_then(|s| CString::new(s).ok()).unwrap();
+            ((*self.0).__bindgen_anon_1.SetLogFilePathTemplate.unwrap())(path.as_ptr());
         }
     }
 
@@ -256,15 +258,12 @@ impl RenderDoc<V100> {
     where
         O: Into<Option<&'a str>>,
     {
-        let extra_opts = extra_opts.into().and_then(|s| CString::new(s).ok());
         let should_connect = connect_immediately as u32;
-        let command_str = extra_opts
-            .as_ref()
-            .map(|s| s.as_ptr())
-            .unwrap_or_else(|| ptr::null());
+        let utf8 = extra_opts.into().and_then(|s| CString::new(s).ok());
+        let extra_opts = utf8.as_ref().map(|s| s.as_ptr()).unwrap_or_else(ptr::null);
 
         unsafe {
-            match ((*self.0).LaunchReplayUI.unwrap())(should_connect, command_str) {
+            match ((*self.0).LaunchReplayUI.unwrap())(should_connect, extra_opts) {
                 0 => Err(()),
                 pid => Ok(pid),
             }
@@ -366,9 +365,9 @@ impl RenderDoc<V112> {
 
     #[allow(missing_docs)]
     pub fn set_capture_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
+        let utf8 = path_template.as_ref().to_str();
+        let cstr = utf8.and_then(|s| CString::new(s).ok()).unwrap();
         unsafe {
-            let bytes = mem::transmute(path_template.as_ref().as_os_str());
-            let cstr = CStr::from_bytes_with_nul_unchecked(bytes);
             ((*self.0)
                 .__bindgen_anon_1
                 .SetCaptureFilePathTemplate
@@ -384,11 +383,8 @@ impl RenderDoc<V120> {
         P: Into<Option<&'a str>>,
         C: AsRef<str>,
     {
-        let path_str = path.into().and_then(|s| CString::new(s).ok());
-        let path = path_str
-            .as_ref()
-            .map(|s| s.as_ptr())
-            .unwrap_or_else(|| ptr::null());
+        let utf8 = path.into().and_then(|s| CString::new(s).ok());
+        let path = utf8.as_ref().map(|s| s.as_ptr()).unwrap_or_else(ptr::null);
 
         let comments = CString::new(comments.as_ref()).expect("string contains extra null bytes");
 

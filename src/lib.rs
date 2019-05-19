@@ -22,6 +22,7 @@ compile_error!("RenderDoc does not support this platform.");
 
 #[macro_use]
 extern crate bitflags;
+extern crate float_cmp;
 extern crate libloading;
 #[macro_use]
 extern crate lazy_static;
@@ -77,7 +78,7 @@ pub const SHADER_MAGIC_DEBUG_VALUE_BYTE_ARRAY: &[u8] = &[
 /// to match up with a stripped shader.
 ///
 /// Truncated version when only a `uint64_t` is available (e.g. Vulkan tags).
-pub const SHADER_MAGIC_DEBUG_VALUE_TRUNCATED: c_ulonglong = 0x4856670eab25520;
+pub const SHADER_MAGIC_DEBUG_VALUE_TRUNCATED: c_ulonglong = 0x0485_6670_eab2_5520;
 
 #[cfg(test)]
 mod tests {
