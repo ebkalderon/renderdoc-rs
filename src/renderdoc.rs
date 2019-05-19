@@ -64,7 +64,7 @@ impl<V: HasPrevious> Deref for RenderDoc<V> {
         // NOTE: This transmutation is actually safe because the underlying entry point exposed by
         // the RenderDoc API is the exact same structure. This call only serves to recursively
         // expose the methods in a statically guaranteed and backwards-compatible way.
-        unsafe { mem::transmute(self) }
+        unsafe { &*(self as *const RenderDoc<V> as *const RenderDoc<<V as HasPrevious>::Previous>) }
     }
 }
 
@@ -73,7 +73,7 @@ impl<V: HasPrevious> DerefMut for RenderDoc<V> {
         // NOTE: This transmutation is actually safe because the underlying entry point exposed by
         // the RenderDoc API is the exact same structure. This call only serves to recursively
         // expose the methods in a statically guaranteed and backwards-compatible way.
-        unsafe { mem::transmute(self) }
+        unsafe { &mut *(self as *mut RenderDoc<V> as *mut RenderDoc<<V as HasPrevious>::Previous>) }
     }
 }
 
