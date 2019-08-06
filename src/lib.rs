@@ -22,6 +22,7 @@ compile_error!("RenderDoc does not support this platform.");
 
 #[macro_use]
 extern crate bitflags;
+#[macro_use]
 extern crate float_cmp;
 extern crate libloading;
 #[macro_use]
