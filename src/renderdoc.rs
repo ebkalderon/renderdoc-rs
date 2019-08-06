@@ -7,8 +7,6 @@ use std::ops::{Deref, DerefMut};
 use std::path::Path;
 use std::ptr;
 
-use float_cmp::ApproxEq;
-
 use handles::{DevicePointer, WindowHandle};
 use settings::{CaptureOption, InputButton, OverlayBits};
 use version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140};
@@ -151,7 +149,7 @@ impl RenderDoc<V100> {
     pub fn get_capture_option_f32(&self, opt: CaptureOption) -> f32 {
         use std::f32::MAX;
         let val = unsafe { ((*self.0).GetCaptureOptionF32.unwrap())(opt as u32) };
-        assert!(val.approx_ne(&-MAX, std::f32::EPSILON, 2));
+        assert!(!approx_eq!(f32, val, -MAX));
         val
     }
 
