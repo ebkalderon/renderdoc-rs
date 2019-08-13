@@ -17,6 +17,6 @@ circle-ci = { repository = "ebkalderon/renderdoc-rs" }
 proc-macro = true
 
 [dependencies]
-proc-macro2 = "0.4.30"
+proc-macro2 = "1.0.0"
 quote = "0.6.12"
 syn = "0.15.34"
