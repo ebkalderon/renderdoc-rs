@@ -9,7 +9,7 @@ extern crate syn;
 
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, TokenStream as TokenStream2};
-use syn::{Attribute, DeriveInput, Meta, MetaList, NestedMeta};
+use syn::{Attribute, DeriveInput, Meta, MetaList, NestedMeta, Path};
 
 /// Generates API boilerplate for the `renderdoc` crate.
 ///
@@ -49,25 +49,25 @@ fn impl_renderdoc(ast: &DeriveInput) -> TokenStream {
 /// Reads the `renderdoc_convert` list attribute and returns a list of API versions to implement.
 ///
 /// Each API version in this list is a unique identifier of the form `V100`, `V110`, `V120`, etc.
-fn build_api_list(attrs: &[Attribute]) -> Vec<Ident> {
+fn build_api_list(attrs: &[Attribute]) -> Vec<Path> {
     let meta = attrs
         .into_iter()
-        .flat_map(|attr| attr.interpret_meta())
-        .find(|meta| meta.name() == "renderdoc_convert")
+        .flat_map(|attr| attr.parse_meta().ok())
+        .find(|meta| meta.path().is_ident("renderdoc_convert"))
         .expect("Missing required attribute `#[renderdoc_convert(...)]`");
 
-    let mut apis: Vec<Ident> = match meta {
+    let mut apis: Vec<Path> = match meta {
         Meta::List(MetaList { nested, .. }) => nested
             .into_iter()
             .flat_map(|elem| match elem {
-                NestedMeta::Meta(Meta::Word(ident)) => Some(ident),
+                NestedMeta::Meta(Meta::Path(api)) => Some(api),
                 _ => None,
             })
             .collect(),
         _ => panic!("Expected list attribute `#[renderdoc_convert(...)]`"),
     };
 
-    apis.sort();
+    apis.sort_by_key(|api| api.segments.last().unwrap().ident.clone());
     apis
 }
 
@@ -113,7 +113,7 @@ fn build_api_list(attrs: &[Attribute]) -> Vec<Ident> {
 ///
 /// // V100 -> ()
 /// ```
-fn gen_from_impls(name: &Ident, apis: &[Ident], tokens: TokenStream2) -> TokenStream2 {
+fn gen_from_impls(name: &Ident, apis: &[Path], tokens: TokenStream2) -> TokenStream2 {
     if apis.len() <= 1 {
         return tokens;
     }
