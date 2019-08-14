@@ -232,15 +232,15 @@ bitflags! {
     /// Bit flags for customizing the RenderDoc overlay.
     pub struct OverlayBits: u32 {
         /// Controls whether the overlay is enabled or disabled globally.
-        const ENABLED = 0x1;
+        const ENABLED = renderdoc_sys::eRENDERDOC_Overlay_Enabled;
         /// Shows the average, minimum, and maximum sampled frame rate.
-        const FRAME_RATE = 0x2;
+        const FRAME_RATE = renderdoc_sys::eRENDERDOC_Overlay_FrameRate;
         /// Shows the current frame number.
-        const FRAME_NUMBER = 0x4;
+        const FRAME_NUMBER = renderdoc_sys::eRENDERDOC_Overlay_FrameNumber;
         /// Shows a list of recent captures, out of the total captures made.
-        const CAPTURE_LIST = 0x8;
+        const CAPTURE_LIST = renderdoc_sys::eRENDERDOC_Overlay_CaptureList;
         /// Sets the default configuration for the overlay.
-        const DEFAULT = (0x1 | 0x2 | 0x4 | 0x8);
+        const DEFAULT = renderdoc_sys::eRENDERDOC_Overlay_Default;
         /// Enables all overlay configuration bits.
         const ALL = u32::MAX;
         /// Disables all overlay configuration bits.
