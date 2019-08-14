@@ -1,6 +1,6 @@
 [package]
 name = "renderdoc-derive"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Eyal Kalderon <ebkalderon@gmail.com>"]
 description = "Internal custom derive macro intended for renderdoc-rs"
 license = "MIT OR Apache-2.0"
@@ -12,6 +12,7 @@ keywords = ["derive", "renderdoc"]
 
 [badges]
 circle-ci = { repository = "ebkalderon/renderdoc-rs" }
+maintenance = { status = "deprecated" }
 
 [lib]
 proc-macro = true
