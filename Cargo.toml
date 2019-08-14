@@ -22,7 +22,6 @@ bitflags = "1.0"
 float-cmp = "0.5"
 lazy_static = "1.0"
 libloading = "0.5"
-renderdoc-derive = { version = "0.6", path = "./renderdoc-derive" }
 renderdoc-sys = { version = "0.6", path = "./renderdoc-sys" }
 
 glutin = { version = "0.21", optional = true }
