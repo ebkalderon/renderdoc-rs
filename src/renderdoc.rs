@@ -453,9 +453,10 @@ impl RenderDoc<V140> {
     }
 }
 
-/// Generates `From` implementations that permit downgrading of API versions. Unlike the
-/// `downgrade()` method, these `From` implementations let any version to downgrade to any other
-/// older backwards-compatible API version in a clean way.
+/// Generates `From` implementations that permit downgrading of API versions.
+///
+/// Unlike the `downgrade()` method, these `From` implementations let any version to downgrade to
+/// any other older backwards-compatible API version in a clean way.
 ///
 /// This function takes a list of API versions sorted in ascending order and recursively generates
 /// `From` implementations for them. For instance, given the following three API versions
