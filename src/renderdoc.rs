@@ -458,10 +458,9 @@ impl RenderDoc<V140> {
 /// Unlike the `downgrade()` method, these `From` implementations let any version to downgrade to
 /// any other older backwards-compatible API version in a clean way.
 ///
-/// This function takes a list of API versions sorted in ascending order and recursively generates
+/// This function takes a list of API versions sorted in descending order and recursively generates
 /// `From` implementations for them. For instance, given the following three API versions
-/// `[V200, V110, V100]` (reverse chronological order), these trait implementations will be
-/// generated:
+/// `[V200, V110, V100]`, these trait implementations will be generated:
 ///
 /// ```rust,ignore
 /// // V200 -> V110, V100
