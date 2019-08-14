@@ -27,8 +27,6 @@ extern crate float_cmp;
 extern crate libloading;
 #[macro_use]
 extern crate lazy_static;
-#[macro_use]
-extern crate renderdoc_derive;
 extern crate renderdoc_sys;
 
 #[cfg(feature = "glutin")]

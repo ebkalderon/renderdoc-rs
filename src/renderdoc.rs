@@ -13,8 +13,7 @@ use version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V
 
 /// An instance of the RenderDoc API with baseline version `V`.
 #[repr(C)]
-#[derive(Eq, Hash, PartialEq, RenderDoc)]
-#[renderdoc_convert(V100, V110, V111, V112, V120, V130, V140)]
+#[derive(Eq, Hash, PartialEq)]
 pub struct RenderDoc<V>(*mut Entry, PhantomData<V>);
 
 impl<V: Version> RenderDoc<V> {
@@ -453,3 +452,69 @@ impl RenderDoc<V140> {
         unsafe { ((*self.0).DiscardFrameCapture.unwrap())(dev as *mut _, win as *mut _) == 1 }
     }
 }
+
+/// Generates `From` implementations that permit downgrading of API versions.
+///
+/// Unlike the `downgrade()` method, these `From` implementations let any version to downgrade to
+/// any other older backwards-compatible API version in a clean way.
+///
+/// This function takes a list of API versions sorted in ascending order and recursively generates
+/// `From` implementations for them. For instance, given the following three API versions
+/// `[V200, V110, V100]` (reverse chronological order), these trait implementations will be
+/// generated:
+///
+/// ```rust,ignore
+/// // V200 -> V110, V100
+///
+/// impl From<#name<V200>> for #name<V110>
+/// where
+///     Self: Sized,
+/// {
+///     fn from(newer: #name<V200>) -> Self {
+///         // ...
+///     }
+/// }
+///
+/// impl From<#name<V200>> for #name<V100>
+/// where
+///     Self: Sized,
+/// {
+///     fn from(newer: #name<V200>) -> Self {
+///         // ...
+///     }
+/// }
+///
+/// // V110 -> V100
+///
+/// impl From<#name<V110>> for #name<V100>
+/// where
+///     Self: Sized,
+/// {
+///     fn from(newer: #name<V200>) -> Self {
+///         // ...
+///     }
+/// }
+///
+/// // V100 -> ()
+/// ```
+macro_rules! impl_from_versions {
+    ($base_version:ident) => {};
+
+    ($newer:ident, $($older:ident),+) => {
+        $(
+            impl From<RenderDoc<$newer>> for RenderDoc<$older>
+            where
+                Self: Sized,
+            {
+                fn from(newer: RenderDoc<$newer>) -> Self {
+                    let RenderDoc(entry, _) = newer;
+                    RenderDoc(entry, PhantomData)
+                }
+            }
+        )+
+
+        impl_from_versions!($($older),+);
+    };
+}
+
+impl_from_versions!(V140, V130, V120, V112, V111, V110, V100);
