@@ -36,5 +36,5 @@ gfx_window_glutin = "0.31"
 glutin = "0.21"
 
 [workspace]
-members = [".", "renderdoc-derive", "renderdoc-sys"]
+members = [".", "renderdoc-sys"]
 default-members = [".", "renderdoc-sys"]
