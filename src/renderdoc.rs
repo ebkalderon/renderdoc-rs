@@ -66,6 +66,7 @@ impl<V: HasPrevious> RenderDoc<V> {
     }
 }
 
+#[doc(hidden)]
 impl<V: HasPrevious> Deref for RenderDoc<V> {
     type Target = RenderDoc<V::Previous>;
 
