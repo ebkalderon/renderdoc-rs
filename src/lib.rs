@@ -45,8 +45,6 @@ use std::os::raw::c_ulonglong;
 
 #[cfg(windows)]
 use winapi::shared::guiddef::GUID;
-#[cfg(windows)]
-use wio::com::ComPtr;
 
 mod handles;
 mod renderdoc;

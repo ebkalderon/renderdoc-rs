@@ -3,6 +3,8 @@
 use std::os::raw::c_void;
 
 use glutin::os::ContextTraitExt;
+#[cfg(windows)]
+use wio::com::ComPtr;
 
 /// Raw mutable pointer to the OS-provided window handle.
 pub type WindowHandle = *const c_void;
@@ -43,7 +45,7 @@ impl From<*mut winapi::um::d3d11::ID3D11Device> for DevicePointer {
 #[cfg(windows)]
 impl From<ComPtr<winapi::um::d3d11::ID3D11Device>> for DevicePointer {
     fn from(ctx: ComPtr<winapi::um::d3d11::ID3D11Device>) -> Self {
-        unsafe { DevicePointer(ctx.as_raw() as *mut _ as *const c_void) }
+        DevicePointer(ctx.as_raw() as *mut _ as *const c_void)
     }
 }
 
@@ -57,7 +59,7 @@ impl From<*mut winapi::um::d3d12::ID3D12Device> for DevicePointer {
 #[cfg(windows)]
 impl From<ComPtr<winapi::um::d3d12::ID3D12Device>> for DevicePointer {
     fn from(ctx: ComPtr<winapi::um::d3d12::ID3D12Device>) -> Self {
-        unsafe { DevicePointer(ctx.as_raw() as *mut _ as *const c_void) }
+        DevicePointer(ctx.as_raw() as *mut _ as *const c_void)
     }
 }
 
