@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.0] - 2019-08-23
+### Added
+* Write more doc comments and add doc tests.
+
+### Changed
+* Bump `float-cmp` dependency to 0.5.
+* Switch to Circle CI Rust 1.33.0 image.
+* Change error type of `launch_replay_ui()` from `()` to `String`.
+* Mark `Deref` block with `#[doc(hidden)]` for cleaner generated docs.
+
+### Removed
+* Remove internal `renderdoc-derive` crate in favor of declarative macro.
+* Eliminate unnecessary `unsafe` blocks.
+
+### Fixed
+* Define `CaptureOption`, `InputButton`, and `OverlayBits` in terms of
+  `renderdoc-sys` types.
+* Add missing discriminant values to `InputButton` enum.
+* Fix broken Windows build (PR #61).
+
 ## [0.6.0] - 2019-05-19
 ### Added
 * Redesign crate to use inherent impls over traits (PR #35).
@@ -46,7 +66,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Convert top-level crate to workspace.
 * Clean up `renderdoc-sys` crate layout.
 * Minor code formatting tweaks.
-* Switch to Circle CI Rust 1.34.1 image.
 
 ### Fixed
 * Switch `set_capture_file_comments()` and `trigger_multi_frame_capture()` to
@@ -95,7 +114,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Type-safe version requests and downgrading.
 * Convenient conversions for `winit::VirtualKeyCode` into RenderDoc `InputButton`.
 
-[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.3.0...v0.4.0

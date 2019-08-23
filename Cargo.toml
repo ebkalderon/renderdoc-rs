@@ -1,6 +1,6 @@
 [package]
 name = "renderdoc"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Eyal Kalderon <ebkalderon@gmail.com>"]
 description = "RenderDoc application bindings for Rust"
 license = "MIT OR Apache-2.0"
