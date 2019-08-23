@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Bump `float-cmp` dependency to 0.5.
 * Switch to Circle CI Rust 1.33.0 image.
 * Change error type of `launch_replay_ui()` from `()` to `String`.
-* Mark `Deref` block with `#[doc(hidden)]` for cleaner generated docs.
+* Mark `Deref` block as `#[doc(hidden)]` for cleaner generated docs.
 
 ### Removed
 * Remove internal `renderdoc-derive` crate in favor of declarative macro.
