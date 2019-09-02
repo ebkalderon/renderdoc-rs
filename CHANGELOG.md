@@ -107,7 +107,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 * Missing byte in `SHADER_MAGIC_DEBUG_VALUE_STRUCT` broke Windows builds.
 
-## 0.1.0 - 2017-10-11
+## [0.1.0] - 2017-10-11
 ### Added
 * Initial crate release.
 * In-application API bindings, supporting versions 1.0 to 1.1.
@@ -121,3 +121,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.4.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/ebkalderon/renderdoc-rs/releases/tag/v0.1.0
