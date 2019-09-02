@@ -1,13 +1,15 @@
 # renderdoc-sys
 
-[![Build Status][s1]][cc] [![Crates.io][s2]][ci] [![Documentation][s3]][docs]
+[![Build Status][build-badge]][build-url]
+[![Crates.io][crate-badge]][crate-url]
+[![Documentation][docs-badge]][docs-url]
 
-[s1]: https://circleci.com/gh/ebkalderon/renderdoc-rs.svg?style=shield
-[cc]: https://circleci.com/gh/ebkalderon/renderdoc-rs/tree/master/renderdoc-sys
-[s2]: https://img.shields.io/crates/v/renderdoc.svg
-[ci]: https://crates.io/crates/renderdoc-sys
-[s3]: https://img.shields.io/badge/docs-master-blue.svg
-[docs]: https://docs.rs/renderdoc-sys
+[build-badge]: https://circleci.com/gh/ebkalderon/renderdoc-rs.svg?style=shield
+[build-url]: https://circleci.com/gh/ebkalderon/renderdoc-rs/tree/master/renderdoc-sys
+[crate-badge]: https://img.shields.io/crates/v/renderdoc-sys.svg
+[crate-url]: https://crates.io/crates/renderdoc-sys
+[docs-badge]: https://docs.rs/renderdoc-sys/badge.svg
+[docs-url]: https://docs.rs/renderdoc-sys
 
 Low-level Rust FFI bindings to [RenderDoc], a popular graphics debugger.
 
