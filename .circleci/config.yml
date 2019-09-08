@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: ebkalderon/renderdoc-rs-circleci:1.33.0
+      - image: ebkalderon/renderdoc-rs-circleci:1.36.0
 
     environment:
       TZ: "/usr/share/zoneinfo/Asia/Singapore"
