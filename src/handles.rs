@@ -2,6 +2,7 @@
 
 use std::os::raw::c_void;
 
+#[cfg(feature = "glutin")]
 use glutin::os::ContextTraitExt;
 #[cfg(windows)]
 use wio::com::ComPtr;
