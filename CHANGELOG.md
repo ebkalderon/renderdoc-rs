@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.1] - 2019-10-07
+### Fixed
+* Fix build without `glutin` enabled (PR #69).
+
 ## [0.7.0] - 2019-08-23
 ### Added
 * Write more doc comments and add doc tests.
@@ -114,7 +118,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Type-safe version requests and downgrading.
 * Convenient conversions for `winit::VirtualKeyCode` into RenderDoc `InputButton`.
 
-[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.4.0...v0.5.0
