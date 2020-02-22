@@ -18,12 +18,9 @@ jobs:
             rustup component add rustfmt
             cargo fmt --all -- --check
       - run:
-          name: Nightly Build
+          name: Test
           command: |
-            rustup toolchain add nightly
-            rustup run nightly rustc --version --verbose
-            rustup run nightly cargo --version --verbose
-            rustup run nightly cargo build --all
+            cargo test --all
       - run:
           name: Stable Build
           command: |
@@ -31,9 +28,12 @@ jobs:
             cargo --version --verbose
             cargo build --all
       - run:
-          name: Test
+          name: Nightly Build
           command: |
-            cargo test --all
+            rustup toolchain add nightly
+            rustup run nightly rustc --version --verbose
+            rustup run nightly cargo --version --verbose
+            rustup run nightly cargo build --all
       - save_cache:
           key: project-cache
           paths:
