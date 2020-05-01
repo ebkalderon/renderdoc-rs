@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.8.1] - 2020-05-01
+
+### Fixed
+
+* Fix copy-paste documentation mistake for `end_frame_capture()`.
+* Fix formatting for `unload_crash_handler()` docs.
+* Fix subtle spacing issue around `$PATH` in docs.
+
 ## [0.8.0] - 2020-05-01
 
 ### Added
@@ -169,7 +177,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Type-safe version requests and downgrading.
 * Convenient conversions for `winit::VirtualKeyCode` into RenderDoc `InputButton`.
 
-[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.6.0...v0.7.0
