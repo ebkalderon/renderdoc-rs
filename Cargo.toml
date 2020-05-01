@@ -1,6 +1,7 @@
 [package]
 name = "renderdoc"
 version = "0.7.1"
+edition = "2018"
 authors = ["Eyal Kalderon <ebkalderon@gmail.com>"]
 description = "RenderDoc application bindings for Rust"
 license = "MIT OR Apache-2.0"

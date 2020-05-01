@@ -2,6 +2,7 @@
 
 use std::u32;
 
+use bitflags::bitflags;
 #[cfg(feature = "glutin")]
 use glutin::VirtualKeyCode;
 

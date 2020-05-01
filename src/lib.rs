@@ -20,21 +20,6 @@
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 compile_error!("RenderDoc does not support this platform.");
 
-#[macro_use]
-extern crate bitflags;
-#[macro_use]
-extern crate float_cmp;
-extern crate libloading;
-extern crate once_cell;
-extern crate renderdoc_sys;
-
-#[cfg(feature = "glutin")]
-extern crate glutin;
-#[cfg(target_os = "windows")]
-extern crate winapi;
-#[cfg(target_os = "windows")]
-extern crate wio;
-
 pub use self::error::Error;
 pub use self::handles::{DevicePointer, WindowHandle};
 pub use self::renderdoc::RenderDoc;
