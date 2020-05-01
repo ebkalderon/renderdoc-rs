@@ -5,7 +5,8 @@ use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
-use std::ptr;
+use std::time::{Duration, SystemTime};
+use std::{ptr, time};
 
 use float_cmp::approx_eq;
 
@@ -290,7 +291,7 @@ impl RenderDoc<V100> {
         unsafe { ((*self.0).GetNumCaptures.unwrap())() }
     }
 
-    /// Retrieves the path and Unix capture time of a capture file indexed by the number `index`.
+    /// Retrieves the path and capture time of a capture file indexed by the number `index`.
     ///
     /// Returns `Some` if the index was within `0..get_num_captures()`, otherwise returns `None`.
     ///
@@ -309,18 +310,22 @@ impl RenderDoc<V100> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn get_capture(&self, index: u32) -> Option<(PathBuf, u64)> {
+    pub fn get_capture(&self, index: u32) -> Option<(PathBuf, SystemTime)> {
         let mut len = self.get_log_file_path_template().as_os_str().len() as u32 + 128;
         let mut path = Vec::with_capacity(len as usize);
         let mut time = 0u64;
 
         unsafe {
             if ((*self.0).GetCapture.unwrap())(index, path.as_mut_ptr(), &mut len, &mut time) == 1 {
-                let raw_path = CString::from_raw(path.as_mut_ptr());
-                let mut path = raw_path.into_string().unwrap();
-                path.shrink_to_fit();
+                let capture_time = time::UNIX_EPOCH + Duration::from_secs(time);
+                let path = {
+                    let raw_path = CString::from_raw(path.as_mut_ptr());
+                    let mut path = raw_path.into_string().unwrap();
+                    path.shrink_to_fit();
+                    path
+                };
 
-                Some((path.into(), time))
+                Some((path.into(), capture_time))
             } else {
                 None
             }
