@@ -192,9 +192,8 @@ impl RenderDoc<V100> {
     /// Removes RenderDoc's injected crash handler from the current process.
     ///
     /// This allows you to provide your own global crash handler with which to handle exceptions,
-    /// if you so desire.
-    ///
-    /// After the crash handler has been removed, subsequent calls to this method will do nothing.
+    /// if you so desire. After the crash handler has been removed, subsequent calls to this method
+    /// will do nothing.
     pub fn unload_crash_handler(&mut self) {
         unsafe {
             ((*self.0).UnloadCrashHandler.unwrap())();
