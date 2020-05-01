@@ -1,6 +1,5 @@
 //! Entry points for the RenderDoc API.
 
-use std::io::Error as IoError;
 use std::os::raw::c_void;
 use std::path::Path;
 
@@ -26,7 +25,7 @@ fn get_path() -> &'static Path {
 }
 
 lazy_static! {
-    static ref RD_LIB: Result<Library, IoError> = Library::new(get_path());
+    static ref RD_LIB: Result<Library, libloading::Error> = Library::new(get_path());
 }
 
 /// Available versions of the RenderDoc API.
