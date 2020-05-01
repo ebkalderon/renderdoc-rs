@@ -7,37 +7,71 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.8.0] - 2020-05-01
+
+### Added
+
+* Add dedicated `Error` type to be used throughout the library.
+
+### Changed
+
+* Expand API documentation and improve existing documentation quality (PR #81).
+* Accept and return `PathBuf` or `&Path` in places instead of String and `&str`
+  (PR #82).
+* Accept `Into<String>` and `Into<PathBuf>` instead of `AsRef` in places where
+  we are going to be allocating anyway (PR #82).
+* Return `std::time::SystemTime` instead of a raw `u64` in `get_capture()`.
+* Convert crate to Rust 2018 edition.
+* Bump `float-cmp` dependency to 0.7.
+* Bump `libloading` dependency to 0.6.
+* Switch to Circle CI Rust 1.40.0 image.
+
+### Deprecated
+
+* Mark `get_log_file_template_path()` and `set_log_file_template_path()` as
+  deprecated for all RenderDoc API versions after 1.1.2 (PR #83).
+
 ## [0.7.1] - 2019-10-07
+
 ### Fixed
+
 * Fix build without `glutin` enabled (PR #69).
 
 ## [0.7.0] - 2019-08-23
+
 ### Added
+
 * Write more doc comments and add doc tests.
 
 ### Changed
+
 * Bump `float-cmp` dependency to 0.5.
 * Switch to Circle CI Rust 1.33.0 image.
 * Change error type of `launch_replay_ui()` from `()` to `String`.
 * Mark `Deref` block as `#[doc(hidden)]` for cleaner generated docs.
 
 ### Removed
+
 * Remove internal `renderdoc-derive` crate in favor of declarative macro.
 * Eliminate unnecessary `unsafe` blocks.
 
 ### Fixed
+
 * Define `CaptureOption`, `InputButton`, and `OverlayBits` in terms of
   `renderdoc-sys` types.
 * Add missing discriminant values to `InputButton` enum.
 * Fix broken Windows build (PR #61).
 
 ## [0.6.0] - 2019-05-19
+
 ### Added
+
 * Redesign crate to use inherent impls over traits (PR #35).
 * Add `HasPrevious` trait to recursively determine version compatibility at
   compile-time.
 
 ### Changed
+
 * Rename `Version` enum to `VersionCode` and `ApiVersion` trait to `Version`.
 * Use a single `Entry` type, since the aliases point to the same struct.
 * Update crate metadata and improve documentation.
@@ -46,10 +80,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Apply Clippy suggestions (PR #43).
 
 ### Deprecated
+
 * Mark `is_remote_access_connected()` as deprecated for all RenderDoc API
   versions after 1.1.1 (PR #42).
 
 ### Removed
+
 * Remove `prelude` module.
 * Remove `RenderDocV###` traits.
 * Remove `RenderDocV###` trait boilerplate code from `renderdoc-derive`.
@@ -57,12 +93,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   (PR #39).
 
 ## [0.5.0] - 2019-05-19
+
 ### Added
+
 * Add CI and documentation badges.
 * Implement support for API versions 1.3.0 and 1.4.0.
 * Allow string slices with lifetimes in `set_capture_file_comments()`.
 
 ### Changed
+
 * Bump `glutin` dependency to 0.21.
 * Bump `gfx` dev-dependency to 0.18.1.
 * Bump `gfx_window_glutin` dev-dependency to 0.31.
@@ -72,6 +111,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Minor code formatting tweaks.
 
 ### Fixed
+
 * Switch `set_capture_file_comments()` and `trigger_multi_frame_capture()` to
   take `&mut self` (PR #32).
 * Unimplement `Clone`, `Send`, and `Sync` for `RenderDoc` struct (PR #29).
@@ -83,42 +123,54 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fix erroneous doc comments (PR #24).
 
 ## [0.4.0] - 2018-09-16
+
 ### Added
+
 * Create `renderdoc-sys` crate for raw FFI bindings.
 * Create `renderdoc-derive` crate for internal codegen.
 * Add support for RenderDoc API 1.1.1, 1.1.2, and 1.2.0.
 
 ### Changed
+
 * Switch to `libloading` from `shared_library`.
 * Update `triangle` example to the latest `glutin` API.
 * Bump dependencies.
 
 ## [0.3.0] - 2018-06-01
+
 ### Changed
+
 * Update existing dependencies (PR #3).
 
 ## [0.2.0] - 2017-12-15
+
 ### Added
+
 * Convenient conversions for `glutin::Context`, `winapi::D3D11Device`,
   `winapi::D3D12Device`, and `winapi::windef::HGLRC` into RenderDoc
   `DevicePointer`.
 
 ### Changed
+
 * Update existing dependencies.
 * Optionally depend on `glutin` in place of `winit`.
 * Depend on `wio` for Windows targets.
 
 ### Fixed
+
 * Missing byte in `SHADER_MAGIC_DEBUG_VALUE_STRUCT` broke Windows builds.
 
 ## [0.1.0] - 2017-10-11
+
 ### Added
+
 * Initial crate release.
 * In-application API bindings, supporting versions 1.0 to 1.1.
 * Type-safe version requests and downgrading.
 * Convenient conversions for `winit::VirtualKeyCode` into RenderDoc `InputButton`.
 
-[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.5.0...v0.6.0
