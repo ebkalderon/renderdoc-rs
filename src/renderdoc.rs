@@ -192,9 +192,8 @@ impl RenderDoc<V100> {
     /// Removes RenderDoc's injected crash handler from the current process.
     ///
     /// This allows you to provide your own global crash handler with which to handle exceptions,
-    /// if you so desire.
-    ///
-    /// After the crash handler has been removed, subsequent calls to this method will do nothing.
+    /// if you so desire. After the crash handler has been removed, subsequent calls to this method
+    /// will do nothing.
     pub fn unload_crash_handler(&mut self) {
         unsafe {
             ((*self.0).UnloadCrashHandler.unwrap())();
@@ -432,7 +431,7 @@ impl RenderDoc<V100> {
     /// For example, you can specify `null(), null()` for the device to capture on if you have only
     /// one device and only one or zero windows, and RenderDoc will capture from that device.
     ///
-    /// This function must be paired with a matching `end_frame_capture()` to complete.
+    /// This function must be paired with a matching `start_frame_capture()` to succeed.
     ///
     /// ```rust,no_run
     /// # use renderdoc::{Error, RenderDoc, V100};

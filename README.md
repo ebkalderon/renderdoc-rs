@@ -21,7 +21,7 @@ examine the graphics pipeline state, and potentially identify nasty graphics
 bugs.
 
 These bindings require that RenderDoc be installed on the target machine, with
-either `renderdoc.dll` or `librenderdoc.so` visible from your`PATH`.
+either `renderdoc.dll` or `librenderdoc.so` visible from your `$PATH`.
 
 For more details on how to use this API to integrate your game or renderer with
 the RenderDoc profiler, consult the [in-application API][in-app] documentation.
