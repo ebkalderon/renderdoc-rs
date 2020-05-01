@@ -608,12 +608,11 @@ impl RenderDoc<V120> {
     pub fn set_capture_file_comments<'a, P, C>(&mut self, path: P, comments: C)
     where
         P: Into<Option<&'a str>>,
-        C: AsRef<str>,
+        C: Into<String>,
     {
         let utf8 = path.into().and_then(|s| CString::new(s).ok());
         let path = utf8.as_ref().map(|s| s.as_ptr()).unwrap_or_else(ptr::null);
-
-        let comments = CString::new(comments.as_ref()).expect("string contains extra null bytes");
+        let comments = CString::new(comments.into()).unwrap();
 
         unsafe {
             ((*self.0).SetCaptureFileComments.unwrap())(path, comments.as_ptr());
