@@ -4,10 +4,12 @@ use std::os::raw::c_void;
 use std::path::Path;
 
 use libloading::{Library, Symbol};
+use once_cell::sync::OnceCell;
 use renderdoc_sys::RENDERDOC_API_1_4_0;
 
-/// Entry point for the RenderDoc API.
-pub type Entry = RENDERDOC_API_1_4_0;
+use error::Error;
+
+static RD_LIB: OnceCell<Library> = OnceCell::new();
 
 #[cfg(windows)]
 fn get_path() -> &'static Path {
@@ -24,9 +26,8 @@ fn get_path() -> &'static Path {
     Path::new("libVkLayer_GLES_RenderDoc.so")
 }
 
-lazy_static! {
-    static ref RD_LIB: Result<Library, libloading::Error> = Library::new(get_path());
-}
+/// Entry point for the RenderDoc API.
+pub type Entry = RENDERDOC_API_1_4_0;
 
 /// Available versions of the RenderDoc API.
 #[repr(u32)]
@@ -69,18 +70,21 @@ pub trait Version {
     /// # Safety
     ///
     /// This function is not thread-safe and should not be called on multiple threads at once.
-    fn load() -> Result<*mut Entry, String> {
+    fn load() -> Result<*mut Entry, Error> {
         use std::ptr;
 
         unsafe {
-            let lib = RD_LIB.as_ref().map_err(ToString::to_string)?;
+            let lib = RD_LIB
+                .get_or_try_init(|| Library::new(get_path()))
+                .map_err(Error::library)?;
+
             let get_api: Symbol<GetApiFn> =
-                lib.get(b"RENDERDOC_GetAPI\0").map_err(|e| e.to_string())?;
+                lib.get(b"RENDERDOC_GetAPI\0").map_err(Error::symbol)?;
 
             let mut obj = ptr::null_mut();
             match get_api(Self::VERSION, &mut obj) {
                 1 => Ok(obj as *mut Entry),
-                _ => Err("Compatible API version not available.".into()),
+                _ => Err(Error::no_compatible_api()),
             }
         }
     }

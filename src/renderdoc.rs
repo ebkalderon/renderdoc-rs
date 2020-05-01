@@ -4,9 +4,10 @@ use std::ffi::{CStr, CString};
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::ptr;
 
+use error::Error;
 use handles::{DevicePointer, WindowHandle};
 use settings::{CaptureOption, InputButton, OverlayBits};
 use version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140};
@@ -18,7 +19,7 @@ pub struct RenderDoc<V>(*mut Entry, PhantomData<V>);
 
 impl<V: Version> RenderDoc<V> {
     /// Initializes a new instance of the RenderDoc API.
-    pub fn new() -> Result<Self, String> {
+    pub fn new() -> Result<Self, Error> {
         let api = V::load()?;
         Ok(RenderDoc(api, PhantomData))
     }
@@ -52,8 +53,8 @@ impl<V: HasPrevious> RenderDoc<V> {
     /// # Examples
     ///
     /// ```rust
-    /// # use renderdoc::{RenderDoc, V100, V111, V112};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100, V111, V112};
+    /// # fn main() -> Result<(), Error> {
     /// let current: RenderDoc<V112> = RenderDoc::new()?;
     /// let previous: RenderDoc<V111> = current.downgrade();
     /// // let older: RenderDoc<V100> = previous.downgrade(); // This line does not compile
@@ -105,8 +106,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// let (major, minor, patch) = renderdoc.get_api_version();
     /// assert_eq!(major, 1);
@@ -227,17 +228,17 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// println!("{:?}", renderdoc.get_log_file_path_template()); // e.g. `my_captures/example`
     /// # Ok(())
     /// # }
     /// ```
-    pub fn get_log_file_path_template(&self) -> &str {
+    pub fn get_log_file_path_template(&self) -> &Path {
         unsafe {
             let raw = ((*self.0).__bindgen_anon_2.GetLogFilePathTemplate.unwrap())();
-            CStr::from_ptr(raw).to_str().unwrap()
+            CStr::from_ptr(raw).to_str().map(Path::new).unwrap()
         }
     }
 
@@ -253,8 +254,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// renderdoc.set_log_file_path_template("my_captures/example");
     ///
@@ -263,9 +264,9 @@ impl RenderDoc<V100> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn set_log_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
+    pub fn set_log_file_path_template<P: Into<PathBuf>>(&mut self, path_template: P) {
         unsafe {
-            let utf8 = path_template.as_ref().to_str();
+            let utf8 = path_template.into().into_os_string().into_string().ok();
             let path = utf8.and_then(|s| CString::new(s).ok()).unwrap();
             ((*self.0).__bindgen_anon_1.SetLogFilePathTemplate.unwrap())(path.as_ptr());
         }
@@ -276,8 +277,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// assert_eq!(renderdoc.get_num_captures(), 0);
     /// # Ok(())
@@ -287,15 +288,15 @@ impl RenderDoc<V100> {
         unsafe { ((*self.0).GetNumCaptures.unwrap())() }
     }
 
-    /// Retrieves the path and capture time of a capture file indexed by the number `index`.
+    /// Retrieves the path and Unix capture time of a capture file indexed by the number `index`.
     ///
     /// Returns `Some` if the index was within `0..get_num_captures()`, otherwise returns `None`.
     ///
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     ///
     /// // Capture a frame.
@@ -306,8 +307,8 @@ impl RenderDoc<V100> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn get_capture(&self, index: u32) -> Option<(String, u64)> {
-        let mut len = self.get_log_file_path_template().len() as u32 + 128;
+    pub fn get_capture(&self, index: u32) -> Option<(PathBuf, u64)> {
+        let mut len = self.get_log_file_path_template().as_os_str().len() as u32 + 128;
         let mut path = Vec::with_capacity(len as usize);
         let mut time = 0u64;
 
@@ -317,7 +318,7 @@ impl RenderDoc<V100> {
                 let mut path = raw_path.into_string().unwrap();
                 path.shrink_to_fit();
 
-                Some((path, time))
+                Some((path.into(), time))
             } else {
                 None
             }
@@ -330,8 +331,8 @@ impl RenderDoc<V100> {
     /// `set_log_file_path_template()`.
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     ///
     /// // Capture the current frame and save to a file.
@@ -350,8 +351,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// assert!(!renderdoc.is_remote_access_connected());
     /// # Ok(())
@@ -373,8 +374,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// let pid = renderdoc.launch_replay_ui(true, None)?;
     /// # Ok(())
@@ -384,7 +385,7 @@ impl RenderDoc<V100> {
         &self,
         connect_immediately: bool,
         extra_opts: O,
-    ) -> Result<u32, String>
+    ) -> Result<u32, Error>
     where
         O: Into<Option<&'a str>>,
     {
@@ -394,7 +395,7 @@ impl RenderDoc<V100> {
 
         unsafe {
             match ((*self.0).LaunchReplayUI.unwrap())(should_connect, extra_opts) {
-                0 => Err("unable to launch replay UI".into()),
+                0 => Err(Error::launch_replay_ui()),
                 pid => Ok(pid),
             }
         }
@@ -427,8 +428,8 @@ impl RenderDoc<V100> {
     /// This function must be paired with a matching `end_frame_capture()` to complete.
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// renderdoc.start_frame_capture(std::ptr::null(), std::ptr::null());
     ///
@@ -451,8 +452,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// if renderdoc.is_frame_capturing() {
     ///     println!("Frames are being captured.");
@@ -477,8 +478,8 @@ impl RenderDoc<V100> {
     /// This function must be paired with a matching `end_frame_capture()` to complete.
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     ///
     /// renderdoc.start_frame_capture(std::ptr::null(), std::ptr::null());
@@ -523,8 +524,8 @@ impl RenderDoc<V111> {
     /// # Examples
     ///
     /// ```rust
-    /// # use renderdoc::{RenderDoc, V111};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V111};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V111> = RenderDoc::new()?;
     /// assert!(!renderdoc.is_target_control_connected());
     /// # Ok(())
@@ -548,20 +549,20 @@ impl RenderDoc<V112> {
     /// # Examples
     ///
     /// ```
-    /// # use renderdoc::{RenderDoc, V112};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V112};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V112> = RenderDoc::new()?;
     /// println!("{:?}", renderdoc.get_capture_file_path_template()); // e.g. `my_captures/example`
     /// # Ok(())
     /// # }
     /// ```
-    pub fn get_capture_file_path_template(&self) -> &str {
+    pub fn get_capture_file_path_template(&self) -> &Path {
         unsafe {
             let raw = ((*self.0)
                 .__bindgen_anon_2
                 .GetCaptureFilePathTemplate
                 .unwrap())();
-            CStr::from_ptr(raw).to_str().unwrap()
+            CStr::from_ptr(raw).to_str().map(Path::new).unwrap()
         }
     }
 
@@ -577,8 +578,8 @@ impl RenderDoc<V112> {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V112};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V112};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V112> = RenderDoc::new()?;
     /// renderdoc.set_capture_file_path_template("my_captures/example");
     ///
@@ -587,8 +588,8 @@ impl RenderDoc<V112> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn set_capture_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
-        let utf8 = path_template.as_ref().to_str();
+    pub fn set_capture_file_path_template<P: Into<PathBuf>>(&mut self, path_template: P) {
+        let utf8 = path_template.into().into_os_string().into_string().ok();
         let cstr = utf8.and_then(|s| CString::new(s).ok()).unwrap();
         unsafe {
             ((*self.0)
@@ -602,15 +603,16 @@ impl RenderDoc<V112> {
 impl RenderDoc<V120> {
     /// Adds or sets an arbitrary comments field to an existing capture on disk, which will then be
     /// displayed in the UI to anyone opening the capture file.
+    ///
+    /// If the `path` argument is `None`, the most recent previous capture file is used.
     pub fn set_capture_file_comments<'a, P, C>(&mut self, path: P, comments: C)
     where
         P: Into<Option<&'a str>>,
-        C: AsRef<str>,
+        C: Into<String>,
     {
         let utf8 = path.into().and_then(|s| CString::new(s).ok());
         let path = utf8.as_ref().map(|s| s.as_ptr()).unwrap_or_else(ptr::null);
-
-        let comments = CString::new(comments.as_ref()).expect("string contains extra null bytes");
+        let comments = CString::new(comments.into()).unwrap();
 
         unsafe {
             ((*self.0).SetCaptureFileComments.unwrap())(path, comments.as_ptr());
