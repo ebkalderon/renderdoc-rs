@@ -263,9 +263,9 @@ impl RenderDoc<V100> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn set_log_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
+    pub fn set_log_file_path_template<P: Into<PathBuf>>(&mut self, path_template: P) {
         unsafe {
-            let utf8 = path_template.as_ref().to_str();
+            let utf8 = path_template.into().into_os_string().into_string().ok();
             let path = utf8.and_then(|s| CString::new(s).ok()).unwrap();
             ((*self.0).__bindgen_anon_1.SetLogFilePathTemplate.unwrap())(path.as_ptr());
         }
@@ -587,8 +587,8 @@ impl RenderDoc<V112> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn set_capture_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
-        let utf8 = path_template.as_ref().to_str();
+    pub fn set_capture_file_path_template<P: Into<PathBuf>>(&mut self, path_template: P) {
+        let utf8 = path_template.into().into_os_string().into_string().ok();
         let cstr = utf8.and_then(|s| CString::new(s).ok()).unwrap();
         unsafe {
             ((*self.0)
