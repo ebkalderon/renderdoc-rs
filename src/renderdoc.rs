@@ -513,13 +513,6 @@ impl RenderDoc<V110> {
 
 impl RenderDoc<V111> {
     /// Returns whether the RenderDoc UI is connected to this application.
-    #[deprecated(since = "1.1.1", note = "renamed to `is_target_control_connected()`")]
-    pub fn is_remote_access_connected(&self) -> bool {
-        let v1: &RenderDoc<V100> = self.deref();
-        v1.is_remote_access_connected()
-    }
-
-    /// Returns whether the RenderDoc UI is connected to this application.
     ///
     /// # Examples
     ///
@@ -533,6 +526,13 @@ impl RenderDoc<V111> {
     /// ```
     pub fn is_target_control_connected(&self) -> bool {
         unsafe { ((*self.0).__bindgen_anon_3.IsTargetControlConnected.unwrap())() == 1 }
+    }
+
+    /// Returns whether the RenderDoc UI is connected to this application.
+    #[deprecated(since = "1.1.1", note = "renamed to `is_target_control_connected`")]
+    pub fn is_remote_access_connected(&self) -> bool {
+        let v1: &RenderDoc<V100> = self.deref();
+        v1.is_remote_access_connected()
     }
 }
 
@@ -597,6 +597,20 @@ impl RenderDoc<V112> {
                 .SetCaptureFilePathTemplate
                 .unwrap())(cstr.as_ptr());
         }
+    }
+
+    /// Returns the path template where new captures will be stored.
+    #[deprecated(since = "1.1.2", note = "renamed to `get_capture_file_path_template`")]
+    pub fn get_log_file_path_template(&self) -> &Path {
+        let v1: &RenderDoc<V100> = self.deref();
+        v1.get_log_file_path_template()
+    }
+
+    /// Sets the path template where new capture files should be stored.
+    #[deprecated(since = "1.1.2", note = "renamed to `set_capture_file_path_template`")]
+    pub fn set_log_file_path_template<P: Into<PathBuf>>(&mut self, path_template: P) {
+        let v1: &mut RenderDoc<V100> = self.deref_mut();
+        v1.set_log_file_path_template(path_template)
     }
 }
 
