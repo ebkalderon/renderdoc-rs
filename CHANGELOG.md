@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Deprecated
 
-* Mark `get_log_file_template_path()` and `set_log_file_template_path()` as
+* Mark `get_log_file_path_template()` and `set_log_file_path_template()` as
   deprecated for all RenderDoc API versions after 1.1.2 (PR #83).
 
 ## [0.7.1] - 2019-10-07
