@@ -602,6 +602,8 @@ impl RenderDoc<V112> {
 impl RenderDoc<V120> {
     /// Adds or sets an arbitrary comments field to an existing capture on disk, which will then be
     /// displayed in the UI to anyone opening the capture file.
+    ///
+    /// If the `path` argument is `None`, the most recent previous capture file is used.
     pub fn set_capture_file_comments<'a, P, C>(&mut self, path: P, comments: C)
     where
         P: Into<Option<&'a str>>,
