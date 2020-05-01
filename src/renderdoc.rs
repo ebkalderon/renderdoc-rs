@@ -165,7 +165,9 @@ impl RenderDoc<V100> {
         val
     }
 
-    #[allow(missing_docs)]
+    /// Sets the key bindings used in-application to trigger a capture on the current window.
+    ///
+    /// If the `keys` slice is empty, all existing capture key bindings are disabled.
     pub fn set_capture_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
         unsafe {
             let mut k: Vec<_> = keys.iter().cloned().map(|k| k.into() as u32).collect();
@@ -173,7 +175,9 @@ impl RenderDoc<V100> {
         }
     }
 
-    #[allow(missing_docs)]
+    /// Sets the key bindings used in-application to switch focus between windows.
+    ///
+    /// If the `keys` slice is empty, all existing focus toggle key bindings are disabled.
     pub fn set_focus_toggle_keys<I: Into<InputButton> + Clone>(&mut self, keys: &[I]) {
         unsafe {
             let mut k: Vec<_> = keys.iter().cloned().map(|k| k.into() as u32).collect();
@@ -181,27 +185,55 @@ impl RenderDoc<V100> {
         }
     }
 
-    #[allow(missing_docs)]
+    /// Removes RenderDoc's injected crash handler from the current process.
+    ///
+    /// This allows you to provide your own global crash handler with which to handle exceptions,
+    /// if you so desire.
+    ///
+    /// After the crash handler has been removed, subsequent calls to this method will do nothing.
     pub fn unload_crash_handler(&mut self) {
         unsafe {
             ((*self.0).UnloadCrashHandler.unwrap())();
         }
     }
 
-    #[allow(missing_docs)]
+    /// Returns a bitmask representing which elements of the RenderDoc overlay are being rendered
+    /// on each window.
     pub fn get_overlay_bits(&self) -> OverlayBits {
         let bits = unsafe { ((*self.0).GetOverlayBits.unwrap())() };
         OverlayBits::from_bits_truncate(bits)
     }
 
-    #[allow(missing_docs)]
+    /// Applies the given `and` and `or` bitflags to determine which elements of the RenderDoc
+    /// overlay should be rendered on each window.
+    ///
+    /// This method applies `and` to the current mask with a bitwise-and, and then applies `or`
+    /// using a bitwise-or on top.
     pub fn mask_overlay_bits(&mut self, and: OverlayBits, or: OverlayBits) {
         unsafe {
             ((*self.0).MaskOverlayBits.unwrap())(and.bits(), or.bits());
         }
     }
 
-    #[allow(missing_docs)]
+    /// Returns the path template where new captures will be stored.
+    ///
+    /// The template can either be a relative or absolute path, which determines where captures
+    /// will be saved and how they will be named. Relative paths will be saved relative to the
+    /// process' current working directory.
+    ///
+    /// By default, this will be in a folder controlled by the UI - initially the system temporary
+    /// directory, and the filename is the executable's filename.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use renderdoc::{RenderDoc, V100};
+    /// # fn main() -> Result<(), String> {
+    /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    /// println!("{:?}", renderdoc.get_log_file_path_template()); // e.g. `my_captures/example`
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn get_log_file_path_template(&self) -> &str {
         unsafe {
             let raw = ((*self.0).__bindgen_anon_2.GetLogFilePathTemplate.unwrap())();
@@ -209,7 +241,28 @@ impl RenderDoc<V100> {
         }
     }
 
-    #[allow(missing_docs)]
+    /// Sets the path template where new capture files should be stored.
+    ///
+    /// The template can either be a relative or absolute path, which determines where captures
+    /// will be saved and how they will be named. Relative paths will be saved relative to the
+    /// process' current working directory.
+    ///
+    /// The default template is in a folder controlled by the UI - initially the system temporary
+    /// directory, and the filename is the executable's filename.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// # use renderdoc::{RenderDoc, V100};
+    /// # fn main() -> Result<(), String> {
+    /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    /// renderdoc.set_log_file_path_template("my_captures/example");
+    ///
+    /// renderdoc.trigger_capture(); // Saved as `my_captures/example_frame123.rdc`
+    /// renderdoc.trigger_capture(); // Saved as `my_captures/example_frame456.rdc`
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn set_log_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
         unsafe {
             let utf8 = path_template.as_ref().to_str();
@@ -218,12 +271,41 @@ impl RenderDoc<V100> {
         }
     }
 
-    #[allow(missing_docs)]
+    /// Returns the number of frame captures that have been made.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use renderdoc::{RenderDoc, V100};
+    /// # fn main() -> Result<(), String> {
+    /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    /// assert_eq!(renderdoc.get_num_captures(), 0);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn get_num_captures(&self) -> u32 {
         unsafe { ((*self.0).GetNumCaptures.unwrap())() }
     }
 
-    #[allow(missing_docs)]
+    /// Retrieves the path and capture time of a capture file indexed by the number `index`.
+    ///
+    /// Returns `Some` if the index was within `0..get_num_captures()`, otherwise returns `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// # use renderdoc::{RenderDoc, V100};
+    /// # fn main() -> Result<(), String> {
+    /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    ///
+    /// // Capture a frame.
+    /// renderdoc.trigger_capture();
+    ///
+    /// // Get information about the previous capture.
+    /// let (file_path, capture_time) = renderdoc.get_capture(0).unwrap();
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn get_capture(&self, index: u32) -> Option<(String, u64)> {
         let mut len = self.get_log_file_path_template().len() as u32 + 128;
         let mut path = Vec::with_capacity(len as usize);
@@ -244,8 +326,19 @@ impl RenderDoc<V100> {
 
     /// Captures the next frame from the currently active window and API device.
     ///
-    /// Data is saved to a capture log file at the location specified via
+    /// Data is saved to a capture file at the location specified by
     /// `set_log_file_path_template()`.
+    ///
+    /// ```rust,no_run
+    /// # use renderdoc::{RenderDoc, V100};
+    /// # fn main() -> Result<(), String> {
+    /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    ///
+    /// // Capture the current frame and save to a file.
+    /// renderdoc.trigger_capture();
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn trigger_capture(&mut self) {
         unsafe {
             ((*self.0).TriggerCapture.unwrap())();
@@ -307,7 +400,12 @@ impl RenderDoc<V100> {
         }
     }
 
-    #[allow(missing_docs)]
+    /// Explicitly set which window is considered "active" by RenderDoc.
+    ///
+    /// The active window is the one that will be captured when the keybinding to trigger a capture
+    /// is pressed by the user, as well as when `trigger_capture()` is called.
+    ///
+    /// Both `dev` and `win` must be valid handles.
     pub fn set_active_window<D>(&mut self, dev: D, win: WindowHandle)
     where
         D: Into<DevicePointer>,
@@ -318,7 +416,26 @@ impl RenderDoc<V100> {
         }
     }
 
-    #[allow(missing_docs)]
+    /// Begins a frame capture for the specified device/window combination.
+    ///
+    /// If either or both `dev` and `win` are set to `std::ptr::null()`, then RenderDoc will
+    /// perform a wildcard match.
+    ///
+    /// For example, you can specify `null(), null()` for the device to capture on if you have only
+    /// one device and only one or zero windows, and RenderDoc will capture from that device.
+    ///
+    /// This function must be paired with a matching `end_frame_capture()` to complete.
+    ///
+    /// ```rust,no_run
+    /// # use renderdoc::{RenderDoc, V100};
+    /// # fn main() -> Result<(), String> {
+    /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    /// renderdoc.start_frame_capture(std::ptr::null(), std::ptr::null());
+    ///
+    /// // Capturing window from here onward...
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn start_frame_capture<D>(&mut self, dev: D, win: WindowHandle)
     where
         D: Into<DevicePointer>,
@@ -349,7 +466,27 @@ impl RenderDoc<V100> {
         unsafe { ((*self.0).IsFrameCapturing.unwrap())() == 1 }
     }
 
-    #[allow(missing_docs)]
+    /// Ends a frame capture for the specified device/window combination, saving results to disk.
+    ///
+    /// If either or both `dev` and `win` are set to `std::ptr::null()`, then RenderDoc will
+    /// perform a wildcard match.
+    ///
+    /// For example, you can specify `null(), null()` for the device to capture on if you have only
+    /// one device and only one or zero windows, and RenderDoc will capture from that device.
+    ///
+    /// This function must be paired with a matching `end_frame_capture()` to complete.
+    ///
+    /// ```rust,no_run
+    /// # use renderdoc::{RenderDoc, V100};
+    /// # fn main() -> Result<(), String> {
+    /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    ///
+    /// renderdoc.start_frame_capture(std::ptr::null(), std::ptr::null());
+    /// // Do some rendering here...
+    /// renderdoc.end_frame_capture(std::ptr::null(), std::ptr::null());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn end_frame_capture<D>(&mut self, dev: D, win: WindowHandle)
     where
         D: Into<DevicePointer>,
@@ -364,7 +501,7 @@ impl RenderDoc<V100> {
 impl RenderDoc<V110> {
     /// Captures the next _n_ frames from the currently active window and API device.
     ///
-    /// Data is saved to a capture log file at the location specified via
+    /// Data is saved to _n_ separate capture files at the location specified via
     /// `set_log_file_path_template()`.
     pub fn trigger_multi_frame_capture(&mut self, num_frames: u32) {
         unsafe {
@@ -399,7 +536,25 @@ impl RenderDoc<V111> {
 }
 
 impl RenderDoc<V112> {
-    #[allow(missing_docs)]
+    /// Returns the path template where new captures will be stored.
+    ///
+    /// The template can either be a relative or absolute path, which determines where captures
+    /// will be saved and how they will be named. Relative paths will be saved relative to the
+    /// process' current working directory.
+    ///
+    /// By default, this will be in a folder controlled by the UI - initially the system temporary
+    /// directory, and the filename is the executable's filename.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use renderdoc::{RenderDoc, V112};
+    /// # fn main() -> Result<(), String> {
+    /// let renderdoc: RenderDoc<V112> = RenderDoc::new()?;
+    /// println!("{:?}", renderdoc.get_capture_file_path_template()); // e.g. `my_captures/example`
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn get_capture_file_path_template(&self) -> &str {
         unsafe {
             let raw = ((*self.0)
@@ -410,7 +565,28 @@ impl RenderDoc<V112> {
         }
     }
 
-    #[allow(missing_docs)]
+    /// Sets the path template where new capture files should be stored.
+    ///
+    /// The template can either be a relative or absolute path, which determines where captures
+    /// will be saved and how they will be named. Relative paths will be saved relative to the
+    /// process' current working directory.
+    ///
+    /// The default template is in a folder controlled by the UI - initially the system temporary
+    /// directory, and the filename is the executable's filename.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// # use renderdoc::{RenderDoc, V112};
+    /// # fn main() -> Result<(), String> {
+    /// let mut renderdoc: RenderDoc<V112> = RenderDoc::new()?;
+    /// renderdoc.set_capture_file_path_template("my_captures/example");
+    ///
+    /// renderdoc.trigger_capture(); // Saved as `my_captures/example_frame123.rdc`
+    /// renderdoc.trigger_capture(); // Saved as `my_captures/example_frame456.rdc`
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn set_capture_file_path_template<P: AsRef<Path>>(&mut self, path_template: P) {
         let utf8 = path_template.as_ref().to_str();
         let cstr = utf8.and_then(|s| CString::new(s).ok()).unwrap();
@@ -424,7 +600,8 @@ impl RenderDoc<V112> {
 }
 
 impl RenderDoc<V120> {
-    #[allow(missing_docs)]
+    /// Adds or sets an arbitrary comments field to an existing capture on disk, which will then be
+    /// displayed in the UI to anyone opening the capture file.
     pub fn set_capture_file_comments<'a, P, C>(&mut self, path: P, comments: C)
     where
         P: Into<Option<&'a str>>,
@@ -442,7 +619,7 @@ impl RenderDoc<V120> {
 }
 
 impl RenderDoc<V140> {
-    /// Ends capturing immediately and discard any data without saving to disk.
+    /// Ends capturing immediately and discards any data without saving to disk.
     ///
     /// Returns `true` if the capture was discarded, or `false` if no capture is in progress.
     pub fn discard_frame_capture<D>(&mut self, dev: D, win: WindowHandle) -> bool
