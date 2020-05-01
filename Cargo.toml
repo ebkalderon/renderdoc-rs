@@ -19,7 +19,7 @@ default = ["glutin"]
 
 [dependencies]
 bitflags = "1.0"
-float-cmp = "0.6"
+float-cmp = "0.7"
 lazy_static = "1.0"
 libloading = "0.6"
 renderdoc-sys = { version = "0.6", path = "./renderdoc-sys" }
