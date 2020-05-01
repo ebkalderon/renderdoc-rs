@@ -234,10 +234,10 @@ impl RenderDoc<V100> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn get_log_file_path_template(&self) -> &str {
+    pub fn get_log_file_path_template(&self) -> &Path {
         unsafe {
             let raw = ((*self.0).__bindgen_anon_2.GetLogFilePathTemplate.unwrap())();
-            CStr::from_ptr(raw).to_str().unwrap()
+            CStr::from_ptr(raw).to_str().map(Path::new).unwrap()
         }
     }
 
@@ -307,7 +307,7 @@ impl RenderDoc<V100> {
     /// # }
     /// ```
     pub fn get_capture(&self, index: u32) -> Option<(PathBuf, u64)> {
-        let mut len = self.get_log_file_path_template().len() as u32 + 128;
+        let mut len = self.get_log_file_path_template().as_os_str().len() as u32 + 128;
         let mut path = Vec::with_capacity(len as usize);
         let mut time = 0u64;
 
@@ -555,13 +555,13 @@ impl RenderDoc<V112> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn get_capture_file_path_template(&self) -> &str {
+    pub fn get_capture_file_path_template(&self) -> &Path {
         unsafe {
             let raw = ((*self.0)
                 .__bindgen_anon_2
                 .GetCaptureFilePathTemplate
                 .unwrap())();
-            CStr::from_ptr(raw).to_str().unwrap()
+            CStr::from_ptr(raw).to_str().map(Path::new).unwrap()
         }
     }
 
