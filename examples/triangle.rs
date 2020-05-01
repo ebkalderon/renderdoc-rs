@@ -85,7 +85,7 @@ pub fn main() {
         out: main_color,
     };
 
-    rd.set_active_window(window.context(), std::ptr::null());;
+    rd.set_active_window(window.context(), std::ptr::null());
     rd.set_focus_toggle_keys(&[glutin::VirtualKeyCode::F]);
     rd.set_capture_keys(&[glutin::VirtualKeyCode::C]);
     rd.set_capture_option_u32(renderdoc::CaptureOption::AllowVSync, 1);
