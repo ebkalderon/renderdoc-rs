@@ -7,6 +7,7 @@ use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 use std::ptr;
 
+use error::Error;
 use handles::{DevicePointer, WindowHandle};
 use settings::{CaptureOption, InputButton, OverlayBits};
 use version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140};
@@ -18,7 +19,7 @@ pub struct RenderDoc<V>(*mut Entry, PhantomData<V>);
 
 impl<V: Version> RenderDoc<V> {
     /// Initializes a new instance of the RenderDoc API.
-    pub fn new() -> Result<Self, String> {
+    pub fn new() -> Result<Self, Error> {
         let api = V::load()?;
         Ok(RenderDoc(api, PhantomData))
     }
@@ -52,8 +53,8 @@ impl<V: HasPrevious> RenderDoc<V> {
     /// # Examples
     ///
     /// ```rust
-    /// # use renderdoc::{RenderDoc, V100, V111, V112};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100, V111, V112};
+    /// # fn main() -> Result<(), Error> {
     /// let current: RenderDoc<V112> = RenderDoc::new()?;
     /// let previous: RenderDoc<V111> = current.downgrade();
     /// // let older: RenderDoc<V100> = previous.downgrade(); // This line does not compile
@@ -105,8 +106,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// let (major, minor, patch) = renderdoc.get_api_version();
     /// assert_eq!(major, 1);
@@ -227,8 +228,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// println!("{:?}", renderdoc.get_log_file_path_template()); // e.g. `my_captures/example`
     /// # Ok(())
@@ -253,8 +254,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// renderdoc.set_log_file_path_template("my_captures/example");
     ///
@@ -276,8 +277,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// assert_eq!(renderdoc.get_num_captures(), 0);
     /// # Ok(())
@@ -294,8 +295,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     ///
     /// // Capture a frame.
@@ -330,8 +331,8 @@ impl RenderDoc<V100> {
     /// `set_log_file_path_template()`.
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     ///
     /// // Capture the current frame and save to a file.
@@ -350,8 +351,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// assert!(!renderdoc.is_remote_access_connected());
     /// # Ok(())
@@ -373,8 +374,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// let pid = renderdoc.launch_replay_ui(true, None)?;
     /// # Ok(())
@@ -384,7 +385,7 @@ impl RenderDoc<V100> {
         &self,
         connect_immediately: bool,
         extra_opts: O,
-    ) -> Result<u32, String>
+    ) -> Result<u32, Error>
     where
         O: Into<Option<&'a str>>,
     {
@@ -394,7 +395,7 @@ impl RenderDoc<V100> {
 
         unsafe {
             match ((*self.0).LaunchReplayUI.unwrap())(should_connect, extra_opts) {
-                0 => Err("unable to launch replay UI".into()),
+                0 => Err(Error::launch_replay_ui()),
                 pid => Ok(pid),
             }
         }
@@ -427,8 +428,8 @@ impl RenderDoc<V100> {
     /// This function must be paired with a matching `end_frame_capture()` to complete.
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// renderdoc.start_frame_capture(std::ptr::null(), std::ptr::null());
     ///
@@ -451,8 +452,8 @@ impl RenderDoc<V100> {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     /// if renderdoc.is_frame_capturing() {
     ///     println!("Frames are being captured.");
@@ -477,8 +478,8 @@ impl RenderDoc<V100> {
     /// This function must be paired with a matching `end_frame_capture()` to complete.
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V100};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V100};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
     ///
     /// renderdoc.start_frame_capture(std::ptr::null(), std::ptr::null());
@@ -523,8 +524,8 @@ impl RenderDoc<V111> {
     /// # Examples
     ///
     /// ```rust
-    /// # use renderdoc::{RenderDoc, V111};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V111};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V111> = RenderDoc::new()?;
     /// assert!(!renderdoc.is_target_control_connected());
     /// # Ok(())
@@ -548,8 +549,8 @@ impl RenderDoc<V112> {
     /// # Examples
     ///
     /// ```
-    /// # use renderdoc::{RenderDoc, V112};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V112};
+    /// # fn main() -> Result<(), Error> {
     /// let renderdoc: RenderDoc<V112> = RenderDoc::new()?;
     /// println!("{:?}", renderdoc.get_capture_file_path_template()); // e.g. `my_captures/example`
     /// # Ok(())
@@ -577,8 +578,8 @@ impl RenderDoc<V112> {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// # use renderdoc::{RenderDoc, V112};
-    /// # fn main() -> Result<(), String> {
+    /// # use renderdoc::{Error, RenderDoc, V112};
+    /// # fn main() -> Result<(), Error> {
     /// let mut renderdoc: RenderDoc<V112> = RenderDoc::new()?;
     /// renderdoc.set_capture_file_path_template("my_captures/example");
     ///

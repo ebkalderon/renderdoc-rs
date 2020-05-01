@@ -35,6 +35,7 @@ extern crate winapi;
 #[cfg(target_os = "windows")]
 extern crate wio;
 
+pub use self::error::Error;
 pub use self::handles::{DevicePointer, WindowHandle};
 pub use self::renderdoc::RenderDoc;
 pub use self::settings::{CaptureOption, InputButton, OverlayBits};
@@ -45,6 +46,7 @@ use std::os::raw::c_ulonglong;
 #[cfg(windows)]
 use winapi::shared::guiddef::GUID;
 
+mod error;
 mod handles;
 mod renderdoc;
 mod settings;
