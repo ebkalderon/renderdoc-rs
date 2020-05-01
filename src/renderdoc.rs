@@ -7,10 +7,12 @@ use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 use std::ptr;
 
-use error::Error;
-use handles::{DevicePointer, WindowHandle};
-use settings::{CaptureOption, InputButton, OverlayBits};
-use version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140};
+use float_cmp::approx_eq;
+
+use crate::error::Error;
+use crate::handles::{DevicePointer, WindowHandle};
+use crate::settings::{CaptureOption, InputButton, OverlayBits};
+use crate::version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140};
 
 /// An instance of the RenderDoc API with baseline version `V`.
 #[repr(C)]

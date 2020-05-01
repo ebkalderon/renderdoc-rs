@@ -7,7 +7,7 @@ use libloading::{Library, Symbol};
 use once_cell::sync::OnceCell;
 use renderdoc_sys::RENDERDOC_API_1_4_0;
 
-use error::Error;
+use crate::error::Error;
 
 static RD_LIB: OnceCell<Library> = OnceCell::new();
 
