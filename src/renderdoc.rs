@@ -46,7 +46,7 @@ impl<V: Version> RenderDoc<V> {
     /// hooks and shut down. Behavior is undefined if this is called after any API functions have
     /// been called.
     pub unsafe fn shutdown(self) {
-        ((*self.0).Shutdown.unwrap())();
+        ((*self.0).__bindgen_anon_1.Shutdown.unwrap())();
     }
 }
 
@@ -239,7 +239,7 @@ impl RenderDoc<V100> {
     /// ```
     pub fn get_log_file_path_template(&self) -> &Path {
         unsafe {
-            let raw = ((*self.0).__bindgen_anon_2.GetLogFilePathTemplate.unwrap())();
+            let raw = ((*self.0).__bindgen_anon_3.GetLogFilePathTemplate.unwrap())();
             CStr::from_ptr(raw).to_str().map(Path::new).unwrap()
         }
     }
@@ -270,7 +270,7 @@ impl RenderDoc<V100> {
         unsafe {
             let utf8 = path_template.into().into_os_string().into_string().ok();
             let path = utf8.and_then(|s| CString::new(s).ok()).unwrap();
-            ((*self.0).__bindgen_anon_1.SetLogFilePathTemplate.unwrap())(path.as_ptr());
+            ((*self.0).__bindgen_anon_2.SetLogFilePathTemplate.unwrap())(path.as_ptr());
         }
     }
 
@@ -365,7 +365,7 @@ impl RenderDoc<V100> {
     /// # }
     /// ```
     pub fn is_remote_access_connected(&self) -> bool {
-        unsafe { ((*self.0).__bindgen_anon_3.IsRemoteAccessConnected.unwrap())() == 1 }
+        unsafe { ((*self.0).__bindgen_anon_4.IsRemoteAccessConnected.unwrap())() == 1 }
     }
 
     /// Launches the replay UI associated with the RenderDoc library injected into the running
@@ -531,7 +531,7 @@ impl RenderDoc<V111> {
     /// # }
     /// ```
     pub fn is_target_control_connected(&self) -> bool {
-        unsafe { ((*self.0).__bindgen_anon_3.IsTargetControlConnected.unwrap())() == 1 }
+        unsafe { ((*self.0).__bindgen_anon_4.IsTargetControlConnected.unwrap())() == 1 }
     }
 
     /// Returns whether the RenderDoc UI is connected to this application.
@@ -565,7 +565,7 @@ impl RenderDoc<V112> {
     pub fn get_capture_file_path_template(&self) -> &Path {
         unsafe {
             let raw = ((*self.0)
-                .__bindgen_anon_2
+                .__bindgen_anon_3
                 .GetCaptureFilePathTemplate
                 .unwrap())();
             CStr::from_ptr(raw).to_str().map(Path::new).unwrap()
@@ -599,7 +599,7 @@ impl RenderDoc<V112> {
         let cstr = utf8.and_then(|s| CString::new(s).ok()).unwrap();
         unsafe {
             ((*self.0)
-                .__bindgen_anon_1
+                .__bindgen_anon_2
                 .SetCaptureFilePathTemplate
                 .unwrap())(cstr.as_ptr());
         }

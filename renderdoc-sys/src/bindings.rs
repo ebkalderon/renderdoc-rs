@@ -108,7 +108,8 @@ pub type RENDERDOC_OverlayBits = ::std::os::raw::c_uint;
 pub type pRENDERDOC_GetOverlayBits = ::std::option::Option<unsafe extern "C" fn() -> u32>;
 pub type pRENDERDOC_MaskOverlayBits =
     ::std::option::Option<unsafe extern "C" fn(And: u32, Or: u32)>;
-pub type pRENDERDOC_Shutdown = ::std::option::Option<unsafe extern "C" fn()>;
+pub type pRENDERDOC_RemoveHooks = ::std::option::Option<unsafe extern "C" fn()>;
+pub type pRENDERDOC_Shutdown = pRENDERDOC_RemoveHooks;
 pub type pRENDERDOC_UnloadCrashHandler = ::std::option::Option<unsafe extern "C" fn()>;
 pub type pRENDERDOC_SetCaptureFilePathTemplate =
     ::std::option::Option<unsafe extern "C" fn(pathtemplate: *const ::std::os::raw::c_char)>;
@@ -171,10 +172,11 @@ pub const eRENDERDOC_API_Version_1_1_2: RENDERDOC_Version = 10102;
 pub const eRENDERDOC_API_Version_1_2_0: RENDERDOC_Version = 10200;
 pub const eRENDERDOC_API_Version_1_3_0: RENDERDOC_Version = 10300;
 pub const eRENDERDOC_API_Version_1_4_0: RENDERDOC_Version = 10400;
+pub const eRENDERDOC_API_Version_1_4_1: RENDERDOC_Version = 10401;
 pub type RENDERDOC_Version = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub struct RENDERDOC_API_1_4_0 {
+pub struct RENDERDOC_API_1_4_1 {
     pub GetAPIVersion: pRENDERDOC_GetAPIVersion,
     pub SetCaptureOptionU32: pRENDERDOC_SetCaptureOptionU32,
     pub SetCaptureOptionF32: pRENDERDOC_SetCaptureOptionF32,
@@ -184,14 +186,14 @@ pub struct RENDERDOC_API_1_4_0 {
     pub SetCaptureKeys: pRENDERDOC_SetCaptureKeys,
     pub GetOverlayBits: pRENDERDOC_GetOverlayBits,
     pub MaskOverlayBits: pRENDERDOC_MaskOverlayBits,
-    pub Shutdown: pRENDERDOC_Shutdown,
+    pub __bindgen_anon_1: RENDERDOC_API_1_4_1__bindgen_ty_1,
     pub UnloadCrashHandler: pRENDERDOC_UnloadCrashHandler,
-    pub __bindgen_anon_1: RENDERDOC_API_1_4_0__bindgen_ty_1,
-    pub __bindgen_anon_2: RENDERDOC_API_1_4_0__bindgen_ty_2,
+    pub __bindgen_anon_2: RENDERDOC_API_1_4_1__bindgen_ty_2,
+    pub __bindgen_anon_3: RENDERDOC_API_1_4_1__bindgen_ty_3,
     pub GetNumCaptures: pRENDERDOC_GetNumCaptures,
     pub GetCapture: pRENDERDOC_GetCapture,
     pub TriggerCapture: pRENDERDOC_TriggerCapture,
-    pub __bindgen_anon_3: RENDERDOC_API_1_4_0__bindgen_ty_3,
+    pub __bindgen_anon_4: RENDERDOC_API_1_4_1__bindgen_ty_4,
     pub LaunchReplayUI: pRENDERDOC_LaunchReplayUI,
     pub SetActiveWindow: pRENDERDOC_SetActiveWindow,
     pub StartFrameCapture: pRENDERDOC_StartFrameCapture,
@@ -203,451 +205,496 @@ pub struct RENDERDOC_API_1_4_0 {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub union RENDERDOC_API_1_4_0__bindgen_ty_1 {
-    pub SetLogFilePathTemplate: pRENDERDOC_SetLogFilePathTemplate,
-    pub SetCaptureFilePathTemplate: pRENDERDOC_SetCaptureFilePathTemplate,
+pub union RENDERDOC_API_1_4_1__bindgen_ty_1 {
+    pub Shutdown: pRENDERDOC_Shutdown,
+    pub RemoveHooks: pRENDERDOC_RemoveHooks,
     _bindgen_union_align: u64,
 }
 #[test]
-fn bindgen_test_layout_RENDERDOC_API_1_4_0__bindgen_ty_1() {
+fn bindgen_test_layout_RENDERDOC_API_1_4_1__bindgen_ty_1() {
     assert_eq!(
-        ::std::mem::size_of::<RENDERDOC_API_1_4_0__bindgen_ty_1>(),
+        ::std::mem::size_of::<RENDERDOC_API_1_4_1__bindgen_ty_1>(),
         8usize,
-        concat!("Size of: ", stringify!(RENDERDOC_API_1_4_0__bindgen_ty_1))
+        concat!("Size of: ", stringify!(RENDERDOC_API_1_4_1__bindgen_ty_1))
     );
     assert_eq!(
-        ::std::mem::align_of::<RENDERDOC_API_1_4_0__bindgen_ty_1>(),
-        8usize,
-        concat!(
-            "Alignment of ",
-            stringify!(RENDERDOC_API_1_4_0__bindgen_ty_1)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0__bindgen_ty_1>())).SetLogFilePathTemplate
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0__bindgen_ty_1),
-            "::",
-            stringify!(SetLogFilePathTemplate)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0__bindgen_ty_1>())).SetCaptureFilePathTemplate
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0__bindgen_ty_1),
-            "::",
-            stringify!(SetCaptureFilePathTemplate)
-        )
-    );
-}
-impl ::std::fmt::Debug for RENDERDOC_API_1_4_0__bindgen_ty_1 {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "RENDERDOC_API_1_4_0__bindgen_ty_1 {{ union }}")
-    }
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub union RENDERDOC_API_1_4_0__bindgen_ty_2 {
-    pub GetLogFilePathTemplate: pRENDERDOC_GetLogFilePathTemplate,
-    pub GetCaptureFilePathTemplate: pRENDERDOC_GetCaptureFilePathTemplate,
-    _bindgen_union_align: u64,
-}
-#[test]
-fn bindgen_test_layout_RENDERDOC_API_1_4_0__bindgen_ty_2() {
-    assert_eq!(
-        ::std::mem::size_of::<RENDERDOC_API_1_4_0__bindgen_ty_2>(),
-        8usize,
-        concat!("Size of: ", stringify!(RENDERDOC_API_1_4_0__bindgen_ty_2))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<RENDERDOC_API_1_4_0__bindgen_ty_2>(),
+        ::std::mem::align_of::<RENDERDOC_API_1_4_1__bindgen_ty_1>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(RENDERDOC_API_1_4_0__bindgen_ty_2)
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_1)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0__bindgen_ty_2>())).GetLogFilePathTemplate
-                as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1__bindgen_ty_1>())).Shutdown as *const _
+                as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0__bindgen_ty_2),
-            "::",
-            stringify!(GetLogFilePathTemplate)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0__bindgen_ty_2>())).GetCaptureFilePathTemplate
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0__bindgen_ty_2),
-            "::",
-            stringify!(GetCaptureFilePathTemplate)
-        )
-    );
-}
-impl ::std::fmt::Debug for RENDERDOC_API_1_4_0__bindgen_ty_2 {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "RENDERDOC_API_1_4_0__bindgen_ty_2 {{ union }}")
-    }
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub union RENDERDOC_API_1_4_0__bindgen_ty_3 {
-    pub IsRemoteAccessConnected: pRENDERDOC_IsRemoteAccessConnected,
-    pub IsTargetControlConnected: pRENDERDOC_IsTargetControlConnected,
-    _bindgen_union_align: u64,
-}
-#[test]
-fn bindgen_test_layout_RENDERDOC_API_1_4_0__bindgen_ty_3() {
-    assert_eq!(
-        ::std::mem::size_of::<RENDERDOC_API_1_4_0__bindgen_ty_3>(),
-        8usize,
-        concat!("Size of: ", stringify!(RENDERDOC_API_1_4_0__bindgen_ty_3))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<RENDERDOC_API_1_4_0__bindgen_ty_3>(),
-        8usize,
-        concat!(
-            "Alignment of ",
-            stringify!(RENDERDOC_API_1_4_0__bindgen_ty_3)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0__bindgen_ty_3>())).IsRemoteAccessConnected
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0__bindgen_ty_3),
-            "::",
-            stringify!(IsRemoteAccessConnected)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0__bindgen_ty_3>())).IsTargetControlConnected
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0__bindgen_ty_3),
-            "::",
-            stringify!(IsTargetControlConnected)
-        )
-    );
-}
-impl ::std::fmt::Debug for RENDERDOC_API_1_4_0__bindgen_ty_3 {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "RENDERDOC_API_1_4_0__bindgen_ty_3 {{ union }}")
-    }
-}
-#[test]
-fn bindgen_test_layout_RENDERDOC_API_1_4_0() {
-    assert_eq!(
-        ::std::mem::size_of::<RENDERDOC_API_1_4_0>(),
-        200usize,
-        concat!("Size of: ", stringify!(RENDERDOC_API_1_4_0))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<RENDERDOC_API_1_4_0>(),
-        8usize,
-        concat!("Alignment of ", stringify!(RENDERDOC_API_1_4_0))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).GetAPIVersion as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
-            "::",
-            stringify!(GetAPIVersion)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).SetCaptureOptionU32 as *const _ as usize
-        },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
-            "::",
-            stringify!(SetCaptureOptionU32)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).SetCaptureOptionF32 as *const _ as usize
-        },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
-            "::",
-            stringify!(SetCaptureOptionF32)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).GetCaptureOptionU32 as *const _ as usize
-        },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
-            "::",
-            stringify!(GetCaptureOptionU32)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).GetCaptureOptionF32 as *const _ as usize
-        },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
-            "::",
-            stringify!(GetCaptureOptionF32)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).SetFocusToggleKeys as *const _ as usize
-        },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
-            "::",
-            stringify!(SetFocusToggleKeys)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).SetCaptureKeys as *const _ as usize
-        },
-        48usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
-            "::",
-            stringify!(SetCaptureKeys)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).GetOverlayBits as *const _ as usize
-        },
-        56usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
-            "::",
-            stringify!(GetOverlayBits)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).MaskOverlayBits as *const _ as usize
-        },
-        64usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
-            "::",
-            stringify!(MaskOverlayBits)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).Shutdown as *const _ as usize },
-        72usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_1),
             "::",
             stringify!(Shutdown)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).UnloadCrashHandler as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1__bindgen_ty_1>())).RemoveHooks as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_1),
+            "::",
+            stringify!(RemoveHooks)
+        )
+    );
+}
+impl ::std::fmt::Debug for RENDERDOC_API_1_4_1__bindgen_ty_1 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "RENDERDOC_API_1_4_1__bindgen_ty_1 {{ union }}")
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union RENDERDOC_API_1_4_1__bindgen_ty_2 {
+    pub SetLogFilePathTemplate: pRENDERDOC_SetLogFilePathTemplate,
+    pub SetCaptureFilePathTemplate: pRENDERDOC_SetCaptureFilePathTemplate,
+    _bindgen_union_align: u64,
+}
+#[test]
+fn bindgen_test_layout_RENDERDOC_API_1_4_1__bindgen_ty_2() {
+    assert_eq!(
+        ::std::mem::size_of::<RENDERDOC_API_1_4_1__bindgen_ty_2>(),
+        8usize,
+        concat!("Size of: ", stringify!(RENDERDOC_API_1_4_1__bindgen_ty_2))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<RENDERDOC_API_1_4_1__bindgen_ty_2>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1__bindgen_ty_2>())).SetLogFilePathTemplate
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_2),
+            "::",
+            stringify!(SetLogFilePathTemplate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1__bindgen_ty_2>())).SetCaptureFilePathTemplate
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_2),
+            "::",
+            stringify!(SetCaptureFilePathTemplate)
+        )
+    );
+}
+impl ::std::fmt::Debug for RENDERDOC_API_1_4_1__bindgen_ty_2 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "RENDERDOC_API_1_4_1__bindgen_ty_2 {{ union }}")
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union RENDERDOC_API_1_4_1__bindgen_ty_3 {
+    pub GetLogFilePathTemplate: pRENDERDOC_GetLogFilePathTemplate,
+    pub GetCaptureFilePathTemplate: pRENDERDOC_GetCaptureFilePathTemplate,
+    _bindgen_union_align: u64,
+}
+#[test]
+fn bindgen_test_layout_RENDERDOC_API_1_4_1__bindgen_ty_3() {
+    assert_eq!(
+        ::std::mem::size_of::<RENDERDOC_API_1_4_1__bindgen_ty_3>(),
+        8usize,
+        concat!("Size of: ", stringify!(RENDERDOC_API_1_4_1__bindgen_ty_3))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<RENDERDOC_API_1_4_1__bindgen_ty_3>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_3)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1__bindgen_ty_3>())).GetLogFilePathTemplate
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_3),
+            "::",
+            stringify!(GetLogFilePathTemplate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1__bindgen_ty_3>())).GetCaptureFilePathTemplate
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_3),
+            "::",
+            stringify!(GetCaptureFilePathTemplate)
+        )
+    );
+}
+impl ::std::fmt::Debug for RENDERDOC_API_1_4_1__bindgen_ty_3 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "RENDERDOC_API_1_4_1__bindgen_ty_3 {{ union }}")
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union RENDERDOC_API_1_4_1__bindgen_ty_4 {
+    pub IsRemoteAccessConnected: pRENDERDOC_IsRemoteAccessConnected,
+    pub IsTargetControlConnected: pRENDERDOC_IsTargetControlConnected,
+    _bindgen_union_align: u64,
+}
+#[test]
+fn bindgen_test_layout_RENDERDOC_API_1_4_1__bindgen_ty_4() {
+    assert_eq!(
+        ::std::mem::size_of::<RENDERDOC_API_1_4_1__bindgen_ty_4>(),
+        8usize,
+        concat!("Size of: ", stringify!(RENDERDOC_API_1_4_1__bindgen_ty_4))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<RENDERDOC_API_1_4_1__bindgen_ty_4>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_4)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1__bindgen_ty_4>())).IsRemoteAccessConnected
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_4),
+            "::",
+            stringify!(IsRemoteAccessConnected)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1__bindgen_ty_4>())).IsTargetControlConnected
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1__bindgen_ty_4),
+            "::",
+            stringify!(IsTargetControlConnected)
+        )
+    );
+}
+impl ::std::fmt::Debug for RENDERDOC_API_1_4_1__bindgen_ty_4 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "RENDERDOC_API_1_4_1__bindgen_ty_4 {{ union }}")
+    }
+}
+#[test]
+fn bindgen_test_layout_RENDERDOC_API_1_4_1() {
+    assert_eq!(
+        ::std::mem::size_of::<RENDERDOC_API_1_4_1>(),
+        200usize,
+        concat!("Size of: ", stringify!(RENDERDOC_API_1_4_1))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<RENDERDOC_API_1_4_1>(),
+        8usize,
+        concat!("Alignment of ", stringify!(RENDERDOC_API_1_4_1))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).GetAPIVersion as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1),
+            "::",
+            stringify!(GetAPIVersion)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).SetCaptureOptionU32 as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1),
+            "::",
+            stringify!(SetCaptureOptionU32)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).SetCaptureOptionF32 as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1),
+            "::",
+            stringify!(SetCaptureOptionF32)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).GetCaptureOptionU32 as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1),
+            "::",
+            stringify!(GetCaptureOptionU32)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).GetCaptureOptionF32 as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1),
+            "::",
+            stringify!(GetCaptureOptionF32)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).SetFocusToggleKeys as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1),
+            "::",
+            stringify!(SetFocusToggleKeys)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).SetCaptureKeys as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1),
+            "::",
+            stringify!(SetCaptureKeys)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).GetOverlayBits as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1),
+            "::",
+            stringify!(GetOverlayBits)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).MaskOverlayBits as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RENDERDOC_API_1_4_1),
+            "::",
+            stringify!(MaskOverlayBits)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).UnloadCrashHandler as *const _ as usize
         },
         80usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(UnloadCrashHandler)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).GetNumCaptures as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).GetNumCaptures as *const _ as usize
         },
         104usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(GetNumCaptures)
         )
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).GetCapture as *const _ as usize },
+        unsafe { &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).GetCapture as *const _ as usize },
         112usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(GetCapture)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).TriggerCapture as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).TriggerCapture as *const _ as usize
         },
         120usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(TriggerCapture)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).LaunchReplayUI as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).LaunchReplayUI as *const _ as usize
         },
         136usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(LaunchReplayUI)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).SetActiveWindow as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).SetActiveWindow as *const _ as usize
         },
         144usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(SetActiveWindow)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).StartFrameCapture as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).StartFrameCapture as *const _ as usize
         },
         152usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(StartFrameCapture)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).IsFrameCapturing as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).IsFrameCapturing as *const _ as usize
         },
         160usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(IsFrameCapturing)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).EndFrameCapture as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).EndFrameCapture as *const _ as usize
         },
         168usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(EndFrameCapture)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).TriggerMultiFrameCapture as *const _
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).TriggerMultiFrameCapture as *const _
                 as usize
         },
         176usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(TriggerMultiFrameCapture)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).SetCaptureFileComments as *const _
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).SetCaptureFileComments as *const _
                 as usize
         },
         184usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(SetCaptureFileComments)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<RENDERDOC_API_1_4_0>())).DiscardFrameCapture as *const _ as usize
+            &(*(::std::ptr::null::<RENDERDOC_API_1_4_1>())).DiscardFrameCapture as *const _ as usize
         },
         192usize,
         concat!(
             "Offset of field: ",
-            stringify!(RENDERDOC_API_1_4_0),
+            stringify!(RENDERDOC_API_1_4_1),
             "::",
             stringify!(DiscardFrameCapture)
         )
     );
 }
-impl ::std::fmt::Debug for RENDERDOC_API_1_4_0 {
+impl ::std::fmt::Debug for RENDERDOC_API_1_4_1 {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write ! ( f , "RENDERDOC_API_1_4_0 {{ GetAPIVersion: {:?}, SetCaptureOptionU32: {:?}, SetCaptureOptionF32: {:?}, GetCaptureOptionU32: {:?}, GetCaptureOptionF32: {:?}, SetFocusToggleKeys: {:?}, SetCaptureKeys: {:?}, GetOverlayBits: {:?}, MaskOverlayBits: {:?}, Shutdown: {:?}, UnloadCrashHandler: {:?}, __bindgen_anon_1: {:?}, __bindgen_anon_2: {:?}, GetNumCaptures: {:?}, GetCapture: {:?}, TriggerCapture: {:?}, __bindgen_anon_3: {:?}, LaunchReplayUI: {:?}, SetActiveWindow: {:?}, StartFrameCapture: {:?}, IsFrameCapturing: {:?}, EndFrameCapture: {:?}, TriggerMultiFrameCapture: {:?}, SetCaptureFileComments: {:?}, DiscardFrameCapture: {:?} }}" , self . GetAPIVersion , self . SetCaptureOptionU32 , self . SetCaptureOptionF32 , self . GetCaptureOptionU32 , self . GetCaptureOptionF32 , self . SetFocusToggleKeys , self . SetCaptureKeys , self . GetOverlayBits , self . MaskOverlayBits , self . Shutdown , self . UnloadCrashHandler , self . __bindgen_anon_1 , self . __bindgen_anon_2 , self . GetNumCaptures , self . GetCapture , self . TriggerCapture , self . __bindgen_anon_3 , self . LaunchReplayUI , self . SetActiveWindow , self . StartFrameCapture , self . IsFrameCapturing , self . EndFrameCapture , self . TriggerMultiFrameCapture , self . SetCaptureFileComments , self . DiscardFrameCapture )
+        write ! ( f , "RENDERDOC_API_1_4_1 {{ GetAPIVersion: {:?}, SetCaptureOptionU32: {:?}, SetCaptureOptionF32: {:?}, GetCaptureOptionU32: {:?}, GetCaptureOptionF32: {:?}, SetFocusToggleKeys: {:?}, SetCaptureKeys: {:?}, GetOverlayBits: {:?}, MaskOverlayBits: {:?}, __bindgen_anon_1: {:?}, UnloadCrashHandler: {:?}, __bindgen_anon_2: {:?}, __bindgen_anon_3: {:?}, GetNumCaptures: {:?}, GetCapture: {:?}, TriggerCapture: {:?}, __bindgen_anon_4: {:?}, LaunchReplayUI: {:?}, SetActiveWindow: {:?}, StartFrameCapture: {:?}, IsFrameCapturing: {:?}, EndFrameCapture: {:?}, TriggerMultiFrameCapture: {:?}, SetCaptureFileComments: {:?}, DiscardFrameCapture: {:?} }}" , self . GetAPIVersion , self . SetCaptureOptionU32 , self . SetCaptureOptionF32 , self . GetCaptureOptionU32 , self . GetCaptureOptionF32 , self . SetFocusToggleKeys , self . SetCaptureKeys , self . GetOverlayBits , self . MaskOverlayBits , self . __bindgen_anon_1 , self . UnloadCrashHandler , self . __bindgen_anon_2 , self . __bindgen_anon_3 , self . GetNumCaptures , self . GetCapture , self . TriggerCapture , self . __bindgen_anon_4 , self . LaunchReplayUI , self . SetActiveWindow , self . StartFrameCapture , self . IsFrameCapturing , self . EndFrameCapture , self . TriggerMultiFrameCapture , self . SetCaptureFileComments , self . DiscardFrameCapture )
     }
 }
-pub type RENDERDOC_API_1_0_0 = RENDERDOC_API_1_4_0;
-pub type RENDERDOC_API_1_0_1 = RENDERDOC_API_1_4_0;
-pub type RENDERDOC_API_1_0_2 = RENDERDOC_API_1_4_0;
-pub type RENDERDOC_API_1_1_0 = RENDERDOC_API_1_4_0;
-pub type RENDERDOC_API_1_1_1 = RENDERDOC_API_1_4_0;
-pub type RENDERDOC_API_1_1_2 = RENDERDOC_API_1_4_0;
-pub type RENDERDOC_API_1_2_0 = RENDERDOC_API_1_4_0;
-pub type RENDERDOC_API_1_3_0 = RENDERDOC_API_1_4_0;
+pub type RENDERDOC_API_1_0_0 = RENDERDOC_API_1_4_1;
+pub type RENDERDOC_API_1_0_1 = RENDERDOC_API_1_4_1;
+pub type RENDERDOC_API_1_0_2 = RENDERDOC_API_1_4_1;
+pub type RENDERDOC_API_1_1_0 = RENDERDOC_API_1_4_1;
+pub type RENDERDOC_API_1_1_1 = RENDERDOC_API_1_4_1;
+pub type RENDERDOC_API_1_1_2 = RENDERDOC_API_1_4_1;
+pub type RENDERDOC_API_1_2_0 = RENDERDOC_API_1_4_1;
+pub type RENDERDOC_API_1_3_0 = RENDERDOC_API_1_4_1;
+pub type RENDERDOC_API_1_4_0 = RENDERDOC_API_1_4_1;
