@@ -36,18 +36,6 @@ impl<V: Version> RenderDoc<V> {
     pub unsafe fn raw_api(&self) -> *mut Entry {
         self.0
     }
-
-    /// Attempts to shut down RenderDoc.
-    ///
-    /// # Safety
-    ///
-    /// Note that this will work correctly if done _immediately_ after the dynamic library is
-    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
-    /// hooks and shut down. Behavior is undefined if this is called after any API functions have
-    /// been called.
-    pub unsafe fn shutdown(self) {
-        ((*self.0).__bindgen_anon_1.Shutdown.unwrap())();
-    }
 }
 
 impl<V: HasPrevious> RenderDoc<V> {
@@ -101,6 +89,18 @@ impl<V: Version> Debug for RenderDoc<V> {
 }
 
 impl RenderDoc<V100> {
+    /// Attempts to shut down RenderDoc.
+    ///
+    /// # Safety
+    ///
+    /// Note that this will work correctly if done _immediately_ after the dynamic library is
+    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
+    /// hooks and shut down. Behavior is undefined if this is called after any API functions have
+    /// been called.
+    pub unsafe fn shutdown(self) {
+        ((*self.0).__bindgen_anon_1.Shutdown.unwrap())();
+    }
+
     /// Returns the major, minor, and patch version numbers of the RenderDoc API currently in use.
     ///
     /// Note that RenderDoc will usually provide a higher API version than the one requested by
@@ -650,6 +650,26 @@ impl RenderDoc<V140> {
     {
         let DevicePointer(dev) = dev.into();
         unsafe { ((*self.0).DiscardFrameCapture.unwrap())(dev as *mut _, win as *mut _) == 1 }
+    }
+}
+
+impl RenderDoc<V141> {
+    /// Attempts to shut down RenderDoc.
+    ///
+    /// # Safety
+    ///
+    /// Note that this will work correctly if done _immediately_ after the dynamic library is
+    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
+    /// hooks and shut down. Behavior is undefined if this is called after any API functions have
+    /// been called.
+    pub unsafe fn remove_hooks(self) {
+        ((*self.0).__bindgen_anon_1.RemoveHooks.unwrap())();
+    }
+
+    /// Attempts to shut down RenderDoc.
+    #[deprecated(since = "1.4.1", note = "renamed to `remove_hooks`")]
+    pub unsafe fn shutdown(self) {
+        ((*self.0).__bindgen_anon_1.Shutdown.unwrap())();
     }
 }
 
