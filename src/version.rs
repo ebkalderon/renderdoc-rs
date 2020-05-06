@@ -5,7 +5,7 @@ use std::path::Path;
 
 use libloading::{Library, Symbol};
 use once_cell::sync::OnceCell;
-use renderdoc_sys::RENDERDOC_API_1_4_0;
+use renderdoc_sys::RENDERDOC_API_1_4_1;
 
 use crate::error::Error;
 
@@ -27,7 +27,7 @@ fn get_path() -> &'static Path {
 }
 
 /// Entry point for the RenderDoc API.
-pub type Entry = RENDERDOC_API_1_4_0;
+pub type Entry = RENDERDOC_API_1_4_1;
 
 /// Available versions of the RenderDoc API.
 #[repr(u32)]
@@ -51,6 +51,8 @@ pub enum VersionCode {
     V130 = 10300,
     /// Version 1.4.0.
     V140 = 10400,
+    /// Version 1.4.1.
+    V141 = 10401,
 }
 
 /// Initializes a new instance of the RenderDoc API.
@@ -174,4 +176,16 @@ impl Version for V140 {
 
 impl HasPrevious for V140 {
     type Previous = V130;
+}
+
+/// Requests a minimum version number of 1.4.1.
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+pub enum V141 {}
+
+impl Version for V141 {
+    const VERSION: VersionCode = VersionCode::V141;
+}
+
+impl HasPrevious for V141 {
+    type Previous = V140;
 }

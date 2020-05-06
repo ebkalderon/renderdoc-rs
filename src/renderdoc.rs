@@ -13,7 +13,7 @@ use float_cmp::approx_eq;
 use crate::error::Error;
 use crate::handles::{DevicePointer, WindowHandle};
 use crate::settings::{CaptureOption, InputButton, OverlayBits};
-use crate::version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140};
+use crate::version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140, V141};
 
 /// An instance of the RenderDoc API with baseline version `V`.
 #[repr(C)]
@@ -716,4 +716,4 @@ macro_rules! impl_from_versions {
     };
 }
 
-impl_from_versions!(V140, V130, V120, V112, V111, V110, V100);
+impl_from_versions!(V141, V140, V130, V120, V112, V111, V110, V100);
