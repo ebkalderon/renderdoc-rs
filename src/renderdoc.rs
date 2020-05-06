@@ -13,7 +13,7 @@ use float_cmp::approx_eq;
 use crate::error::Error;
 use crate::handles::{DevicePointer, WindowHandle};
 use crate::settings::{CaptureOption, InputButton, OverlayBits};
-use crate::version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140};
+use crate::version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140, V141};
 
 /// An instance of the RenderDoc API with baseline version `V`.
 #[repr(C)]
@@ -35,18 +35,6 @@ impl<V: Version> RenderDoc<V> {
     /// default with this library.
     pub unsafe fn raw_api(&self) -> *mut Entry {
         self.0
-    }
-
-    /// Attempts to shut down RenderDoc.
-    ///
-    /// # Safety
-    ///
-    /// Note that this will work correctly if done _immediately_ after the dynamic library is
-    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
-    /// hooks and shut down. Behavior is undefined if this is called after any API functions have
-    /// been called.
-    pub unsafe fn shutdown(self) {
-        ((*self.0).Shutdown.unwrap())();
     }
 }
 
@@ -101,6 +89,23 @@ impl<V: Version> Debug for RenderDoc<V> {
 }
 
 impl RenderDoc<V100> {
+    /// Attempts to shut down RenderDoc.
+    ///
+    /// # Safety
+    ///
+    /// Note that this will work correctly if done _immediately_ after the dynamic library is
+    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
+    /// hooks and shut down. Behavior is undefined if this is called after any API functions have
+    /// been called.
+    ///
+    /// # Compatibility
+    ///
+    /// This process is only possible on Windows, and even then it is not well defined so may not
+    /// be possible in all circumstances. This function is provided at your own risk.
+    pub unsafe fn shutdown(self) {
+        ((*self.0).__bindgen_anon_1.Shutdown.unwrap())();
+    }
+
     /// Returns the major, minor, and patch version numbers of the RenderDoc API currently in use.
     ///
     /// Note that RenderDoc will usually provide a higher API version than the one requested by
@@ -239,7 +244,7 @@ impl RenderDoc<V100> {
     /// ```
     pub fn get_log_file_path_template(&self) -> &Path {
         unsafe {
-            let raw = ((*self.0).__bindgen_anon_2.GetLogFilePathTemplate.unwrap())();
+            let raw = ((*self.0).__bindgen_anon_3.GetLogFilePathTemplate.unwrap())();
             CStr::from_ptr(raw).to_str().map(Path::new).unwrap()
         }
     }
@@ -270,7 +275,7 @@ impl RenderDoc<V100> {
         unsafe {
             let utf8 = path_template.into().into_os_string().into_string().ok();
             let path = utf8.and_then(|s| CString::new(s).ok()).unwrap();
-            ((*self.0).__bindgen_anon_1.SetLogFilePathTemplate.unwrap())(path.as_ptr());
+            ((*self.0).__bindgen_anon_2.SetLogFilePathTemplate.unwrap())(path.as_ptr());
         }
     }
 
@@ -365,7 +370,7 @@ impl RenderDoc<V100> {
     /// # }
     /// ```
     pub fn is_remote_access_connected(&self) -> bool {
-        unsafe { ((*self.0).__bindgen_anon_3.IsRemoteAccessConnected.unwrap())() == 1 }
+        unsafe { ((*self.0).__bindgen_anon_4.IsRemoteAccessConnected.unwrap())() == 1 }
     }
 
     /// Launches the replay UI associated with the RenderDoc library injected into the running
@@ -531,7 +536,7 @@ impl RenderDoc<V111> {
     /// # }
     /// ```
     pub fn is_target_control_connected(&self) -> bool {
-        unsafe { ((*self.0).__bindgen_anon_3.IsTargetControlConnected.unwrap())() == 1 }
+        unsafe { ((*self.0).__bindgen_anon_4.IsTargetControlConnected.unwrap())() == 1 }
     }
 
     /// Returns whether the RenderDoc UI is connected to this application.
@@ -565,7 +570,7 @@ impl RenderDoc<V112> {
     pub fn get_capture_file_path_template(&self) -> &Path {
         unsafe {
             let raw = ((*self.0)
-                .__bindgen_anon_2
+                .__bindgen_anon_3
                 .GetCaptureFilePathTemplate
                 .unwrap())();
             CStr::from_ptr(raw).to_str().map(Path::new).unwrap()
@@ -599,7 +604,7 @@ impl RenderDoc<V112> {
         let cstr = utf8.and_then(|s| CString::new(s).ok()).unwrap();
         unsafe {
             ((*self.0)
-                .__bindgen_anon_1
+                .__bindgen_anon_2
                 .SetCaptureFilePathTemplate
                 .unwrap())(cstr.as_ptr());
         }
@@ -650,6 +655,31 @@ impl RenderDoc<V140> {
     {
         let DevicePointer(dev) = dev.into();
         unsafe { ((*self.0).DiscardFrameCapture.unwrap())(dev as *mut _, win as *mut _) == 1 }
+    }
+}
+
+impl RenderDoc<V141> {
+    /// Attempts to shut down RenderDoc.
+    ///
+    /// # Safety
+    ///
+    /// Note that this will work correctly if done _immediately_ after the dynamic library is
+    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
+    /// hooks and shut down. Behavior is undefined if this is called after any API functions have
+    /// been called.
+    ///
+    /// # Compatibility
+    ///
+    /// This process is only possible on Windows, and even then it is not well defined so may not
+    /// be possible in all circumstances. This function is provided at your own risk.
+    pub unsafe fn remove_hooks(self) {
+        ((*self.0).__bindgen_anon_1.RemoveHooks.unwrap())();
+    }
+
+    /// Attempts to shut down RenderDoc.
+    #[deprecated(since = "1.4.1", note = "renamed to `remove_hooks`")]
+    pub unsafe fn shutdown(self) {
+        ((*self.0).__bindgen_anon_1.Shutdown.unwrap())();
     }
 }
 
@@ -716,4 +746,4 @@ macro_rules! impl_from_versions {
     };
 }
 
-impl_from_versions!(V140, V130, V120, V112, V111, V110, V100);
+impl_from_versions!(V141, V140, V130, V120, V112, V111, V110, V100);
