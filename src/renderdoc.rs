@@ -97,6 +97,11 @@ impl RenderDoc<V100> {
     /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
     /// hooks and shut down. Behavior is undefined if this is called after any API functions have
     /// been called.
+    ///
+    /// # Compatibility
+    ///
+    /// This process is only possible on Windows, and even then it is not well defined so may not
+    /// be possible in all circumstances. This function is provided at your own risk.
     pub unsafe fn shutdown(self) {
         ((*self.0).__bindgen_anon_1.Shutdown.unwrap())();
     }
@@ -662,6 +667,11 @@ impl RenderDoc<V141> {
     /// loaded, before any API work happens. At that point, RenderDoc will remove its injected
     /// hooks and shut down. Behavior is undefined if this is called after any API functions have
     /// been called.
+    ///
+    /// # Compatibility
+    ///
+    /// This process is only possible on Windows, and even then it is not well defined so may not
+    /// be possible in all circumstances. This function is provided at your own risk.
     pub unsafe fn remove_hooks(self) {
         ((*self.0).__bindgen_anon_1.RemoveHooks.unwrap())();
     }
