@@ -49,7 +49,7 @@ fn main() {
 
     // Query the details of an existing capture like this.
     match rd.get_capture(0) {
-        Some(cap) => println!("ID: 0, Path: {}, Timestamp: {}", cap.0, cap.1),
+        Some(cap) => println!("ID: 0, Path: {}, Timestamp: {:?}", cap.0, cap.1),
         None => println!("No capture found with ID of 0!"),
     }
 
