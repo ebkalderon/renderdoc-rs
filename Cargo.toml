@@ -12,6 +12,9 @@ readme = "README.md"
 categories = ["rendering"]
 keywords = ["graphics", "profile", "renderdoc", "trace"]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [badges]
 circle-ci = { repository = "ebkalderon/renderdoc-rs" }
 
