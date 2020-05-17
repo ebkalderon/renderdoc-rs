@@ -3,7 +3,7 @@
 use std::os::raw::c_void;
 
 #[cfg(feature = "glutin")]
-use glutin::os::ContextTraitExt;
+use glutin::platform::ContextTraitExt;
 #[cfg(windows)]
 use wio::com::ComPtr;
 
@@ -69,7 +69,7 @@ impl<'a, T: glutin::ContextCurrentState> From<&'a glutin::Context<T>> for Device
     fn from(ctx: &'a glutin::Context<T>) -> Self {
         #[cfg(unix)]
         unsafe {
-            use glutin::os::unix::RawHandle;
+            use glutin::platform::unix::RawHandle;
             match ctx.raw_handle() {
                 RawHandle::Glx(glx) => DevicePointer::from(glx),
                 _ => panic!("RenderDoc only supports GLX contexts on Unix!"),
@@ -78,7 +78,7 @@ impl<'a, T: glutin::ContextCurrentState> From<&'a glutin::Context<T>> for Device
 
         #[cfg(windows)]
         unsafe {
-            use glutin::os::windows::RawHandle;
+            use glutin::platform::windows::RawHandle;
             match ctx.raw_handle() {
                 RawHandle::Wgl(wgl) => DevicePointer::from(wgl),
                 _ => panic!("RenderDoc only supports WGL contexts on Windows!"),
