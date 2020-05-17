@@ -34,7 +34,7 @@ the RenderDoc profiler, consult the [in-application API][in-app] documentation.
 use renderdoc::{RenderDoc, V100, V110};
 
 fn main() {
-    let mut rd: RenderDoc<V110> = RenderDoc::new().expect("Failed to init");
+    let mut rd: RenderDoc<V110> = RenderDoc::new().expect("Unable to connect");
 
     let (major, minor, patch) = rd.get_api_version();
     assert_eq!(major, 1u32);
@@ -49,7 +49,7 @@ fn main() {
 
     // Query the details of an existing capture like this.
     match rd.get_capture(0) {
-        Some(cap) => println!("ID: 0, Path: {}, Timestamp: {:?}", cap.0, cap.1),
+        Some((path, capture_time)) => println!("ID: 0, Path: {}, Captured: {:?}", path, capture_time),
         None => println!("No capture found with ID of 0!"),
     }
 
