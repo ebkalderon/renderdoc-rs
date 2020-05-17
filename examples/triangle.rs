@@ -15,13 +15,10 @@
 
 #[macro_use]
 extern crate gfx;
-extern crate gfx_window_glutin;
-extern crate glutin;
-extern crate renderdoc;
 
 use gfx::traits::FactoryExt;
 use gfx::Device;
-use glutin::GlProfile;
+use glutin_021::GlProfile;
 use renderdoc::{RenderDoc, V110};
 
 pub type ColorFormat = gfx::format::Rgba8;
@@ -59,11 +56,11 @@ const CLEAR_COLOR: [f32; 4] = [0.1, 0.2, 0.3, 1.0];
 pub fn main() {
     let mut rd: RenderDoc<V110> = RenderDoc::new().unwrap();
 
-    let mut events_loop = glutin::EventsLoop::new();
-    let window_config = glutin::WindowBuilder::new()
+    let mut events_loop = glutin_021::EventsLoop::new();
+    let window_config = glutin_021::WindowBuilder::new()
         .with_title("Triangle example".to_string())
         .with_dimensions((1024, 768).into());
-    let context = glutin::ContextBuilder::new()
+    let context = glutin_021::ContextBuilder::new()
         .with_vsync(true)
         .with_gl_profile(GlProfile::Core);
 
@@ -85,22 +82,21 @@ pub fn main() {
         out: main_color,
     };
 
-    rd.set_active_window(window.context(), std::ptr::null());
-    rd.set_focus_toggle_keys(&[glutin::VirtualKeyCode::F]);
-    rd.set_capture_keys(&[glutin::VirtualKeyCode::C]);
+    rd.set_focus_toggle_keys(&[renderdoc::InputButton::F]);
+    rd.set_capture_keys(&[renderdoc::InputButton::C]);
     rd.set_capture_option_u32(renderdoc::CaptureOption::AllowVSync, 1);
     rd.set_capture_option_u32(renderdoc::CaptureOption::ApiValidation, 1);
 
     let mut running = true;
     while running {
         events_loop.poll_events(|event| {
-            if let glutin::Event::WindowEvent { event, .. } = event {
+            if let glutin_021::Event::WindowEvent { event, .. } = event {
                 match event {
-                    glutin::WindowEvent::KeyboardInput {
+                    glutin_021::WindowEvent::KeyboardInput {
                         input:
-                            glutin::KeyboardInput {
-                                virtual_keycode: Some(glutin::VirtualKeyCode::R),
-                                state: glutin::ElementState::Pressed,
+                            glutin_021::KeyboardInput {
+                                virtual_keycode: Some(glutin_021::VirtualKeyCode::R),
+                                state: glutin_021::ElementState::Pressed,
                                 ..
                             },
                         ..
@@ -108,16 +104,16 @@ pub fn main() {
                         Ok(pid) => println!("Launched replay UI ({}).", pid),
                         Err(err) => eprintln!("{:?}", err),
                     },
-                    glutin::WindowEvent::KeyboardInput {
+                    glutin_021::WindowEvent::KeyboardInput {
                         input:
-                            glutin::KeyboardInput {
-                                virtual_keycode: Some(glutin::VirtualKeyCode::Escape),
+                            glutin_021::KeyboardInput {
+                                virtual_keycode: Some(glutin_021::VirtualKeyCode::Escape),
                                 ..
                             },
                         ..
                     }
-                    | glutin::WindowEvent::CloseRequested => running = false,
-                    glutin::WindowEvent::Resized(logical_size) => {
+                    | glutin_021::WindowEvent::CloseRequested => running = false,
+                    glutin_021::WindowEvent::Resized(logical_size) => {
                         let dpi_factor = window.window().get_hidpi_factor();
                         window.resize(logical_size.to_physical(dpi_factor));
                         gfx_window_glutin::update_views(&window, &mut data.out, &mut main_depth);
