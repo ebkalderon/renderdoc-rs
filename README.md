@@ -31,8 +31,6 @@ the RenderDoc profiler, consult the [in-application API][in-app] documentation.
 ## Example
 
 ```rust
-extern crate renderdoc;
-
 use renderdoc::{RenderDoc, V100, V110};
 
 fn main() {
