@@ -9,6 +9,7 @@ repository = "https://github.com/ebkalderon/renderdoc-rs"
 documentation = "https://docs.rs/renderdoc-sys/"
 readme = "README.md"
 keywords = ["ffi", "renderdoc"]
+exclude = ["/vendor"]
 
 [badges]
 circle-ci = { repository = "ebkalderon/renderdoc-rs" }
