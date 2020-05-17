@@ -15,9 +15,6 @@ keywords = ["graphics", "profile", "renderdoc", "trace"]
 [badges]
 circle-ci = { repository = "ebkalderon/renderdoc-rs" }
 
-[features]
-default = ["glutin"]
-
 [dependencies]
 bitflags = "1.0"
 float-cmp = "0.8"
