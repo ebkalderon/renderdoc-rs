@@ -99,17 +99,6 @@ impl<V: HasPrevious> DerefMut for RenderDoc<V> {
     }
 }
 
-impl<V: Version> Debug for RenderDoc<V> {
-    fn fmt(&self, fmt: &mut Formatter) -> FmtResult {
-        fmt.debug_tuple(stringify!(RenderDoc))
-            .field(&self.0)
-            .field(&V::VERSION)
-            .finish()
-    }
-}
-
-unsafe impl<V> Send for RenderDoc<V> {}
-
 impl RenderDoc<V100> {
     /// Returns the major, minor, and patch version numbers of the RenderDoc API currently in use.
     ///
@@ -662,6 +651,17 @@ impl RenderDoc<V140> {
         unsafe { ((*self.0).DiscardFrameCapture.unwrap())(dev as *mut _, win as *mut _) == 1 }
     }
 }
+
+impl<V: Version> Debug for RenderDoc<V> {
+    fn fmt(&self, fmt: &mut Formatter) -> FmtResult {
+        fmt.debug_tuple(stringify!(RenderDoc))
+            .field(&self.0)
+            .field(&V::VERSION)
+            .finish()
+    }
+}
+
+unsafe impl<V> Send for RenderDoc<V> {}
 
 /// Generates `From` implementations that permit downgrading of API versions.
 ///
