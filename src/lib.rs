@@ -24,7 +24,9 @@ pub use self::error::Error;
 pub use self::handles::{DevicePointer, WindowHandle};
 pub use self::renderdoc::RenderDoc;
 pub use self::settings::{CaptureOption, InputButton, OverlayBits};
-pub use self::version::{Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140};
+pub use self::version::{
+    Entry, HasPrevious, Version, V100, V110, V111, V112, V120, V130, V140, V141,
+};
 
 use std::os::raw::c_ulonglong;
 
