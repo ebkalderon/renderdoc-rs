@@ -83,18 +83,18 @@ impl<V: HasPrevious> Deref for RenderDoc<V> {
     type Target = RenderDoc<V::Previous>;
 
     fn deref(&self) -> &Self::Target {
-        // NOTE: This transmutation is actually safe because the underlying entry point exposed by
-        // the RenderDoc API is the exact same structure. This call only serves to recursively
-        // expose the methods in a statically guaranteed and backwards-compatible way.
+        // NOTE: This transmutation is safe because the entry point type and layout does not change
+        // between API versions. This call only serves as type-level magic to expose the inherent
+        // methods in a backwards-compatible way.
         unsafe { &*(self as *const RenderDoc<V> as *const RenderDoc<<V as HasPrevious>::Previous>) }
     }
 }
 
 impl<V: HasPrevious> DerefMut for RenderDoc<V> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        // NOTE: This transmutation is actually safe because the underlying entry point exposed by
-        // the RenderDoc API is the exact same structure. This call only serves to recursively
-        // expose the methods in a statically guaranteed and backwards-compatible way.
+        // NOTE: This transmutation is safe because the entry point type and layout does not change
+        // between API versions. This call only serves as type-level magic to expose the inherent
+        // methods in a backwards-compatible way.
         unsafe { &mut *(self as *mut RenderDoc<V> as *mut RenderDoc<<V as HasPrevious>::Previous>) }
     }
 }
