@@ -108,6 +108,8 @@ impl<V: Version> Debug for RenderDoc<V> {
     }
 }
 
+unsafe impl<V> Send for RenderDoc<V> {}
+
 impl RenderDoc<V100> {
     /// Returns the major, minor, and patch version numbers of the RenderDoc API currently in use.
     ///
