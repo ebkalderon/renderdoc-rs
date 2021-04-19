@@ -1,133 +1,176 @@
-// Copyright 2017-2019 Eyal Kalderon
-// Copyright 2015 The Gfx-rs Developers.
+// Copyright 2021 Eyal Kalderon
+// Copyright 2021 gfx-rs/wgpu-rs Developers
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#[macro_use]
-extern crate gfx;
+use std::borrow::Cow;
 
-use gfx::traits::FactoryExt;
-use gfx::Device;
-use glutin_021::GlProfile;
 use renderdoc::{RenderDoc, V110};
+use winit::{
+    event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent},
+    event_loop::{ControlFlow, EventLoop},
+    window::Window,
+};
 
-pub type ColorFormat = gfx::format::Rgba8;
-pub type DepthFormat = gfx::format::DepthStencil;
+async fn run(event_loop: EventLoop<()>, window: Window, rd: RenderDoc<V110>) {
+    let size = window.inner_size();
+    let instance = wgpu::Instance::new(wgpu::BackendBit::all());
+    let surface = unsafe { instance.create_surface(&window) };
+    let adapter = instance
+        .request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::default(),
+            // Request an adapter which can render to our surface
+            compatible_surface: Some(&surface),
+        })
+        .await
+        .expect("Failed to find an appropriate adapter");
 
-gfx_defines! {
-    vertex Vertex {
-        pos: [f32; 2] = "a_Pos",
-        color: [f32; 3] = "a_Color",
-    }
-
-    pipeline pipe {
-        vbuf: gfx::VertexBuffer<Vertex> = (),
-        out: gfx::RenderTarget<ColorFormat> = "Target0",
-    }
-}
-
-const TRIANGLE: [Vertex; 3] = [
-    Vertex {
-        pos: [-0.5, -0.5],
-        color: [1.0, 0.0, 0.0],
-    },
-    Vertex {
-        pos: [0.5, -0.5],
-        color: [0.0, 1.0, 0.0],
-    },
-    Vertex {
-        pos: [0.0, 0.5],
-        color: [0.0, 0.0, 1.0],
-    },
-];
-
-const CLEAR_COLOR: [f32; 4] = [0.1, 0.2, 0.3, 1.0];
-
-pub fn main() {
-    let mut rd: RenderDoc<V110> = RenderDoc::new().unwrap();
-
-    let mut events_loop = glutin_021::EventsLoop::new();
-    let window_config = glutin_021::WindowBuilder::new()
-        .with_title("Triangle example".to_string())
-        .with_dimensions((1024, 768).into());
-    let context = glutin_021::ContextBuilder::new()
-        .with_vsync(true)
-        .with_gl_profile(GlProfile::Core);
-
-    let (window, mut device, mut factory, main_color, mut main_depth) =
-        gfx_window_glutin::init::<ColorFormat, DepthFormat>(window_config, context, &events_loop)
-            .unwrap();
-
-    let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
-    let pso = factory
-        .create_pipeline_simple(
-            include_bytes!("shader/triangle_150.glslv"),
-            include_bytes!("shader/triangle_150.glslf"),
-            pipe::new(),
+    // Create the logical device and command queue
+    let (device, queue) = adapter
+        .request_device(
+            &wgpu::DeviceDescriptor {
+                label: None,
+                features: wgpu::Features::empty(),
+                limits: wgpu::Limits::default(),
+            },
+            None,
         )
-        .unwrap();
-    let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&TRIANGLE, ());
-    let mut data = pipe::Data {
-        vbuf: vertex_buffer,
-        out: main_color,
+        .await
+        .expect("Failed to create device");
+
+    // Load the shaders from disk
+    let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+        label: None,
+        source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("shader.wgsl"))),
+        flags: wgpu::ShaderFlags::all(),
+    });
+
+    let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: None,
+        bind_group_layouts: &[],
+        push_constant_ranges: &[],
+    });
+
+    let swapchain_format = adapter.get_swap_chain_preferred_format(&surface);
+
+    let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: None,
+        layout: Some(&pipeline_layout),
+        vertex: wgpu::VertexState {
+            module: &shader,
+            entry_point: "vs_main",
+            buffers: &[],
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: &shader,
+            entry_point: "fs_main",
+            targets: &[swapchain_format.into()],
+        }),
+        primitive: wgpu::PrimitiveState::default(),
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState::default(),
+    });
+
+    let mut sc_desc = wgpu::SwapChainDescriptor {
+        usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
+        format: swapchain_format,
+        width: size.width,
+        height: size.height,
+        present_mode: wgpu::PresentMode::Mailbox,
     };
 
+    let mut swap_chain = device.create_swap_chain(&surface, &sc_desc);
+
+    event_loop.run(move |event, _, control_flow| {
+        // Have the closure take ownership of the resources.
+        // `event_loop.run` never returns, therefore we must do this to ensure
+        // the resources are properly cleaned up.
+        let _ = (&instance, &adapter, &shader, &pipeline_layout);
+
+        *control_flow = ControlFlow::Poll;
+        match event {
+            Event::WindowEvent {
+                event: WindowEvent::Resized(size),
+                ..
+            } => {
+                // Recreate the swap chain with the new size
+                sc_desc.width = size.width;
+                sc_desc.height = size.height;
+                swap_chain = device.create_swap_chain(&surface, &sc_desc);
+            }
+            Event::WindowEvent {
+                event:
+                    WindowEvent::KeyboardInput {
+                        input:
+                            KeyboardInput {
+                                virtual_keycode: Some(VirtualKeyCode::R),
+                                state: ElementState::Pressed,
+                                ..
+                            },
+                        ..
+                    },
+                ..
+            } => match rd.launch_replay_ui(true, None) {
+                Ok(pid) => println!("Launched RenderDoc replay UI [{}]", pid),
+                Err(err) => eprintln!("Failed to launch RenderDoc replay UI: {:?}", err),
+            },
+            Event::MainEventsCleared => {
+                let frame = swap_chain
+                    .get_current_frame()
+                    .expect("Failed to acquire next swap chain texture")
+                    .output;
+                let mut encoder =
+                    device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+                {
+                    let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                        label: None,
+                        color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
+                            attachment: &frame.view,
+                            resolve_target: None,
+                            ops: wgpu::Operations {
+                                load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
+                                store: true,
+                            },
+                        }],
+                        depth_stencil_attachment: None,
+                    });
+                    rpass.set_pipeline(&render_pipeline);
+                    rpass.draw(0..3, 0..1);
+                }
+
+                queue.submit(Some(encoder.finish()));
+            }
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::KeyboardInput {
+                    input:
+                        KeyboardInput {
+                            virtual_keycode: Some(VirtualKeyCode::Escape),
+                            state: ElementState::Pressed,
+                            ..
+                        },
+                    ..
+                }
+                | WindowEvent::CloseRequested => {
+                    *control_flow = ControlFlow::Exit;
+                }
+                _ => {}
+            },
+            _ => {}
+        }
+    });
+}
+
+fn main() {
+    let mut rd: RenderDoc<V110> = RenderDoc::new().unwrap();
     rd.set_focus_toggle_keys(&[renderdoc::InputButton::F]);
     rd.set_capture_keys(&[renderdoc::InputButton::C]);
     rd.set_capture_option_u32(renderdoc::CaptureOption::AllowVSync, 1);
     rd.set_capture_option_u32(renderdoc::CaptureOption::ApiValidation, 1);
 
-    let mut running = true;
-    while running {
-        events_loop.poll_events(|event| {
-            if let glutin_021::Event::WindowEvent { event, .. } = event {
-                match event {
-                    glutin_021::WindowEvent::KeyboardInput {
-                        input:
-                            glutin_021::KeyboardInput {
-                                virtual_keycode: Some(glutin_021::VirtualKeyCode::R),
-                                state: glutin_021::ElementState::Pressed,
-                                ..
-                            },
-                        ..
-                    } => match rd.launch_replay_ui(true, None) {
-                        Ok(pid) => println!("Launched replay UI ({}).", pid),
-                        Err(err) => eprintln!("{:?}", err),
-                    },
-                    glutin_021::WindowEvent::KeyboardInput {
-                        input:
-                            glutin_021::KeyboardInput {
-                                virtual_keycode: Some(glutin_021::VirtualKeyCode::Escape),
-                                ..
-                            },
-                        ..
-                    }
-                    | glutin_021::WindowEvent::CloseRequested => running = false,
-                    glutin_021::WindowEvent::Resized(logical_size) => {
-                        let dpi_factor = window.window().get_hidpi_factor();
-                        window.resize(logical_size.to_physical(dpi_factor));
-                        gfx_window_glutin::update_views(&window, &mut data.out, &mut main_depth);
-                    }
-                    _ => (),
-                }
-            }
-        });
-
-        // draw a frame
-        encoder.clear(&data.out, CLEAR_COLOR);
-        encoder.draw(&slice, &pso, &data);
-        encoder.flush(&mut device);
-        window.swap_buffers().unwrap();
-        device.cleanup();
-    }
+    let event_loop = EventLoop::new();
+    let window = winit::window::Window::new(&event_loop).unwrap();
+    wgpu_subscriber::initialize_default_subscriber(None);
+    pollster::block_on(run(event_loop, window, rd));
 }
