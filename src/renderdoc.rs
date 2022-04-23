@@ -430,7 +430,7 @@ impl RenderDoc<V100> {
     /// For example, you can specify `null(), null()` for the device to capture on if you have only
     /// one device and only one or zero windows, and RenderDoc will capture from that device.
     ///
-    /// This function must be paired with a matching `start_frame_capture()` to succeed.
+    /// This function must be paired with a matching `end_frame_capture()` to succeed.
     ///
     /// ```rust,no_run
     /// # use renderdoc::{Error, RenderDoc, V100};
@@ -480,7 +480,7 @@ impl RenderDoc<V100> {
     /// For example, you can specify `null(), null()` for the device to capture on if you have only
     /// one device and only one or zero windows, and RenderDoc will capture from that device.
     ///
-    /// This function must be paired with a matching `end_frame_capture()` to complete.
+    /// This function must be paired with a matching `start_frame_capture()` to complete.
     ///
     /// ```rust,no_run
     /// # use renderdoc::{Error, RenderDoc, V100};
