@@ -6,7 +6,7 @@ jobs:
       - image: ebkalderon/renderdoc-rs-circleci:1.48.0
 
     environment:
-      TZ: "/usr/share/zoneinfo/Asia/Singapore"
+      TZ: "/usr/share/zoneinfo/America/New_York"
 
     steps:
       - checkout
