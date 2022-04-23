@@ -35,7 +35,7 @@ jobs:
             rustup run nightly cargo --version --verbose
             rustup run nightly cargo build --all
       - save_cache:
-          key: project-cache
+          key: project-cache-1
           paths:
             - "~/.cargo"
             - "./target"
