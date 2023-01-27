@@ -39,6 +39,12 @@ jobs:
       with:
         command: test
         args: --workspace --all-features
+    - name: Check examples
+      continue-on-error: ${{ matrix.continue-on-error || false }}
+      uses: actions-rs/cargo@v1
+      with:
+        command: check
+        args: --examples
 
   cargo-audit:
     name: cargo audit
