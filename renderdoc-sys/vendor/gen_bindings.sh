@@ -19,8 +19,8 @@ cd "${TEMP_DIR}" || exit 1
 curl -LO "https://raw.githubusercontent.com/baldurk/renderdoc/${VERSION}/renderdoc/api/app/renderdoc_app.h"
 
 bindgen \
-  --blacklist-type '__uint64_t|__uint32_t' \
-  --whitelist-type 'RENDERDOC*|pRENDERDOC*' \
+  --blocklist-type '__uint64_t|__uint32_t' \
+  --allowlist-type 'RENDERDOC.*|pRENDERDOC.*' \
   --generate-inline-functions \
   --no-prepend-enum-name \
   --impl-debug \
