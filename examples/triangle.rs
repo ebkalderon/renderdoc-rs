@@ -1,26 +1,22 @@
-// Copyright 2021 Eyal Kalderon
-// Copyright 2021 gfx-rs/wgpu-rs Developers
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 use std::borrow::Cow;
 
-use renderdoc::{RenderDoc, V110};
+use renderdoc::{InputButton, RenderDoc, V110};
 use winit::{
     event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     window::Window,
 };
 
-async fn run(event_loop: EventLoop<()>, window: Window, rd: RenderDoc<V110>) {
+async fn run(event_loop: EventLoop<()>, window: Window) {
     let size = window.inner_size();
-    let instance = wgpu::Instance::new(wgpu::BackendBit::all());
-    let surface = unsafe { instance.create_surface(&window) };
+
+    let instance = wgpu::Instance::default();
+
+    let surface = unsafe { instance.create_surface(&window) }.unwrap();
     let adapter = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::default(),
+            force_fallback_adapter: false,
             // Request an adapter which can render to our surface
             compatible_surface: Some(&surface),
         })
@@ -33,18 +29,23 @@ async fn run(event_loop: EventLoop<()>, window: Window, rd: RenderDoc<V110>) {
             &wgpu::DeviceDescriptor {
                 label: None,
                 features: wgpu::Features::empty(),
-                limits: wgpu::Limits::default(),
+                // Make sure we use the texture resolution limits from the adapter, so we can support images the size of the swapchain.
+                limits: wgpu::Limits::downlevel_webgl2_defaults()
+                    .using_resolution(adapter.limits()),
             },
             None,
         )
         .await
         .expect("Failed to create device");
 
+    let mut rd: RenderDoc<V110> = RenderDoc::new().unwrap();
+    rd.set_focus_toggle_keys(&[InputButton::F]);
+    rd.set_capture_keys(&[InputButton::C]);
+
     // Load the shaders from disk
-    let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+    let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: None,
         source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("shader.wgsl"))),
-        flags: wgpu::ShaderFlags::all(),
     });
 
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -53,7 +54,8 @@ async fn run(event_loop: EventLoop<()>, window: Window, rd: RenderDoc<V110>) {
         push_constant_ranges: &[],
     });
 
-    let swapchain_format = adapter.get_swap_chain_preferred_format(&surface);
+    let swapchain_capabilities = surface.get_capabilities(&adapter);
+    let swapchain_format = swapchain_capabilities.formats[0];
 
     let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: None,
@@ -66,22 +68,25 @@ async fn run(event_loop: EventLoop<()>, window: Window, rd: RenderDoc<V110>) {
         fragment: Some(wgpu::FragmentState {
             module: &shader,
             entry_point: "fs_main",
-            targets: &[swapchain_format.into()],
+            targets: &[Some(swapchain_format.into())],
         }),
         primitive: wgpu::PrimitiveState::default(),
         depth_stencil: None,
         multisample: wgpu::MultisampleState::default(),
+        multiview: None,
     });
 
-    let mut sc_desc = wgpu::SwapChainDescriptor {
-        usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
+    let mut config = wgpu::SurfaceConfiguration {
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
         format: swapchain_format,
         width: size.width,
         height: size.height,
-        present_mode: wgpu::PresentMode::Mailbox,
+        present_mode: wgpu::PresentMode::Fifo,
+        alpha_mode: swapchain_capabilities.alpha_modes[0],
+        view_formats: vec![],
     };
 
-    let mut swap_chain = device.create_swap_chain(&surface, &sc_desc);
+    surface.configure(&device, &config);
 
     event_loop.run(move |event, _, control_flow| {
         // Have the closure take ownership of the resources.
@@ -89,51 +94,59 @@ async fn run(event_loop: EventLoop<()>, window: Window, rd: RenderDoc<V110>) {
         // the resources are properly cleaned up.
         let _ = (&instance, &adapter, &shader, &pipeline_layout);
 
-        *control_flow = ControlFlow::Poll;
+        *control_flow = ControlFlow::Wait;
         match event {
             Event::WindowEvent {
                 event: WindowEvent::Resized(size),
                 ..
             } => {
-                // Recreate the swap chain with the new size
-                sc_desc.width = size.width;
-                sc_desc.height = size.height;
-                swap_chain = device.create_swap_chain(&surface, &sc_desc);
+                // Reconfigure the surface with the new size
+                config.width = size.width;
+                config.height = size.height;
+                surface.configure(&device, &config);
+                // On macos the window needs to be redrawn manually after resizing
+                window.request_redraw();
             }
             Event::WindowEvent {
                 event:
                     WindowEvent::KeyboardInput {
                         input:
                             KeyboardInput {
-                                virtual_keycode: Some(VirtualKeyCode::R),
+                                virtual_keycode: Some(keycode),
                                 state: ElementState::Pressed,
                                 ..
                             },
                         ..
                     },
                 ..
-            } => match rd.launch_replay_ui(true, None) {
-                Ok(pid) => println!("Launched RenderDoc replay UI [{}]", pid),
-                Err(err) => eprintln!("Failed to launch RenderDoc replay UI: {:?}", err),
+            } => match keycode {
+                VirtualKeyCode::C => rd.trigger_capture(),
+                VirtualKeyCode::R => match rd.launch_replay_ui(true, None) {
+                    Ok(pid) => println!("Launched replay UI (PID {pid})"),
+                    Err(e) => eprintln!("Failed to launch replay UI: {e}"),
+                },
+                _ => {}
             },
-            Event::MainEventsCleared => {
-                let frame = swap_chain
-                    .get_current_frame()
-                    .expect("Failed to acquire next swap chain texture")
-                    .output;
+            Event::RedrawRequested(_) => {
+                let frame = surface
+                    .get_current_texture()
+                    .expect("Failed to acquire next swap chain texture");
+                let view = frame
+                    .texture
+                    .create_view(&wgpu::TextureViewDescriptor::default());
                 let mut encoder =
                     device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
                 {
                     let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                         label: None,
-                        color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
-                            attachment: &frame.view,
+                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                            view: &view,
                             resolve_target: None,
                             ops: wgpu::Operations {
                                 load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
                                 store: true,
                             },
-                        }],
+                        })],
                         depth_stencil_attachment: None,
                     });
                     rpass.set_pipeline(&render_pipeline);
@@ -141,36 +154,20 @@ async fn run(event_loop: EventLoop<()>, window: Window, rd: RenderDoc<V110>) {
                 }
 
                 queue.submit(Some(encoder.finish()));
+                frame.present();
             }
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::KeyboardInput {
-                    input:
-                        KeyboardInput {
-                            virtual_keycode: Some(VirtualKeyCode::Escape),
-                            state: ElementState::Pressed,
-                            ..
-                        },
-                    ..
-                }
-                | WindowEvent::CloseRequested => {
-                    *control_flow = ControlFlow::Exit;
-                }
-                _ => {}
-            },
+            Event::WindowEvent {
+                event: WindowEvent::CloseRequested,
+                ..
+            } => *control_flow = ControlFlow::Exit,
             _ => {}
         }
     });
 }
 
 fn main() {
-    let mut rd: RenderDoc<V110> = RenderDoc::new().unwrap();
-    rd.set_focus_toggle_keys(&[renderdoc::InputButton::F]);
-    rd.set_capture_keys(&[renderdoc::InputButton::C]);
-    rd.set_capture_option_u32(renderdoc::CaptureOption::AllowVSync, 1);
-    rd.set_capture_option_u32(renderdoc::CaptureOption::ApiValidation, 1);
-
     let event_loop = EventLoop::new();
     let window = winit::window::Window::new(&event_loop).unwrap();
     wgpu_subscriber::initialize_default_subscriber(None);
-    pollster::block_on(run(event_loop, window, rd));
+    pollster::block_on(run(event_loop, window));
 }

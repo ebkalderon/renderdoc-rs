@@ -3,8 +3,6 @@
 use std::u32;
 
 use bitflags::bitflags;
-#[cfg(feature = "glutin")]
-use glutin::event::VirtualKeyCode;
 
 /// RenderDoc capture options.
 #[repr(u32)]
@@ -158,9 +156,10 @@ pub enum InputButton {
     Max = renderdoc_sys::eRENDERDOC_Key_Max,
 }
 
-#[cfg(feature = "glutin")]
-impl From<glutin::event::VirtualKeyCode> for InputButton {
-    fn from(code: glutin::event::VirtualKeyCode) -> InputButton {
+#[cfg(feature = "winit")]
+impl From<winit::event::VirtualKeyCode> for InputButton {
+    fn from(code: winit::event::VirtualKeyCode) -> InputButton {
+        use winit::event::VirtualKeyCode;
         match code {
             VirtualKeyCode::Key1 => InputButton::Key1,
             VirtualKeyCode::Key2 => InputButton::Key2,
@@ -198,10 +197,10 @@ impl From<glutin::event::VirtualKeyCode> for InputButton {
             VirtualKeyCode::X => InputButton::X,
             VirtualKeyCode::Y => InputButton::Y,
             VirtualKeyCode::Z => InputButton::Z,
-            VirtualKeyCode::Divide => InputButton::Divide,
-            VirtualKeyCode::Multiply => InputButton::Multiply,
-            VirtualKeyCode::Subtract => InputButton::Subtract,
-            VirtualKeyCode::Add => InputButton::Plus,
+            VirtualKeyCode::NumpadDivide => InputButton::Divide,
+            VirtualKeyCode::NumpadMultiply => InputButton::Multiply,
+            VirtualKeyCode::NumpadSubtract => InputButton::Subtract,
+            VirtualKeyCode::NumpadAdd => InputButton::Plus,
             VirtualKeyCode::F1 => InputButton::F1,
             VirtualKeyCode::F2 => InputButton::F2,
             VirtualKeyCode::F3 => InputButton::F3,
