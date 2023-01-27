@@ -156,10 +156,10 @@ pub enum InputButton {
     Max = renderdoc_sys::eRENDERDOC_Key_Max,
 }
 
-#[cfg(feature = "glutin")]
-impl From<glutin::event::VirtualKeyCode> for InputButton {
-    fn from(code: glutin::event::VirtualKeyCode) -> InputButton {
-        use glutin::event::VirtualKeyCode;
+#[cfg(feature = "winit")]
+impl From<winit::event::VirtualKeyCode> for InputButton {
+    fn from(code: winit::event::VirtualKeyCode) -> InputButton {
+        use winit::event::VirtualKeyCode;
         match code {
             VirtualKeyCode::Key1 => InputButton::Key1,
             VirtualKeyCode::Key2 => InputButton::Key2,

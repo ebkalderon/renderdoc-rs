@@ -27,6 +27,7 @@ once_cell = "1.0"
 renderdoc-sys = { version = "0.7", path = "./renderdoc-sys" }
 
 glutin = { version = "0.30", optional = true }
+winit = { version = "0.27", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["d3d12","d3d11"] }
@@ -36,7 +37,6 @@ wio = "0.2"
 pollster = "0.2"
 wgpu = "0.15"
 wgpu-subscriber = "0.1.0"
-winit = "0.27"
 
 [workspace]
 members = [".", "renderdoc-sys"]
