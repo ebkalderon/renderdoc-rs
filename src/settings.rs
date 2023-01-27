@@ -3,8 +3,6 @@
 use std::u32;
 
 use bitflags::bitflags;
-#[cfg(feature = "glutin")]
-use glutin::event::VirtualKeyCode;
 
 /// RenderDoc capture options.
 #[repr(u32)]
@@ -161,6 +159,7 @@ pub enum InputButton {
 #[cfg(feature = "glutin")]
 impl From<glutin::event::VirtualKeyCode> for InputButton {
     fn from(code: glutin::event::VirtualKeyCode) -> InputButton {
+        use glutin::event::VirtualKeyCode;
         match code {
             VirtualKeyCode::Key1 => InputButton::Key1,
             VirtualKeyCode::Key2 => InputButton::Key2,
