@@ -1,0 +1,84 @@
+name: ci
+
+on:
+  push:
+    branches:
+    - master
+    - release/*
+  pull_request:
+    branches:
+    - master
+    - release/*
+
+jobs:
+  cargo-test:
+    name: cargo test (${{ matrix.rust-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust-version: [1.64.0, beta, nightly]
+        include:
+        - rust-version: nightly
+          continue-on-error: true
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup RenderDoc
+      shell: bash
+      run: |
+        wget -qO renderdoc_1.24.tar.gz https://renderdoc.org/stable/1.24/renderdoc_1.24.tar.gz
+        tar zxvf renderdoc_1.24.tar.gz
+        sudo rsync -r --ignore-existing --keep-dirlinks renderdoc_1.24/* /
+    - name: Install Rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust-version }}
+    - name: Run cargo test
+      continue-on-error: ${{ matrix.continue-on-error || false }}
+      uses: actions-rs/cargo@v1
+      with:
+        command: test
+        args: --workspace --all-features
+
+  cargo-audit:
+    name: cargo audit
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions-rs/audit-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  cargo-clippy:
+    name: cargo clippy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        components: clippy
+    - name: Run cargo clippy
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --all-targets --all-features -- -D warnings
+
+  cargo-fmt:
+    name: cargo fmt
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        components: rustfmt
+    - name: Run cargo fmt
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
