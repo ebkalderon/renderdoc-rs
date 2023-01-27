@@ -19,6 +19,12 @@ all-features = true
 [badges]
 circle-ci = { repository = "ebkalderon/renderdoc-rs" }
 
+[features]
+default = []
+
+# Private feature only intended for doctests in CI
+ci = []
+
 [dependencies]
 bitflags = "1.0"
 float-cmp = "0.9"

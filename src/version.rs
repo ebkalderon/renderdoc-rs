@@ -61,6 +61,7 @@ pub trait Version {
         let lib_path = "libVkLayer_GLES_RenderDoc.so";
 
         unsafe {
+            #[cfg(not(feature = "ci"))]
             #[cfg(unix)]
             let lib = LIBRARY
                 .get_or_try_init(|| {
@@ -72,11 +73,17 @@ pub trait Version {
                 })
                 .map_err(Error::library)?;
 
+            #[cfg(not(feature = "ci"))]
             #[cfg(windows)]
             let lib = LIBRARY
                 .get_or_try_init(|| {
                     libloading::os::windows::Library::open_already_loaded(lib_path).map(Into::into)
                 })
+                .map_err(Error::library)?;
+
+            #[cfg(feature = "ci")]
+            let lib = LIBRARY
+                .get_or_try_init(|| Library::new(lib_path))
                 .map_err(Error::library)?;
 
             let get_api: Symbol<GetApiFn> =
