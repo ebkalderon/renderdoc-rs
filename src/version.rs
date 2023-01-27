@@ -1,30 +1,13 @@
 //! Entry points for the RenderDoc API.
 
-use std::os::raw::c_void;
-use std::path::Path;
+use std::ffi::c_void;
+use std::ptr;
 
 use libloading::{Library, Symbol};
 use once_cell::sync::OnceCell;
 use renderdoc_sys::RENDERDOC_API_1_4_1;
 
 use crate::error::Error;
-
-static RD_LIB: OnceCell<Library> = OnceCell::new();
-
-#[cfg(windows)]
-fn get_path() -> &'static Path {
-    Path::new("renderdoc.dll")
-}
-
-#[cfg(all(unix, not(target_os = "android")))]
-fn get_path() -> &'static Path {
-    Path::new("librenderdoc.so")
-}
-
-#[cfg(target_os = "android")]
-fn get_path() -> &'static Path {
-    Path::new("libVkLayer_GLES_RenderDoc.so")
-}
 
 /// Entry point for the RenderDoc API.
 pub type Entry = RENDERDOC_API_1_4_1;
@@ -55,13 +38,6 @@ pub enum VersionCode {
     V141 = 10401,
 }
 
-/// Initializes a new instance of the RenderDoc API.
-///
-/// # Safety
-///
-/// This function is not thread-safe and should not be called on multiple threads at once.
-type GetApiFn = unsafe extern "C" fn(ver: VersionCode, out: *mut *mut c_void) -> i32;
-
 /// Entry point into the RenderDoc API.
 pub trait Version {
     /// Minimum compatible version number.
@@ -73,18 +49,41 @@ pub trait Version {
     ///
     /// This function is not thread-safe and should not be called on multiple threads at once.
     fn load() -> Result<*mut Entry, Error> {
-        use std::ptr;
+        static LIBRARY: OnceCell<Library> = OnceCell::new();
+
+        type GetApiFn = unsafe extern "C" fn(ver: u32, out: *mut *mut c_void) -> i32;
+
+        #[cfg(windows)]
+        let lib_path = "renderdoc.dll";
+        #[cfg(all(unix, not(target_os = "android")))]
+        let lib_path = "librenderdoc.so";
+        #[cfg(target_os = "android")]
+        let lib_path = "libVkLayer_GLES_RenderDoc.so";
 
         unsafe {
-            let lib = RD_LIB
-                .get_or_try_init(|| Library::new(get_path()))
+            #[cfg(unix)]
+            let lib = LIBRARY
+                .get_or_try_init(|| {
+                    // TODO: Use constant from `libloading`, once added upstream.
+                    const RTLD_NOLOAD: i32 = 0x4;
+
+                    let flags = libloading::os::unix::RTLD_NOW | RTLD_NOLOAD;
+                    libloading::os::unix::Library::open(Some(lib_path), flags).map(Into::into)
+                })
+                .map_err(Error::library)?;
+
+            #[cfg(windows)]
+            let lib = LIBRARY
+                .get_or_try_init(|| {
+                    libloading::os::windows::Library::open_already_loaded(lib_path).map(Into::into)
+                })
                 .map_err(Error::library)?;
 
             let get_api: Symbol<GetApiFn> =
                 lib.get(b"RENDERDOC_GetAPI\0").map_err(Error::symbol)?;
 
             let mut obj = ptr::null_mut();
-            match get_api(Self::VERSION, &mut obj) {
+            match get_api(Self::VERSION as u32, &mut obj) {
                 1 => Ok(obj as *mut Entry),
                 _ => Err(Error::no_compatible_api()),
             }

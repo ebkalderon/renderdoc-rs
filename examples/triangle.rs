@@ -38,7 +38,7 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
         .await
         .expect("Failed to create device");
 
-    let mut rd: RenderDoc<V110> = RenderDoc::new().unwrap();
+    let mut rd: RenderDoc<V110> = RenderDoc::new().expect("RenderDoc is not running");
     rd.set_focus_toggle_keys(&[InputButton::F]);
     rd.set_capture_keys(&[InputButton::C]);
 
