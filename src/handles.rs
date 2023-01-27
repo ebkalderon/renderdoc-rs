@@ -2,8 +2,6 @@
 
 use std::os::raw::c_void;
 
-#[cfg(feature = "glutin")]
-use glutin::platform::ContextTraitExt;
 #[cfg(windows)]
 use wio::com::ComPtr;
 
@@ -44,8 +42,8 @@ impl From<*mut winapi::um::d3d11::ID3D11Device> for DevicePointer {
 }
 
 #[cfg(windows)]
-impl From<ComPtr<winapi::um::d3d11::ID3D11Device>> for DevicePointer {
-    fn from(ctx: ComPtr<winapi::um::d3d11::ID3D11Device>) -> Self {
+impl From<wio::com::ComPtr<winapi::um::d3d11::ID3D11Device>> for DevicePointer {
+    fn from(ctx: wio::com::ComPtr<winapi::um::d3d11::ID3D11Device>) -> Self {
         DevicePointer(ctx.as_raw() as *mut _ as *const c_void)
     }
 }
@@ -58,31 +56,27 @@ impl From<*mut winapi::um::d3d12::ID3D12Device> for DevicePointer {
 }
 
 #[cfg(windows)]
-impl From<ComPtr<winapi::um::d3d12::ID3D12Device>> for DevicePointer {
-    fn from(ctx: ComPtr<winapi::um::d3d12::ID3D12Device>) -> Self {
+impl From<wio::com::ComPtr<winapi::um::d3d12::ID3D12Device>> for DevicePointer {
+    fn from(ctx: wio::com::ComPtr<winapi::um::d3d12::ID3D12Device>) -> Self {
         DevicePointer(ctx.as_raw() as *mut _ as *const c_void)
     }
 }
 
 #[cfg(feature = "glutin")]
-impl<'a, T: glutin::ContextCurrentState> From<&'a glutin::Context<T>> for DevicePointer {
-    fn from(ctx: &'a glutin::Context<T>) -> Self {
+impl<'a, T: glutin::context::AsRawContext> From<&'a T> for DevicePointer {
+    fn from(ctx: &'a T) -> Self {
+        use glutin::context::RawContext;
+
         #[cfg(unix)]
-        unsafe {
-            use glutin::platform::unix::RawHandle;
-            match ctx.raw_handle() {
-                RawHandle::Glx(glx) => DevicePointer::from(glx),
-                _ => panic!("RenderDoc only supports GLX contexts on Unix!"),
-            }
+        match ctx.raw_context() {
+            RawContext::Egl(egl) => DevicePointer::from(egl),
+            RawContext::Glx(glx) => DevicePointer::from(glx),
         }
 
         #[cfg(windows)]
-        unsafe {
-            use glutin::platform::windows::RawHandle;
-            match ctx.raw_handle() {
-                RawHandle::Wgl(wgl) => DevicePointer::from(wgl),
-                _ => panic!("RenderDoc only supports WGL contexts on Windows!"),
-            }
+        match ctx.raw_context() {
+            RawContext::Egl(egl) => DevicePointer::from(egl),
+            RawContext::Wgl(wgl) => DevicePointer::from(wgl),
         }
     }
 }
