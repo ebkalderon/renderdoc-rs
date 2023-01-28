@@ -136,3 +136,44 @@ define_versions! {
     V150 => eRENDERDOC_API_Version_1_5_0 (HasRemoveHooks),
     V160 => eRENDERDOC_API_Version_1_6_0 (HasRemoveHooks)
 }
+
+/// Encodes the given RenderDoc version into a valid `RENDERDOC_Version`.
+#[inline]
+pub const fn from_digits(major: u8, minor: u8, patch: u8) -> RENDERDOC_Version {
+    let mut version = major as c_uint * 10_000;
+    version += minor as c_uint * 100;
+    version += patch as c_uint;
+    version
+}
+
+#[cfg(test)]
+mod tests {
+    use renderdoc_sys::*;
+
+    use super::*;
+
+    #[test]
+    fn encodes_version_from_digits() {
+        let versions = [
+            ((1, 0, 0), eRENDERDOC_API_Version_1_0_0),
+            ((1, 0, 1), eRENDERDOC_API_Version_1_0_1),
+            ((1, 0, 2), eRENDERDOC_API_Version_1_0_2),
+            ((1, 1, 0), eRENDERDOC_API_Version_1_1_0),
+            ((1, 1, 1), eRENDERDOC_API_Version_1_1_1),
+            ((1, 1, 2), eRENDERDOC_API_Version_1_1_2),
+            ((1, 2, 0), eRENDERDOC_API_Version_1_2_0),
+            ((1, 3, 0), eRENDERDOC_API_Version_1_3_0),
+            ((1, 4, 0), eRENDERDOC_API_Version_1_4_0),
+            ((1, 4, 1), eRENDERDOC_API_Version_1_4_1),
+            ((1, 4, 2), eRENDERDOC_API_Version_1_4_2),
+            ((1, 5, 0), eRENDERDOC_API_Version_1_5_0),
+            ((1, 6, 0), eRENDERDOC_API_Version_1_6_0),
+        ];
+
+        for (input_digits, expected_version) in versions {
+            let (major, minor, patch) = input_digits;
+            let computed_version = from_digits(major, minor, patch);
+            assert_eq!(computed_version, expected_version);
+        }
+    }
+}
