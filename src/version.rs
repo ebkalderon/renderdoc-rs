@@ -68,10 +68,7 @@ pub trait Version {
 }
 
 pub trait Minimum<V: Version> {}
-
-pub trait HasShutdown {}
-
-pub trait HasRemoveHooks {}
+pub trait Below<V: Version> {}
 
 pub enum V100 {}
 pub enum V101 {}
@@ -88,20 +85,22 @@ pub enum V150 {}
 pub enum V160 {}
 
 macro_rules! define_versions {
-    ($($name:ident => $version_code:ident $( ( $($mixin:ident),* ) )?),+) => {
-        $(define_versions!(@version $name $version_code $( $($mixin)+ )?);)+
+    // Entry point into the macro.
+    ($($name:ident => $version_code:ident),+) => {
+        $(define_versions!(@version $name $version_code);)+
 
         define_versions!(@minimum $($name)+);
+        define_versions!(@below $($name)+);
     };
 
-    (@version $name:ident $version_code:ident $($mixin:ident)*) => {
+    // Implements the `Version` trait for `$name`.
+    (@version $name:ident $version_code:ident) => {
         impl Version for $name {
             const VERSION: RENDERDOC_Version = renderdoc_sys::$version_code;
         }
-
-        $(impl $mixin for $name {})*
     };
 
+    // Implements the `Minimum<V>` trait for all version enums.
     (@minimum $first:ident $($rest:ident)*) => {
         impl<V: Version> Minimum<$first> for V {}
 
@@ -119,22 +118,47 @@ macro_rules! define_versions {
     (@minimum_rec $single:ident) => {
         impl Minimum<$single> for $single {}
     };
+
+    // Implements the `Below<V>` trait for all version enums.
+    (@below $($name:ident)*) => {
+        define_versions!(@below_rev [$($name)*]);
+    };
+
+    (@below_rev [$first:ident $($rest:ident)*] $($reversed:ident)*) => {
+        define_versions!(@below_rev [$($rest)*] $first $($reversed)*);
+    };
+
+    (@below_rev [] $($reversed:ident)*) => {
+        define_versions!(@below_rec $($reversed)*);
+    };
+
+    (@below_rec $first:ident $second:ident $($rest:ident)+) => {
+        impl Below<$first> for $second {}
+
+        impl<V: Below<$second>> Below<$first> for V {}
+
+        define_versions!(@below_rec $second $($rest)*);
+    };
+
+    (@below_rec $first:ident $second:ident) => {
+        impl Below<$first> for $second {}
+    };
 }
 
 define_versions! {
-    V100 => eRENDERDOC_API_Version_1_0_0 (HasShutdown),
-    V101 => eRENDERDOC_API_Version_1_0_1 (HasShutdown),
-    V102 => eRENDERDOC_API_Version_1_0_2 (HasShutdown),
-    V110 => eRENDERDOC_API_Version_1_1_0 (HasShutdown),
-    V111 => eRENDERDOC_API_Version_1_1_1 (HasShutdown),
-    V112 => eRENDERDOC_API_Version_1_1_2 (HasShutdown),
-    V120 => eRENDERDOC_API_Version_1_2_0 (HasShutdown),
-    V130 => eRENDERDOC_API_Version_1_3_0 (HasShutdown),
-    V140 => eRENDERDOC_API_Version_1_4_0 (HasShutdown),
-    V141 => eRENDERDOC_API_Version_1_4_1 (HasRemoveHooks),
-    V142 => eRENDERDOC_API_Version_1_4_2 (HasRemoveHooks),
-    V150 => eRENDERDOC_API_Version_1_5_0 (HasRemoveHooks),
-    V160 => eRENDERDOC_API_Version_1_6_0 (HasRemoveHooks)
+    V100 => eRENDERDOC_API_Version_1_0_0,
+    V101 => eRENDERDOC_API_Version_1_0_1,
+    V102 => eRENDERDOC_API_Version_1_0_2,
+    V110 => eRENDERDOC_API_Version_1_1_0,
+    V111 => eRENDERDOC_API_Version_1_1_1,
+    V112 => eRENDERDOC_API_Version_1_1_2,
+    V120 => eRENDERDOC_API_Version_1_2_0,
+    V130 => eRENDERDOC_API_Version_1_3_0,
+    V140 => eRENDERDOC_API_Version_1_4_0,
+    V141 => eRENDERDOC_API_Version_1_4_1,
+    V142 => eRENDERDOC_API_Version_1_4_2,
+    V150 => eRENDERDOC_API_Version_1_5_0,
+    V160 => eRENDERDOC_API_Version_1_6_0
 }
 
 /// Encodes the given RenderDoc version into a valid `RENDERDOC_Version`.

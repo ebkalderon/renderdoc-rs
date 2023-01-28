@@ -9,7 +9,7 @@ pub use self::version::{
     V160,
 };
 
-use self::version::Minimum;
+use self::version::{Below, Minimum};
 
 mod error;
 mod version;
@@ -107,6 +107,50 @@ impl<V: Minimum<V100>> RenderDoc<V> {
         }
 
         (major as u8, minor as u8, patch as u8)
+    }
+}
+
+impl<V: Minimum<V100> + Below<V141>> RenderDoc<V> {
+    /// Attempts to shut down RenderDoc.
+    ///
+    /// # Safety
+    ///
+    /// Note that this will only work correctly if done _immediately_ after the dynamic library is
+    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected hooks
+    /// and shut down. Behavior is undefined if this is called after any API functions have been
+    /// called.
+    ///
+    /// # Compatibility
+    ///
+    /// This process is only possible on Windows, and even then it is not well defined so may not be
+    /// possible in all circumstances. This method is provided at your own risk.
+    ///
+    /// Since version 1.4.1, this method has been renamed to [`remove_hooks`].
+    #[cfg(windows)]
+    pub unsafe fn shutdown(self) {
+        ((*self.api).__bindgen_anon_1.Shutdown.unwrap())();
+    }
+}
+
+impl<V: Minimum<V141>> RenderDoc<V> {
+    /// Attempts to remove RenderDoc's hooks in the application.
+    ///
+    /// # Safety
+    ///
+    /// Note that this will only work correctly if done _immediately_ after the dynamic library is
+    /// loaded, before any API work happens. At that point, RenderDoc will remove its injected hooks
+    /// and shut down. Behavior is undefined if this is called after any API functions have been
+    /// called.
+    ///
+    /// # Compatibility
+    ///
+    /// This process is only possible on Windows, and even then it is not well defined so may not be
+    /// possible in all circumstances. This method is provided at your own risk.
+    ///
+    /// Prior to version 1.4.1, this method was named [`shutdown`].
+    #[cfg(windows)]
+    pub unsafe fn remove_hooks(self) {
+        ((*self.api).__bindgen_anon_1.RemoveHooks.unwrap())();
     }
 }
 
