@@ -2,6 +2,8 @@
 
 use std::fmt::{self, Display, Formatter};
 
+use renderdoc_sys::RENDERDOC_CaptureOption;
+
 /// Errors that can occur with the RenderDoc in-application API.
 #[derive(Debug)]
 pub struct Error(ErrorKind);
@@ -22,15 +24,30 @@ impl Error {
     pub(crate) fn launch_replay_ui() -> Self {
         Error(ErrorKind::LaunchReplayUi)
     }
+
+    pub(crate) fn set_capture_options(opt: RENDERDOC_CaptureOption, val: u32) -> Self {
+        Error(ErrorKind::SetCaptureOptions(opt, val))
+    }
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.0 {
-            ErrorKind::Library(_) => write!(f, "Unable to load RenderDoc shared library"),
-            ErrorKind::Symbol(_) => write!(f, "Unable to find `RENDERDOC_GetAPI` symbol"),
-            ErrorKind::NoCompatibleApi => write!(f, "Library could not provide compatible API"),
-            ErrorKind::LaunchReplayUi => write!(f, "Failed to launch replay UI"),
+            ErrorKind::Library(_) => f.write_str("Unable to load RenderDoc shared library"),
+            ErrorKind::Symbol(_) => f.write_str("Unable to find `RENDERDOC_GetAPI` symbol"),
+            ErrorKind::NoCompatibleApi => f.write_str("Library could not provide compatible API"),
+            ErrorKind::LaunchReplayUi => f.write_str("Failed to launch replay UI"),
+            ErrorKind::SetCaptureOptions(opt, val) => {
+                if f.alternate() {
+                    write!(
+                        f,
+                        "Invalid capture option {} or value {} out of range",
+                        opt, val
+                    )
+                } else {
+                    f.write_str("Invalid capture option or value, option left unchanged")
+                }
+            }
         }
     }
 }
@@ -50,4 +67,5 @@ enum ErrorKind {
     Symbol(libloading::Error),
     NoCompatibleApi,
     LaunchReplayUi,
+    SetCaptureOptions(RENDERDOC_CaptureOption, u32),
 }
