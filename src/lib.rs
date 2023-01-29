@@ -6,6 +6,7 @@ use std::marker::PhantomData;
 
 pub use self::capture_opts::{CaptureCallstacksOption, CaptureOptions, SetCaptureOptions};
 pub use self::error::Error;
+pub use self::input_button::{AsInputButtons, InputButton};
 pub use self::version::{
     RawRenderDoc, Version, V100, V101, V102, V110, V111, V112, V120, V130, V140, V141, V142, V150,
     V160,
@@ -15,6 +16,7 @@ use self::version::{Below, DebugVersion, Minimum};
 
 mod capture_opts;
 mod error;
+mod input_button;
 mod version;
 
 pub struct RenderDoc<V = V160> {
@@ -159,6 +161,68 @@ impl<V: Minimum<V100>> RenderDoc<V> {
         CaptureOptions {
             api: self.api,
             _min_version: PhantomData,
+        }
+    }
+
+    /// Sets which key(s) should be used to toggle focus between multiple windows.
+    ///
+    /// If `keys` contains no items, focus toggling will be disabled entirely.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::Error;
+    /// # fn main() -> Result<(), Error> {
+    /// use renderdoc::{InputButton, RenderDoc};
+    ///
+    /// let mut renderdoc: RenderDoc = RenderDoc::new()?;
+    ///
+    /// // Map "F" as the focus toggle key.
+    /// renderdoc.set_focus_toggle_keys(InputButton::F);
+    /// // Map both "F" and "T" as focus toggle keys.
+    /// renderdoc.set_focus_toggle_keys([InputButton::F, InputButton::T]);
+    /// // Disable focus toggling altogether.
+    /// renderdoc.set_focus_toggle_keys(None);
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn set_focus_toggle_keys<K>(&mut self, keys: K)
+    where
+        K: AsInputButtons,
+    {
+        unsafe {
+            (self.api.SetFocusToggleKeys.unwrap())(keys.as_ptr() as *mut _, keys.len());
+        }
+    }
+
+    /// Sets which key(s) should be used to capture the next frame.
+    ///
+    /// If `keys` contains no items, capture keys will be disabled entirely.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::Error;
+    /// # fn main() -> Result<(), Error> {
+    /// use renderdoc::{InputButton, RenderDoc};
+    ///
+    /// let mut renderdoc: RenderDoc = RenderDoc::new()?;
+    ///
+    /// // Map "C" as the trigger capture key.
+    /// renderdoc.set_capture_keys(InputButton::C);
+    /// // Map both "C" and "T" as trigger capture keys.
+    /// renderdoc.set_capture_keys([InputButton::C, InputButton::T]);
+    /// // Disable capture keys altogether.
+    /// renderdoc.set_capture_keys(None);
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn set_capture_keys<K>(&mut self, keys: K)
+    where
+        K: AsInputButtons,
+    {
+        unsafe {
+            (self.api.SetCaptureKeys.unwrap())(keys.as_ptr() as *mut _, keys.len());
         }
     }
 }
