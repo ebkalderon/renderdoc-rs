@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use renderdoc_sys::RENDERDOC_CaptureOption;
 
-use crate::{Below, DebugVersion, Error, Minimum, RawRenderDoc, Version, V100, V102, V110, V130};
+use crate::{Below, DebugVersion, Error, Minimum, RawRenderDoc, Version, V100, V102, V130};
 
 /// A possible state of the "capture callstacks" option.
 #[derive(Clone, Copy, Debug)]
@@ -183,10 +183,7 @@ impl<V: Minimum<V100>> SetCaptureOptions<'_, V> {
         since = "1.1.0",
         note = "`save_all_initials` is always enabled in version 1.1.0 and newer"
     )]
-    pub fn save_all_initials(&mut self, enabled: bool) -> &mut Self
-    where
-        V: Below<V110>,
-    {
+    pub fn save_all_initials(&mut self, enabled: bool) -> &mut Self {
         use renderdoc_sys::eRENDERDOC_Option_SaveAllInitials;
         self.set_u32(eRENDERDOC_Option_SaveAllInitials, enabled as u32);
         self
@@ -420,10 +417,7 @@ impl<V: Minimum<V100>> CaptureOptions<'_, V> {
         since = "1.1.0",
         note = "`save_all_initials` is always enabled in version 1.1.0 and newer"
     )]
-    pub fn save_all_initials(&self) -> bool
-    where
-        V: Below<V110>,
-    {
+    pub fn save_all_initials(&self) -> bool {
         self.get_u32(renderdoc_sys::eRENDERDOC_Option_SaveAllInitials) == 1
     }
 
