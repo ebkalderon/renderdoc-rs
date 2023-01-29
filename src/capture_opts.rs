@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use renderdoc_sys::RENDERDOC_CaptureOption;
 
-use crate::{Below, Error, Minimum, RawRenderDoc, Version, V100, V102, V110, V130};
+use crate::{Below, DebugVersion, Error, Minimum, RawRenderDoc, Version, V100, V102, V110, V130};
 
 /// A possible state of the "capture callstacks" option.
 #[derive(Clone, Copy, Debug)]
@@ -29,7 +29,7 @@ pub enum CaptureCallstacksOption {
 /// [`RenderDoc<V>`]: crate::RenderDoc
 pub struct SetCaptureOptions<'api, V> {
     pub(super) api: *mut RawRenderDoc,
-    pub(super) _version: PhantomData<&'api mut V>,
+    pub(super) _min_version: PhantomData<&'api mut V>,
 }
 
 impl<V> SetCaptureOptions<'_, V> {
@@ -279,7 +279,7 @@ impl<V: Minimum<V130>> SetCaptureOptions<'_, V> {
 impl<V: Version> Debug for SetCaptureOptions<'_, V> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         f.debug_struct(stringify!(SetCaptureOptions))
-            .field("version", &V::VERSION)
+            .field("min_version", &DebugVersion(V::VERSION))
             .finish()
     }
 }
@@ -292,7 +292,7 @@ impl<V: Version> Debug for SetCaptureOptions<'_, V> {
 /// [`RenderDoc<V>`]: crate::RenderDoc
 pub struct CaptureOptions<'api, V> {
     pub(super) api: *mut RawRenderDoc,
-    pub(super) _version: PhantomData<&'api V>,
+    pub(super) _min_version: PhantomData<&'api V>,
 }
 
 impl<V> CaptureOptions<'_, V> {
@@ -492,7 +492,7 @@ impl<V: Minimum<V130>> CaptureOptions<'_, V> {
 impl<V: Version> Debug for CaptureOptions<'_, V> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         f.debug_struct(stringify!(CaptureOptions))
-            .field("version", &V::VERSION)
+            .field("min_version", &DebugVersion(V::VERSION))
             .finish()
     }
 }

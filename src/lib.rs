@@ -1,6 +1,7 @@
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 compile_error!("RenderDoc does not support this platform.");
 
+use std::fmt::{self, Debug, Formatter};
 use std::marker::PhantomData;
 
 pub use self::capture_opts::{CaptureCallstacksOption, CaptureOptions, SetCaptureOptions};
@@ -10,7 +11,7 @@ pub use self::version::{
     V160,
 };
 
-use self::version::{Below, Minimum};
+use self::version::{Below, DebugVersion, Minimum};
 
 mod capture_opts;
 mod error;
@@ -18,7 +19,7 @@ mod version;
 
 pub struct RenderDoc<V = V160> {
     api: *mut RawRenderDoc,
-    _version: PhantomData<V>,
+    _min_version: PhantomData<V>,
 }
 
 impl<V: Version> RenderDoc<V> {
@@ -29,7 +30,7 @@ impl<V: Version> RenderDoc<V> {
     pub fn new() -> Result<Self, Error> {
         Ok(RenderDoc {
             api: V::load()?,
-            _version: PhantomData,
+            _min_version: PhantomData,
         })
     }
 
@@ -65,7 +66,7 @@ impl<V: Version> RenderDoc<V> {
         if version::from_digits(major, minor, patch) >= U::VERSION {
             Ok(RenderDoc {
                 api: self.api,
-                _version: PhantomData,
+                _min_version: PhantomData,
             })
         } else {
             Err(self)
@@ -132,7 +133,7 @@ impl<V: Minimum<V100>> RenderDoc<V> {
     pub fn set_capture_options(&mut self) -> SetCaptureOptions<'_, V> {
         SetCaptureOptions {
             api: self.api,
-            _version: PhantomData,
+            _min_version: PhantomData,
         }
     }
 
@@ -157,7 +158,7 @@ impl<V: Minimum<V100>> RenderDoc<V> {
     pub fn capture_options(&self) -> CaptureOptions<'_, V> {
         CaptureOptions {
             api: self.api,
-            _version: PhantomData,
+            _min_version: PhantomData,
         }
     }
 }
@@ -207,3 +208,11 @@ impl<V: Minimum<V141>> RenderDoc<V> {
 }
 
 unsafe impl<V> Send for RenderDoc<V> {}
+
+impl<V: Version> Debug for RenderDoc<V> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        f.debug_struct(stringify!(RenderDoc))
+            .field("min_version", &DebugVersion(V::VERSION))
+            .finish()
+    }
+}

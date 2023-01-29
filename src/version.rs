@@ -1,4 +1,5 @@
 use std::ffi::{c_uint, c_void};
+use std::fmt::{self, Debug, Formatter};
 use std::ptr;
 
 use libloading::{Library, Symbol};
@@ -170,15 +171,33 @@ pub const fn from_digits(major: u8, minor: u8, patch: u8) -> RENDERDOC_Version {
     version
 }
 
+/// Decodes the given `RENDERDOC_Version` into major, minor, and patch digits.
+#[inline]
+const fn into_digits(ver: RENDERDOC_Version) -> (u8, u8, u8) {
+    let patch = ver % 100;
+    let minor = ver % 10_000 / 100;
+    let major = ver / 10_000;
+    (major as u8, minor as u8, patch as u8)
+}
+
+/// Newtype used to pretty-print a RenderDoc version.
+pub struct DebugVersion(pub RENDERDOC_Version);
+
+impl Debug for DebugVersion {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        let (major, minor, patch) = into_digits(self.0);
+        write!(f, "{}.{}.{}", major, minor, patch)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use renderdoc_sys::*;
 
     use super::*;
 
-    #[test]
-    fn encodes_version_from_digits() {
-        let versions = [
+    fn versions() -> impl IntoIterator<Item = ((u8, u8, u8), RENDERDOC_Version)> {
+        [
             ((1, 0, 0), eRENDERDOC_API_Version_1_0_0),
             ((1, 0, 1), eRENDERDOC_API_Version_1_0_1),
             ((1, 0, 2), eRENDERDOC_API_Version_1_0_2),
@@ -192,12 +211,43 @@ mod tests {
             ((1, 4, 2), eRENDERDOC_API_Version_1_4_2),
             ((1, 5, 0), eRENDERDOC_API_Version_1_5_0),
             ((1, 6, 0), eRENDERDOC_API_Version_1_6_0),
-        ];
+        ]
+    }
 
-        for (input_digits, expected_version) in versions {
+    #[test]
+    fn encodes_version_from_digits() {
+        for (input_digits, expected_version) in versions() {
             let (major, minor, patch) = input_digits;
             let computed_version = from_digits(major, minor, patch);
             assert_eq!(computed_version, expected_version);
         }
+    }
+
+    #[test]
+    fn decodes_digits_from_version() {
+        for (expected_digits, input_version) in versions() {
+            let computed_digits = into_digits(input_version);
+            assert_eq!(computed_digits, expected_digits);
+        }
+    }
+
+    #[test]
+    fn round_trip_from_into_digits() {
+        let computed_versions = versions()
+            .into_iter()
+            .map(|((major, minor, patch), _)| from_digits(major, minor, patch));
+
+        for (computed_version, (expected_digits, _)) in computed_versions.zip(versions()) {
+            let computed_digits = into_digits(computed_version);
+            assert_eq!(computed_digits, expected_digits);
+        }
+    }
+
+    #[test]
+    fn produces_reasonable_debug_output() {
+        assert_eq!(
+            format!("{:?}", DebugVersion(eRENDERDOC_API_Version_1_4_2)),
+            "1.4.2"
+        );
     }
 }
