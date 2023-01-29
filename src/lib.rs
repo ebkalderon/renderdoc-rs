@@ -225,9 +225,7 @@ impl<V: Minimum<V100>> RenderDoc<V> {
             (self.api.SetCaptureKeys.unwrap())(keys.as_ptr() as *mut _, keys.len());
         }
     }
-}
 
-impl<V: Minimum<V100> + Below<V141>> RenderDoc<V> {
     /// Attempts to shut down RenderDoc.
     ///
     /// # Safety
@@ -244,7 +242,10 @@ impl<V: Minimum<V100> + Below<V141>> RenderDoc<V> {
     ///
     /// Since version 1.4.1, this method has been renamed to [`remove_hooks`].
     #[cfg(windows)]
-    pub unsafe fn shutdown(self) {
+    pub unsafe fn shutdown(self)
+    where
+        V: Below<V141>,
+    {
         ((*self.api).__bindgen_anon_1.Shutdown.unwrap())();
     }
 }
