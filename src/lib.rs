@@ -3,7 +3,7 @@ compile_error!("RenderDoc does not support this platform.");
 
 use std::marker::PhantomData;
 
-pub use self::capture_opts::{CaptureCallstacksOption, SetCaptureOptions};
+pub use self::capture_opts::{CaptureCallstacksOption, CaptureOptions, SetCaptureOptions};
 pub use self::error::Error;
 pub use self::version::{
     RawRenderDoc, Version, V100, V101, V102, V110, V111, V112, V120, V130, V140, V141, V142, V150,
@@ -131,6 +131,31 @@ impl<V: Minimum<V100>> RenderDoc<V> {
     /// ```
     pub fn set_capture_options(&mut self) -> SetCaptureOptions<'_, V> {
         SetCaptureOptions {
+            api: self.api,
+            _version: PhantomData,
+        }
+    }
+
+    /// Gets the current values of RenderDoc capture options.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::Error;
+    /// # fn main() -> Result<(), Error> {
+    /// use renderdoc::RenderDoc;
+    ///
+    /// let renderdoc: RenderDoc = RenderDoc::new()?;
+    /// if renderdoc.capture_options().allow_vsync() {
+    ///     // vsync is allowed
+    /// } else {
+    ///     // vsync is not allowed
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn capture_options(&self) -> CaptureOptions<'_, V> {
+        CaptureOptions {
             api: self.api,
             _version: PhantomData,
         }

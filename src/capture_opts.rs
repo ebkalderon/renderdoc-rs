@@ -283,3 +283,216 @@ impl<V: Version> Debug for SetCaptureOptions<'_, V> {
             .finish()
     }
 }
+
+/// Gets the values of RenderDoc capture options.
+///
+/// This struct is created by the [`capture_options`] method on [`RenderDoc<V>`].
+///
+/// [`capture_options`]: crate::RenderDoc::capture_options
+/// [`RenderDoc<V>`]: crate::RenderDoc
+pub struct CaptureOptions<'api, V> {
+    pub(super) api: *mut RawRenderDoc,
+    pub(super) _version: PhantomData<&'api V>,
+}
+
+impl<V> CaptureOptions<'_, V> {
+    fn get_u32(&self, opt: RENDERDOC_CaptureOption) -> u32 {
+        self.try_get_u32(opt).expect("CaptureOptions bug")
+    }
+
+    #[inline]
+    fn try_get_u32(&self, opt: RENDERDOC_CaptureOption) -> Result<u32, Error> {
+        let value = unsafe { (self.api.GetCaptureOptionU32.unwrap())(opt) };
+        match value {
+            u32::MAX => Err(Error::get_capture_options(opt)),
+            val => Ok(val),
+        }
+    }
+}
+
+impl<V: Minimum<V100>> CaptureOptions<'_, V> {
+    /// Returns whether the application is allowed to enable vertical synchronization at will.
+    ///
+    /// If this option is set to `false`, the application will be prevented from enabling vsync.
+    pub fn allow_vsync(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_AllowVSync) == 1
+    }
+
+    /// Returns whether the application is allowed to enter fullscreen mode at will.
+    ///
+    /// If this option is set to `false`, the application will be prevented from entering
+    /// fullscreen mode.
+    pub fn allow_fullscreen(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_AllowFullscreen) == 1
+    }
+
+    /// Capture a CPU callstack on every API call.
+    ///
+    /// See [`CaptureCallstacksOption`] documentation for details.
+    pub fn capture_callstacks(&self) -> CaptureCallstacksOption {
+        if self.get_u32(renderdoc_sys::eRENDERDOC_Option_CaptureCallstacks) == 1 {
+            if self.get_u32(renderdoc_sys::eRENDERDOC_Option_CaptureCallstacksOnlyDraws) == 1 {
+                CaptureCallstacksOption::OnlyActions
+            } else {
+                CaptureCallstacksOption::Enabled
+            }
+        } else {
+            CaptureCallstacksOption::Disabled
+        }
+    }
+
+    /// Returns the `delay` RenderDoc will wait after launching a process to allow debuggers to
+    /// attach.
+    ///
+    /// This only applies to child processes since the delay happens at process startup.
+    pub fn delay_for_debugger(&self) -> Duration {
+        let secs = self.get_u32(renderdoc_sys::eRENDERDOC_Option_DelayForDebugger);
+        Duration::from_secs(secs as u64)
+    }
+
+    /// Returns whether any child processes launched by the initial application should be hooked by
+    /// RenderDoc as well.
+    ///
+    /// The child processes will inherit the same RenderDoc capture options as the parent. This
+    /// setting is commonly used in cases where a launcher process is necessary to start the
+    /// application.
+    pub fn hook_into_children(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_HookIntoChildren) == 1
+    }
+
+    /// Returns whether _all_ live resources at the time of capture are included in the capture,
+    /// even those that are not referenced by the frame.
+    ///
+    /// By default, RenderDoc only includes the resources necessary for that specific frame in the
+    /// final capture. Enabling this option overrides this behavior so all live resources are
+    /// available for inspection.
+    pub fn ref_all_resources(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_RefAllResources) == 1
+    }
+
+    /// Returns whether all deferred command lists are saved, even when idling.
+    ///
+    /// In APIs that allow for the recording of command lists to be replayed later, RenderDoc may
+    /// choose to not capture command lists before a frame capture is triggered to reduce overhead.
+    /// This means any command lists recorded once and replayed many times will not be available
+    /// and may cause a failure to capture.
+    ///
+    /// Enabling this option may impose a performance overhead, but it ensures that any command
+    /// list still being held by the application will be captured.
+    ///
+    /// # Compatibility
+    ///
+    /// With regards to the comment above about overhead: this is only true for APIs where
+    /// multithreading is difficult or discouraged. Newer APIs like Vulkan and D3D12 will ignore
+    /// this option and always capture all command lists. Such APIs were designed with
+    /// multithreading in mind and overheads are low by design.
+    pub fn capture_all_command_lists(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_CaptureAllCmdLists) == 1
+    }
+
+    /// Returns whether API debugging output is muted when the API validation mode option is
+    /// enabled.
+    ///
+    /// See documentation of [`debug_device_mode`] (below 1.0.2) or [`api_validation`] (1.0.2 and
+    /// newer) for details.
+    ///
+    /// [`debug_device_mode`]: CaptureOptions::debug_device_mode
+    /// [`api_validation`]: CaptureOptions::api_validation
+    pub fn mute_debug_output(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_DebugOutputMute) == 1
+    }
+}
+
+impl<V: Minimum<V100> + Below<V102>> CaptureOptions<'_, V> {
+    /// Returns whether the graphics API was initialized with built-in validation enabled.
+    ///
+    /// If enabled, this allows capturing and reading of errors and warnings generated by the API's
+    /// own debugging system.
+    ///
+    /// # Compatibility
+    ///
+    /// Since version 1.0.2, this capture option has been renamed to [`api_validation`].
+    ///
+    /// [`api_validation`]: CaptureOptions::api_validation
+    pub fn debug_device_mode(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_DebugDeviceMode) == 1
+    }
+}
+
+impl<V: Minimum<V100> + Below<V110>> CaptureOptions<'_, V> {
+    /// Returns whether the initial contents of all resources are saved at the start of each frame,
+    /// even if they are later overwritten or cleared before being used.
+    ///
+    /// By default, RenderDoc skips saving initial states for resources where the previous contents
+    /// don't appear to have been used, assuming that a write followed by a read means that the
+    /// resource had never been used before (and is therefore treated as empty).
+    #[deprecated(
+        since = "1.1.0",
+        note = "`save_all_initials` is always enabled in version 1.1.0 and newer"
+    )]
+    pub fn save_all_initials(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_SaveAllInitials) == 1
+    }
+}
+
+impl<V: Minimum<V100> + Below<V130>> CaptureOptions<'_, V> {
+    /// Returns whether RenderDoc will verify writes to mapped buffers.
+    ///
+    /// This option indicates mapped memory updates should be bounds-checked for overruns, and
+    /// uninitialized buffers should be initialized to `0xdddddddd` to catch use of uninitialized
+    /// data.
+    ///
+    /// # Compatibility
+    ///
+    /// Only supported on D3D11 and OpenGL.
+    ///
+    /// Since version 1.3.0, this capture option has been renamed to [`verify_buffer_access`].
+    ///
+    /// [`verify_buffer_access`]: CaptureOptions::verify_buffer_access
+    pub fn verify_map_writes(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_VerifyMapWrites) == 1
+    }
+}
+
+impl<V: Minimum<V102>> CaptureOptions<'_, V> {
+    /// Returns whether the graphics API was initialized with built-in validation enabled.
+    ///
+    /// If enabled, this allows capturing and reading of errors and warnings generated by the API's
+    /// own debugging system.
+    ///
+    /// # Compatibility
+    ///
+    /// Prior to version 1.0.2, this capture option was named [`debug_device_mode`].
+    ///
+    /// [`debug_device_mode`]: CaptureOptions::debug_device_mode
+    pub fn api_validation(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_APIValidation) == 1
+    }
+}
+
+impl<V: Minimum<V130>> CaptureOptions<'_, V> {
+    /// Returns whether RenderDoc will verify writes to mapped buffers.
+    ///
+    /// This option indicates mapped memory updates should be bounds-checked for overruns, and
+    /// uninitialized buffers should be initialized to `0xdddddddd` to catch use of uninitialized
+    /// data.
+    ///
+    /// # Compatibility
+    ///
+    /// Only supported on Direct3D 11 and OpenGL.
+    ///
+    /// Prior to version 1.3.0, this capture option was named [`verify_map_writes`].
+    ///
+    /// [`verify_map_writes`]: CaptureOptions::verify_map_writes
+    pub fn verify_buffer_access(&self) -> bool {
+        self.get_u32(renderdoc_sys::eRENDERDOC_Option_VerifyBufferAccess) == 1
+    }
+}
+
+impl<V: Version> Debug for CaptureOptions<'_, V> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        f.debug_struct(stringify!(CaptureOptions))
+            .field("version", &V::VERSION)
+            .finish()
+    }
+}

@@ -28,6 +28,10 @@ impl Error {
     pub(crate) fn set_capture_options(opt: RENDERDOC_CaptureOption, val: u32) -> Self {
         Error(ErrorKind::SetCaptureOptions(opt, val))
     }
+
+    pub(crate) fn get_capture_options(opt: RENDERDOC_CaptureOption) -> Self {
+        Error(ErrorKind::GetCaptureOptions(opt))
+    }
 }
 
 impl Display for Error {
@@ -46,6 +50,13 @@ impl Display for Error {
                     )
                 } else {
                     f.write_str("Invalid capture option or value, option left unchanged")
+                }
+            }
+            ErrorKind::GetCaptureOptions(opt) => {
+                if f.alternate() {
+                    write!(f, "Invalid capture option {}", opt)
+                } else {
+                    f.write_str("Invalid capture option")
                 }
             }
         }
@@ -68,4 +79,5 @@ enum ErrorKind {
     NoCompatibleApi,
     LaunchReplayUi,
     SetCaptureOptions(RENDERDOC_CaptureOption, u32),
+    GetCaptureOptions(RENDERDOC_CaptureOption),
 }
