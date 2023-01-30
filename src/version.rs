@@ -10,6 +10,25 @@ use crate::Error;
 
 pub type RawRenderDoc = renderdoc_sys::RENDERDOC_API_1_6_0;
 
+#[cfg(all(windows, not(feature = "ci")))]
+fn load_library(path: &str) -> Result<Library, libloading::Error> {
+    unsafe { libloading::os::windows::Library::open_already_loaded(path).map(Library::from) }
+}
+
+#[cfg(all(unix, not(feature = "ci")))]
+fn load_library(path: &str) -> Result<Library, libloading::Error> {
+    // TODO: Use constant from `libloading`, once added upstream.
+    const RTLD_NOLOAD: i32 = 0x4;
+
+    let flags = libloading::os::unix::RTLD_NOW | RTLD_NOLOAD;
+    unsafe { libloading::os::unix::Library::open(Some(path), flags).map(Library::from) }
+}
+
+#[cfg(feature = "ci")]
+fn load_library(path: &str) -> Result<Library, libloading::Error> {
+    unsafe { Library::new(path) }
+}
+
 pub trait Version {
     const VERSION: RENDERDOC_Version;
 
@@ -31,36 +50,15 @@ pub trait Version {
         let lib_path = "libVkLayer_GLES_RenderDoc.so";
 
         unsafe {
-            #[cfg(not(feature = "ci"))]
-            #[cfg(unix)]
             let lib = LIBRARY
-                .get_or_try_init(|| {
-                    // TODO: Use constant from `libloading`, once added upstream.
-                    const RTLD_NOLOAD: i32 = 0x4;
-
-                    let flags = libloading::os::unix::RTLD_NOW | RTLD_NOLOAD;
-                    libloading::os::unix::Library::open(Some(lib_path), flags).map(Into::into)
-                })
-                .map_err(Error::library)?;
-
-            #[cfg(not(feature = "ci"))]
-            #[cfg(windows)]
-            let lib = LIBRARY
-                .get_or_try_init(|| {
-                    libloading::os::windows::Library::open_already_loaded(lib_path).map(Into::into)
-                })
-                .map_err(Error::library)?;
-
-            #[cfg(feature = "ci")]
-            let lib = LIBRARY
-                .get_or_try_init(|| Library::new(lib_path))
+                .get_or_try_init(|| load_library(lib_path))
                 .map_err(Error::library)?;
 
             let get_api: Symbol<GetApiFn> =
                 lib.get(b"RENDERDOC_GetAPI\0").map_err(Error::symbol)?;
 
             let mut obj = ptr::null_mut();
-            match get_api(Self::VERSION as c_uint, &mut obj) {
+            match get_api(Self::VERSION, &mut obj) {
                 1 => Ok(obj as *mut RawRenderDoc),
                 _ => Err(Error::no_compatible_api()),
             }
