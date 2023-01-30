@@ -21,6 +21,10 @@ impl Error {
         Error(ErrorKind::NoCompatibleApi)
     }
 
+    pub(crate) fn multiple_instances() -> Self {
+        Error(ErrorKind::MultipleInstances)
+    }
+
     pub(crate) fn launch_replay_ui() -> Self {
         Error(ErrorKind::LaunchReplayUi)
     }
@@ -40,6 +44,7 @@ impl Display for Error {
             ErrorKind::Library(_) => f.write_str("Unable to load RenderDoc shared library"),
             ErrorKind::Symbol(_) => f.write_str("Unable to find `RENDERDOC_GetAPI` symbol"),
             ErrorKind::NoCompatibleApi => f.write_str("Library could not provide compatible API"),
+            ErrorKind::MultipleInstances => f.write_str("Multiple API instances are not permitted"),
             ErrorKind::LaunchReplayUi => f.write_str("Failed to launch replay UI"),
             ErrorKind::SetCaptureOptions(opt, val) => {
                 if f.alternate() {
@@ -77,6 +82,7 @@ enum ErrorKind {
     Library(libloading::Error),
     Symbol(libloading::Error),
     NoCompatibleApi,
+    MultipleInstances,
     LaunchReplayUi,
     SetCaptureOptions(RENDERDOC_CaptureOption, u32),
     GetCaptureOptions(RENDERDOC_CaptureOption),

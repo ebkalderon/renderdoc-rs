@@ -7,20 +7,22 @@ use std::marker::PhantomData;
 pub use self::capture_opts::{CaptureCallstacksOption, CaptureOptions, SetCaptureOptions};
 pub use self::error::Error;
 pub use self::input_button::{AsInputButtons, InputButton};
+pub use self::loader::RawRenderDoc;
 pub use self::version::{
-    RawRenderDoc, Version, V100, V101, V102, V110, V111, V112, V120, V130, V140, V141, V142, V150,
-    V160,
+    Version, V100, V101, V102, V110, V111, V112, V120, V130, V140, V141, V142, V150, V160,
 };
 
+use self::loader::FunctionTable;
 use self::version::{Below, DebugVersion, Minimum};
 
 mod capture_opts;
 mod error;
 mod input_button;
+mod loader;
 mod version;
 
 pub struct RenderDoc<V = V160> {
-    api: *mut RawRenderDoc,
+    api: FunctionTable,
     _min_version: PhantomData<V>,
 }
 
@@ -29,9 +31,15 @@ impl<V: Version> RenderDoc<V> {
     ///
     /// Note that RenderDoc will usually provide a higher API version than the one requested by the
     /// user, provided it is backwards compatible.
+    ///
+    /// Returns `Err` if the application is not running inside RenderDoc, the library could not be
+    /// found in `$PATH`, or another error occurred while opening the API.
+    ///
+    /// Only one `RenderDoc` instance may exist at any one time. If this function is called while
+    /// another instance is still live, this function will return an error.
     pub fn new() -> Result<Self, Error> {
         Ok(RenderDoc {
-            api: V::load()?,
+            api: loader::load(V::VERSION)?,
             _min_version: PhantomData,
         })
     }
@@ -75,13 +83,15 @@ impl<V: Version> RenderDoc<V> {
         }
     }
 
-    /// Returns the underlying API entry point struct.
+    /// Returns the underlying pointer to the API function table.
     ///
     /// # Safety
     ///
-    /// Directly accessing this function table discards any and all safety features of this library.
+    /// Making copies of this pointer and mutating the RenderDoc API from multiple locations breaks
+    /// the safety invariants of this library. Use with caution!
+    #[inline]
     pub unsafe fn raw_api(&self) -> *mut RawRenderDoc {
-        self.api
+        self.api.inner()
     }
 }
 
@@ -134,7 +144,7 @@ impl<V: Minimum<V100>> RenderDoc<V> {
     /// ```
     pub fn set_capture_options(&mut self) -> SetCaptureOptions<'_, V> {
         SetCaptureOptions {
-            api: self.api,
+            api: &mut self.api,
             _min_version: PhantomData,
         }
     }
@@ -159,7 +169,7 @@ impl<V: Minimum<V100>> RenderDoc<V> {
     /// ```
     pub fn capture_options(&self) -> CaptureOptions<'_, V> {
         CaptureOptions {
-            api: self.api,
+            api: &self.api,
             _min_version: PhantomData,
         }
     }
@@ -246,7 +256,7 @@ impl<V: Minimum<V100>> RenderDoc<V> {
     where
         V: Below<V141>,
     {
-        ((*self.api).__bindgen_anon_1.Shutdown.unwrap())();
+        (self.api.__bindgen_anon_1.Shutdown.unwrap())();
     }
 }
 
@@ -268,11 +278,9 @@ impl<V: Minimum<V141>> RenderDoc<V> {
     /// Prior to version 1.4.1, this method was named [`shutdown`].
     #[cfg(windows)]
     pub unsafe fn remove_hooks(self) {
-        ((*self.api).__bindgen_anon_1.RemoveHooks.unwrap())();
+        (self.api.__bindgen_anon_1.RemoveHooks.unwrap())();
     }
 }
-
-unsafe impl<V> Send for RenderDoc<V> {}
 
 impl<V: Version> Debug for RenderDoc<V> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {

@@ -1,69 +1,10 @@
-use std::ffi::{c_uint, c_void};
+use std::ffi::c_uint;
 use std::fmt::{self, Debug, Formatter};
-use std::ptr;
 
-use libloading::{Library, Symbol};
-use once_cell::sync::OnceCell;
 use renderdoc_sys::RENDERDOC_Version;
-
-use crate::Error;
-
-pub type RawRenderDoc = renderdoc_sys::RENDERDOC_API_1_6_0;
-
-#[cfg(all(windows, not(feature = "ci")))]
-fn load_library(path: &str) -> Result<Library, libloading::Error> {
-    unsafe { libloading::os::windows::Library::open_already_loaded(path).map(Library::from) }
-}
-
-#[cfg(all(unix, not(feature = "ci")))]
-fn load_library(path: &str) -> Result<Library, libloading::Error> {
-    // TODO: Use constant from `libloading`, once added upstream.
-    const RTLD_NOLOAD: i32 = 0x4;
-
-    let flags = libloading::os::unix::RTLD_NOW | RTLD_NOLOAD;
-    unsafe { libloading::os::unix::Library::open(Some(path), flags).map(Library::from) }
-}
-
-#[cfg(feature = "ci")]
-fn load_library(path: &str) -> Result<Library, libloading::Error> {
-    unsafe { Library::new(path) }
-}
 
 pub trait Version {
     const VERSION: RENDERDOC_Version;
-
-    /// Initializes a new instance of the RenderDoc API.
-    ///
-    /// # Safety
-    ///
-    /// This function is not thread-safe and should not be called on multiple threads at once.
-    fn load() -> Result<*mut RawRenderDoc, Error> {
-        static LIBRARY: OnceCell<Library> = OnceCell::new();
-
-        type GetApiFn = unsafe extern "C" fn(ver: c_uint, out: *mut *mut c_void) -> i32;
-
-        #[cfg(windows)]
-        let lib_path = "renderdoc.dll";
-        #[cfg(all(unix, not(target_os = "android")))]
-        let lib_path = "librenderdoc.so";
-        #[cfg(target_os = "android")]
-        let lib_path = "libVkLayer_GLES_RenderDoc.so";
-
-        unsafe {
-            let lib = LIBRARY
-                .get_or_try_init(|| load_library(lib_path))
-                .map_err(Error::library)?;
-
-            let get_api: Symbol<GetApiFn> =
-                lib.get(b"RENDERDOC_GetAPI\0").map_err(Error::symbol)?;
-
-            let mut obj = ptr::null_mut();
-            match get_api(Self::VERSION, &mut obj) {
-                1 => Ok(obj as *mut RawRenderDoc),
-                _ => Err(Error::no_compatible_api()),
-            }
-        }
-    }
 }
 
 pub trait Minimum<V: Version> {}

@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use renderdoc_sys::RENDERDOC_CaptureOption;
 
-use crate::{Below, DebugVersion, Error, Minimum, RawRenderDoc, Version, V100, V102, V130};
+use crate::{Below, DebugVersion, Error, FunctionTable, Minimum, Version, V100, V102, V130};
 
 /// A possible state of the "capture callstacks" option.
 #[derive(Clone, Copy, Debug)]
@@ -28,8 +28,8 @@ pub enum CaptureCallstacksOption {
 /// [`set_capture_options`]: crate::RenderDoc::set_capture_options
 /// [`RenderDoc<V>`]: crate::RenderDoc
 pub struct SetCaptureOptions<'api, V> {
-    pub(super) api: *mut RawRenderDoc,
-    pub(super) _min_version: PhantomData<&'api mut V>,
+    pub(super) api: &'api mut FunctionTable,
+    pub(super) _min_version: PhantomData<V>,
 }
 
 impl<V> SetCaptureOptions<'_, V> {
@@ -291,8 +291,8 @@ impl<V: Version> Debug for SetCaptureOptions<'_, V> {
 /// [`capture_options`]: crate::RenderDoc::capture_options
 /// [`RenderDoc<V>`]: crate::RenderDoc
 pub struct CaptureOptions<'api, V> {
-    pub(super) api: *mut RawRenderDoc,
-    pub(super) _min_version: PhantomData<&'api V>,
+    pub(super) api: &'api FunctionTable,
+    pub(super) _min_version: PhantomData<V>,
 }
 
 impl<V> CaptureOptions<'_, V> {
