@@ -8,6 +8,7 @@ pub use self::capture_opts::{CaptureCallstacksOption, CaptureOptions, SetCapture
 pub use self::error::Error;
 pub use self::input_button::{AsInputButtons, InputButton};
 pub use self::loader::RawRenderDoc;
+pub use self::overlay_bits::OverlayBits;
 pub use self::version::{
     Version, V100, V101, V102, V110, V111, V112, V120, V130, V140, V141, V142, V150, V160,
 };
@@ -19,6 +20,7 @@ mod capture_opts;
 mod error;
 mod input_button;
 mod loader;
+mod overlay_bits;
 mod version;
 
 pub struct RenderDoc<V = V160> {
@@ -234,6 +236,86 @@ impl<V: Minimum<V100>> RenderDoc<V> {
         unsafe {
             (self.api.SetCaptureKeys.unwrap())(keys.as_ptr() as *mut _, keys.len());
         }
+    }
+
+    /// Enables options for the in-application overlay.
+    ///
+    /// The overlay state is set to [`OverlayBits::DEFAULT`] on startup.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::Error;
+    /// # fn main() -> Result<(), Error> {
+    /// use renderdoc::{OverlayBits, RenderDoc};
+    ///
+    /// let mut renderdoc: RenderDoc = RenderDoc::new()?;
+    ///
+    /// // Enable the RenderDoc overlay globally, enable the frame rate counter.
+    /// renderdoc.set_overlay_bits(OverlayBits::ENABLED | OverlayBits::FRAME_RATE);
+    /// // Enable all overlay options.
+    /// renderdoc.set_overlay_bits(OverlayBits::all());
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn set_overlay_bits(&mut self, or_mask: OverlayBits<V>) {
+        self.mask_overlay_bits(OverlayBits::all(), or_mask)
+    }
+
+    /// Disables options for the in-application overlay.
+    ///
+    /// The overlay state is set to [`OverlayBits::DEFAULT`] on startup.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::Error;
+    /// # fn main() -> Result<(), Error> {
+    /// use renderdoc::{OverlayBits, RenderDoc};
+    ///
+    /// let mut renderdoc: RenderDoc = RenderDoc::new()?;
+    ///
+    /// // Disable the capture list and frame number counter.
+    /// renderdoc.clear_overlay_bits(!OverlayBits::CAPTURE_LIST & !OverlayBits::FRAME_NUMBER);
+    /// // Disable the RenderDoc overlay globally.
+    /// renderdoc.clear_overlay_bits(!OverlayBits::ENABLED);
+    /// // Disable the overlay and also all other options.
+    /// renderdoc.clear_overlay_bits(!OverlayBits::all());
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn clear_overlay_bits(&mut self, and_mask: OverlayBits<V>) {
+        self.mask_overlay_bits(and_mask, OverlayBits::empty());
+    }
+
+    fn mask_overlay_bits(&mut self, and: OverlayBits<V>, or: OverlayBits<V>) {
+        unsafe {
+            (self.api.MaskOverlayBits.unwrap())(and.bits, or.bits);
+        }
+    }
+
+    /// Returns the current in-application overlay configuration.
+    ///
+    /// The overlay state is set to [`OverlayBits::DEFAULT`] on startup.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::Error;
+    /// # fn main() -> Result<(), Error> {
+    /// use renderdoc::{OverlayBits, RenderDoc};
+    ///
+    /// let mut renderdoc: RenderDoc = RenderDoc::new()?;
+    ///
+    /// let bits = renderdoc.overlay_bits();
+    ///
+    /// assert!(bits.contains(OverlayBits::ENABLED | OverlayBits::DEFAULT));
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn overlay_bits(&self) -> OverlayBits<V> {
+        let bits = unsafe { (self.api.GetOverlayBits.unwrap())() };
+        OverlayBits::from_bits_truncate(bits)
     }
 
     /// Attempts to shut down RenderDoc.
