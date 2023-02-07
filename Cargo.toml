@@ -40,7 +40,7 @@ winapi = { version = "0.3", features = ["d3d12","d3d11"] }
 wio = "0.2"
 
 [dev-dependencies]
-pollster = "0.2"
+pollster = "0.3"
 wgpu = "0.15"
 wgpu-subscriber = "0.1.0"
 winit = "0.27"
