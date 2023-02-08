@@ -340,6 +340,16 @@ impl<V: Minimum<V100>> RenderDoc<V> {
     {
         (self.api.__bindgen_anon_1.Shutdown.unwrap())();
     }
+
+    /// Removes RenderDoc's injected crash handler from the current process.
+    ///
+    /// If you use your own crash handler and don't want RenderDoc's handler to intercede, you may
+    /// call this method to unload it. Any unhandled exceptions will then pass to the next handler.
+    pub fn unload_crash_handler(&mut self) {
+        unsafe {
+            (self.api.UnloadCrashHandler.unwrap())();
+        }
+    }
 }
 
 impl<V: Minimum<V141>> RenderDoc<V> {
