@@ -25,6 +25,10 @@ impl Error {
         Error(ErrorKind::MultipleInstances)
     }
 
+    pub(crate) fn non_utf8_path() -> Self {
+        Error(ErrorKind::NonUtf8Path)
+    }
+
     pub(crate) fn launch_replay_ui() -> Self {
         Error(ErrorKind::LaunchReplayUi)
     }
@@ -45,6 +49,7 @@ impl Display for Error {
             ErrorKind::Symbol(_) => f.write_str("Unable to find `RENDERDOC_GetAPI` symbol"),
             ErrorKind::NoCompatibleApi => f.write_str("Library could not provide compatible API"),
             ErrorKind::MultipleInstances => f.write_str("Multiple API instances are not permitted"),
+            ErrorKind::NonUtf8Path => f.write_str("RenderDoc only accepts UTF-8 paths"),
             ErrorKind::LaunchReplayUi => f.write_str("Failed to launch replay UI"),
             ErrorKind::SetCaptureOptions(opt, val) => {
                 if f.alternate() {
@@ -86,4 +91,5 @@ enum ErrorKind {
     LaunchReplayUi,
     SetCaptureOptions(RENDERDOC_CaptureOption, u32),
     GetCaptureOptions(RENDERDOC_CaptureOption),
+    NonUtf8Path,
 }

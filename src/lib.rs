@@ -5,6 +5,7 @@ use std::fmt::{self, Debug, Formatter};
 use std::marker::PhantomData;
 
 pub use self::capture_opts::{CaptureCallstacksOption, CaptureOptions, SetCaptureOptions};
+pub use self::captures::{Capture, Captures, CapturesIter};
 pub use self::error::Error;
 pub use self::input_button::{AsInputButtons, InputButton};
 pub use self::loader::RawRenderDoc;
@@ -17,6 +18,7 @@ use self::loader::FunctionTable;
 use self::version::{Below, DebugVersion, Minimum};
 
 mod capture_opts;
+mod captures;
 mod error;
 mod input_button;
 mod loader;
@@ -349,6 +351,35 @@ impl<V: Minimum<V100>> RenderDoc<V> {
         unsafe {
             (self.api.UnloadCrashHandler.unwrap())();
         }
+    }
+
+    /// Returns the frame captures created by RenderDoc.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use renderdoc::Error;
+    /// # fn main() -> Result<(), Error> {
+    /// use renderdoc::{RenderDoc, V100};
+    ///
+    /// let mut renderdoc: RenderDoc<V100> = RenderDoc::new()?;
+    ///
+    /// // Set the capture file path template.
+    /// renderdoc.captures().set_path_template("mycaptures/example");
+    ///
+    /// // Iterate over all frame captures created so far.
+    /// for capture in renderdoc.captures().iter() {
+    ///     println!("capture file: {:?}", capture.path);
+    /// }
+    ///
+    /// // Retrieve specific capture by index.
+    /// let _ = renderdoc.captures().get(0);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn captures(&mut self) -> Captures<'_, V> {
+        Captures::new(&mut self.api)
     }
 }
 
