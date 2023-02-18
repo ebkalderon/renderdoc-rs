@@ -323,12 +323,7 @@ impl RenderDoc<V100> {
         unsafe {
             if ((*self.0).GetCapture.unwrap())(index, path.as_mut_ptr(), &mut len, &mut time) == 1 {
                 let capture_time = time::UNIX_EPOCH + Duration::from_secs(time);
-                let path = {
-                    let raw_path = CString::from_raw(path.as_mut_ptr());
-                    let mut path = raw_path.into_string().unwrap();
-                    path.shrink_to_fit();
-                    path
-                };
+                let path = CStr::from_ptr(path.as_ptr()).to_str().unwrap();
 
                 Some((path.into(), capture_time))
             } else {
