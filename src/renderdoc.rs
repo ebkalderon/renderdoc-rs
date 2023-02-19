@@ -309,19 +309,21 @@ impl RenderDoc<V100> {
     /// # }
     /// ```
     pub fn get_capture(&self, index: u32) -> Option<(PathBuf, SystemTime)> {
-        let mut len = self.get_log_file_path_template().as_os_str().len() as u32 + 128;
+        let mut len = 0;
+        if unsafe {
+            (*self.0).GetCapture.unwrap()(index, ptr::null_mut(), &mut len, ptr::null_mut())
+        } == 0
+        {
+            return None;
+        };
+
         let mut path = Vec::with_capacity(len as usize);
         let mut time = 0u64;
 
         unsafe {
             if ((*self.0).GetCapture.unwrap())(index, path.as_mut_ptr(), &mut len, &mut time) == 1 {
                 let capture_time = time::UNIX_EPOCH + Duration::from_secs(time);
-                let path = {
-                    let raw_path = CString::from_raw(path.as_mut_ptr());
-                    let mut path = raw_path.into_string().unwrap();
-                    path.shrink_to_fit();
-                    path
-                };
+                let path = CStr::from_ptr(path.as_ptr()).to_str().unwrap();
 
                 Some((path.into(), capture_time))
             } else {
