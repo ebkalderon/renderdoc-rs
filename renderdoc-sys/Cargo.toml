@@ -1,6 +1,6 @@
 [package]
 name = "renderdoc-sys"
-version = "0.7.1"
+version = "1.0.0"
 authors = ["Eyal Kalderon <ebkalderon@gmail.com>"]
 description = "Raw FFI bindings to the RenderDoc API"
 license = "MIT OR Apache-2.0"
@@ -9,9 +9,8 @@ repository = "https://github.com/ebkalderon/renderdoc-rs"
 documentation = "https://docs.rs/renderdoc-sys/"
 readme = "README.md"
 keywords = ["ffi", "renderdoc"]
-exclude = ["/vendor"]
 
 [badges]
-circle-ci = { repository = "ebkalderon/renderdoc-rs" }
+maintenance = { status = "passively-maintained" }
 
 [dependencies]
