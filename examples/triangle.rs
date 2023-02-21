@@ -38,9 +38,12 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
         .await
         .expect("Failed to create device");
 
-    let mut rd: RenderDoc<V110> = RenderDoc::new().expect("RenderDoc is not running");
-    rd.set_focus_toggle_keys(&[InputButton::F]);
-    rd.set_capture_keys(&[InputButton::C]);
+    let mut renderdoc: Result<RenderDoc<V110>, _> = RenderDoc::new();
+
+    if let Ok(rd) = renderdoc.as_mut() {
+        rd.set_focus_toggle_keys(&[InputButton::F]);
+        rd.set_capture_keys(&[InputButton::C]);
+    }
 
     // Load the shaders from disk
     let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
@@ -119,9 +122,9 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
                         ..
                     },
                 ..
-            } => match keycode {
-                VirtualKeyCode::C => rd.trigger_capture(),
-                VirtualKeyCode::R => match rd.launch_replay_ui(true, None) {
+            } => match (keycode, renderdoc.as_mut()) {
+                (VirtualKeyCode::C, Ok(rd)) => rd.trigger_capture(),
+                (VirtualKeyCode::R, Ok(rd)) => match rd.launch_replay_ui(true, None) {
                     Ok(pid) => println!("Launched replay UI (PID {pid})"),
                     Err(e) => eprintln!("Failed to launch replay UI: {e}"),
                 },

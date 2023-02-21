@@ -4,8 +4,8 @@
 [![Crates.io][crate-badge]][crate-url]
 [![Documentation][docs-badge]][docs-url]
 
-[build-badge]: https://circleci.com/gh/ebkalderon/renderdoc-rs.svg?style=shield
-[build-url]: https://circleci.com/gh/ebkalderon/renderdoc-rs
+[build-badge]: https://github.com/ebkalderon/renderdoc-rs/actions/workflows/ci.yml/badge.svg
+[build-url]: https://github.com/ebkalderon/renderdoc-rs/actions
 [crate-badge]: https://img.shields.io/crates/v/renderdoc.svg
 [crate-url]: https://crates.io/crates/renderdoc
 [docs-badge]: https://docs.rs/renderdoc/badge.svg
@@ -15,10 +15,15 @@ Rust bindings to [RenderDoc], a popular graphics debugger.
 
 [RenderDoc]: https://renderdoc.org/
 
-RenderDoc is a free and open source graphics debugging tool. RenderDoc allows
-game developers to take frame captures of their applications, replay them,
-examine the graphics pipeline state, and potentially identify nasty graphics
-bugs.
+RenderDoc is a free and open source debugger for real-time graphics providing
+quick and easy frame captures and detailed introspection of any application
+using [Vulkan], [Direct3D 11], [Direct3D 12], [OpenGL], and [OpenGL ES].
+
+[Vulkan]: https://www.vulkan.org/
+[Direct3D 11]: https://learn.microsoft.com/en-us/windows/win32/direct3d11/atoc-dx-graphics-direct3d-11
+[Direct3D 12]: https://learn.microsoft.com/en-us/windows/win32/direct3d12/direct3d-12-graphics
+[OpenGL]: https://www.khronos.org/opengl/
+[OpenGL ES]: https://www.khronos.org/opengles/
 
 These bindings require that RenderDoc be installed on the target machine, with
 either `renderdoc.dll` or `librenderdoc.so` visible from your `$PATH`.
