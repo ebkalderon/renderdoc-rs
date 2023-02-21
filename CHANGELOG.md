@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.11.0] - 2023-02-20
+
+### Changed
+
+* Update `renderdoc-sys` dependency to 1.0.0.
+* Update `float-cmp` dependency to 0.9.
+* Update optional `glutin` dependency to 0.30.
+* Update optional `winit` dependency to 0.28.
+* Improve crate-level documentation.
+
+### Fixed
+
+* Fix loading strategy of `renderdoc` library (PR #140).
+* Fix typo in `start_frame_capture` and `end_frame_capture` docs (PR #122).
+* Fix undefined behavior and crash in `get_capture` (PR #143).
+
 ## [0.10.1] - 2021-02-10
 
 ### Changed
@@ -211,7 +227,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Type-safe version requests and downgrading.
 * Convenient conversions for `winit::VirtualKeyCode` into RenderDoc `InputButton`.
 
-[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.10.1...HEAD
+[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.9.0...v0.9.1
