@@ -21,8 +21,4 @@ bindgen \
   --generate-inline-functions \
   --no-prepend-enum-name \
   --impl-debug \
-  --impl-partialeq \
-  --with-derive-partialeq \
-  --with-derive-eq \
-  --with-derive-hash \
   "${TEMP_DIR}/renderdoc_app.h" > ./src/bindings.rs
