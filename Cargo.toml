@@ -47,4 +47,3 @@ winit = "0.28"
 
 [workspace]
 members = [".", "renderdoc-sys"]
-default-members = [".", "renderdoc-sys"]
