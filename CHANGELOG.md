@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add `eRENDERDOC_Option_SoftMemoryLimit` symbol to `renderdoc-sys` (PR #151).
+
 ## [0.12.0] - 2024-03-01
 
 ### Changed
