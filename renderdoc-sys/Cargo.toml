@@ -1,6 +1,6 @@
 [package]
 name = "renderdoc-sys"
-version = "1.0.0"
+version = "1.1.0"
 authors = ["Eyal Kalderon <ebkalderon@gmail.com>"]
 description = "Low-level bindings to the RenderDoc API"
 license = "MIT OR Apache-2.0"
