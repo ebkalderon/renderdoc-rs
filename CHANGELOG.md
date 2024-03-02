@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.12.1] - 2024-03-01
+
 ### Added
 
 * Add `eRENDERDOC_Option_SoftMemoryLimit` symbol to `renderdoc-sys` (PR #151).
+
+### Changed
+
+* Update `renderdoc-sys` dependency to 1.1.0 (PR #152).
 
 ## [0.12.0] - 2024-03-01
 
@@ -238,7 +244,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Type-safe version requests and downgrading.
 * Convenient conversions for `winit::VirtualKeyCode` into RenderDoc `InputButton`.
 
-[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/ebkalderon/renderdoc-rs/compare/v0.10.0...v0.10.1
