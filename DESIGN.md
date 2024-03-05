@@ -115,6 +115,9 @@ Let's get more concrete. What do we need?
      options on and off in between taking captures.
    * Don't think we should allow users to change capture settings _while_ a
      capture is ongoing. Seems weird and possibly broken to allow this.
+   * I doubt `start_frame_capture`/`end_frame_capture` can _ever_ be made
+     safe. Only this type of API can truly be made safe:
+     * `fn capture_frame<T>(&mut self, dev, win, f: impl FnOnce() -> T) -> T`
 4. When not capturing actively, we should be able to list existing captures.
 5. Some way to customize the debug UI.
 6. Some way to set global capture and focus keys.
@@ -190,13 +193,13 @@ loop {
     // Update simulation here...
 
     if let Ok(renderdoc) = renderdoc.as_mut() {
-        renderdoc.start_frame_capture(None, None);
+        unsafe { renderdoc.start_frame_capture(None, None); }
     }
 
     // Draw frame here...
 
     if let Ok(renderdoc) = renderdoc.as_mut() {
-        renderdoc.end_frame_capture(None, None);
+        unsafe { renderdoc.end_frame_capture(None, None); }
     }
 }
 ```
@@ -217,12 +220,12 @@ impl<V: Version> RenderDoc<V> {
 // Maybe include the extension trait below too?
 
 pub trait ResultExt {
-    fn start_frame_capture<D, W>(&mut self, device: D, window: W)
+    unsafe fn start_frame_capture<D, W>(&mut self, device: D, window: W)
     where
         D: AsDeviceHandle,
         W: AsWindowHandle;
 
-    fn end_frame_capture<D, W>(&mut self, device: D, window: W)
+    unsafe fn end_frame_capture<D, W>(&mut self, device: D, window: W)
     where
         D: AsDeviceHandle,
         W: AsWindowHandle;
@@ -402,8 +405,12 @@ pub struct Instance<V> {
 }
 
 impl<V: Minimum<V100>> Instance<V> {
-    pub fn start_frame_capture(&mut self, ...) { ... }
-    pub fn end_frame_capture(&mut self, ...) { ... }
+    pub fn capture_frame<F, R>(&mut self, device: ..., window: ..., f: F) -> R
+    where
+        F: FnMut() -> R,
+    { ... }
+    pub unsafe fn start_frame_capture(&mut self, ...) { ... }
+    pub unsafe fn end_frame_capture(&mut self, ...) { ... }
     // All other methods here...
 }
 
@@ -449,13 +456,13 @@ loop {
     let mut renderdoc = RENDERDOC.write().unwrap();
 
     if let Ok(renderdoc) = renderdoc.loaded_mut() {
-        renderdoc.start_frame_capture(None, None);
+        unsafe { renderdoc.start_frame_capture(None, None) };
     }
 
     // Draw and present frame here...
 
     if let Ok(renderdoc) = renderdoc.loaded_mut() {
-        renderdoc.end_frame_capture(None, None);
+        unsafe { renderdoc.end_frame_capture(None, None) };
     }
 }
 ```
