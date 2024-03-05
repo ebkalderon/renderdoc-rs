@@ -215,7 +215,7 @@ loop {
     // Draw frame here...
 
     if let Ok(renderdoc) = renderdoc.as_mut() {
-        unsafe { renderdoc.end_frame_capture(None, None); }
+        let _ = unsafe { renderdoc.end_frame_capture(None, None); }
     }
 }
 ```
@@ -241,7 +241,7 @@ pub trait ResultExt {
         D: AsDeviceHandle,
         W: AsWindowHandle;
 
-    unsafe fn end_frame_capture<D, W>(&mut self, device: D, window: W)
+    unsafe fn end_frame_capture<D, W>(&mut self, device: D, window: W) -> Result<(), Error>
     where
         D: AsDeviceHandle,
         W: AsWindowHandle;
@@ -357,7 +357,7 @@ impl<V: Version> UnsafeRenderDoc<V> {
     pub unsafe fn as_raw(&self) -> *mut RawRenderDoc { ... }
     pub unsafe fn start_frame_capture(&self, ...) { ... }
     pub unsafe fn is_capturing(&self) -> bool { ... }
-    pub unsafe fn end_frame_capture(&self, ...) { ... }
+    pub unsafe fn end_frame_capture(&self, ...) -> Result<(), Error> { ... }
 }
 
 unsafe impl<V> Send for UnsafeRenderDoc<V> {}
@@ -397,7 +397,7 @@ impl<V: Version> RenderDoc<V> {
         }
     }
 
-    pub unsafe fn capture_frame<F, R>(&mut self, device: ..., window: ..., f: F) -> R
+    pub unsafe fn capture_frame<F, R>(&mut self, device: ..., window: ..., f: F) -> Result<R, Error>
     where
         F: FnMut(Result<&mut Instance<V>, &Error>) -> R,
     {
@@ -409,10 +409,10 @@ impl<V: Version> RenderDoc<V> {
         let ret = (f)(result);
 
         if let Ok(instance) = self.loaded_mut() {
-            instance.end_frame_capture(...);
+            instance.end_frame_capture(...)?;
         }
 
-        ret
+        Ok(ret)
     }
 }
 
@@ -421,12 +421,12 @@ pub struct Instance<V> {
 }
 
 impl<V: Minimum<V100>> Instance<V> {
-    pub unsafe fn capture_frame<F, R>(&mut self, device: ..., window: ..., f: F) -> R
+    pub unsafe fn capture_frame<F, R>(&mut self, device: ..., window: ..., f: F) -> Result<R, Error>
     where
         F: FnMut() -> R,
     { ... }
     pub unsafe fn start_frame_capture(&mut self, ...) { ... }
-    pub unsafe fn end_frame_capture(&mut self, ...) { ... }
+    pub unsafe fn end_frame_capture(&mut self, ...) -> Result<(), Error> { ... }
     // All other methods here...
 }
 
