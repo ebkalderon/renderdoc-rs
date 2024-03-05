@@ -115,9 +115,25 @@ Let's get more concrete. What do we need?
      options on and off in between taking captures.
    * Don't think we should allow users to change capture settings _while_ a
      capture is ongoing. Seems weird and possibly broken to allow this.
-   * I doubt `start_frame_capture`/`end_frame_capture` can _ever_ be made
-     safe. Only this type of API can truly be made safe:
+   * Also, I doubt `start_frame_capture`/`end_frame_capture` can _ever_ be made
+     safe. Perhaps a closure-based API might be?
      * `fn capture_frame<T>(&mut self, dev, win, f: impl FnOnce() -> T) -> T`
+     * Nope! A device handle of `None` and/or window handle of `None` is unsafe.
+     * This would be 100% safe only if all these criteria are met:
+       1. No other captures are ungoing.
+       2. Device handle is well-defined (type from `wgpu`, `glutin`, or similar)
+          and refers to a graphics device that is _still alive_.
+       3. Window handle is well-defined (type from `winit` or similar) and
+          refers to a window that is _still alive_.
+          * Calling `set_active_window` with a well-defined type and passing
+            `None` to `capture_frame` is still unsafe! What if the window the
+            handle refers to is destroyed before `capture_frame` is called? The
+            wildcard lookup will inevitably fail, in that case.
+          * We could resolve this issue by keeping a copy of the active window
+            handle internally and checking its liveness within `capture_frame`
+            before making the API call. `capture_frame` would return `Err(_)` if
+            the active window handle is invalid.
+          * Not sure all this extra effort is worth it...
 4. When not capturing actively, we should be able to list existing captures.
 5. Some way to customize the debug UI.
 6. Some way to set global capture and focus keys.
@@ -381,7 +397,7 @@ impl<V: Version> RenderDoc<V> {
         }
     }
 
-    pub fn capture_frame<F, R>(&mut self, device: ..., window: ..., f: F) -> R
+    pub unsafe fn capture_frame<F, R>(&mut self, device: ..., window: ..., f: F) -> R
     where
         F: FnMut(Result<&mut Instance<V>, &Error>) -> R,
     {
@@ -405,7 +421,7 @@ pub struct Instance<V> {
 }
 
 impl<V: Minimum<V100>> Instance<V> {
-    pub fn capture_frame<F, R>(&mut self, device: ..., window: ..., f: F) -> R
+    pub unsafe fn capture_frame<F, R>(&mut self, device: ..., window: ..., f: F) -> R
     where
         F: FnMut() -> R,
     { ... }
