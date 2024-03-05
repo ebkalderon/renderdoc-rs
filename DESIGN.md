@@ -540,3 +540,54 @@ stateDiagram-v2
     Loaded* --> [*]
     Loaded --> [*]
 ```
+
+### API Surface
+
+The table below documents the entire API surface and which states they are
+allowed to be called in:
+
+| Function Name                                         | Unloaded           | Loaded             | Loaded*            | Capturing          |
+|-------------------------------------------------------|--------------------|--------------------|--------------------|--------------------|
+| `GetAPI`                                              | :white_check_mark: |                    |                    |                    |
+| `GetAPIVersion`                                       |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `SetCaptureOptionU32`                                 |                    | :white_check_mark: | :white_check_mark: |                    |
+| `SetCaptureOptionF32`                                 |                    | :white_check_mark: | :white_check_mark: |                    |
+| `GetCaptureOptionU32`                                 |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `GetCaptureOptionF32`                                 |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `SetFocusToggleKeys`                                  |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `SetCaptureKeys`                                      |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `GetOverlayBits`                                      |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `MaskOverlayBits`                                     |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `Shutdown`/`RemoveHooks`                              |                    | :white_check_mark: |                    |                    |
+| `UnloadCrashHandler`                                  |                    | :white_check_mark: | :white_check_mark: |                    |
+| `SetLogFilePathTemplate`/`SetCaptureFilePathTemplate` |                    | :white_check_mark: | :white_check_mark: |                    |
+| `GetLogFilePathTemplate`/`GetCaptureFilePathTemplate` |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `GetNumCaptures`                                      |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `GetCapture`                                          |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `TriggerCapture`                                      |                    | :white_check_mark: | :white_check_mark: |                    |
+| `IsRemoteAccessConnected`/`IsTargetControlConnected`  |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `LaunchReplayUI`                                      |                    | :white_check_mark: | :white_check_mark: |                    |
+| `SetActiveWindow`                                     |                    | :white_check_mark: | :white_check_mark: |                    |
+| `StartFrameCapture`                                   |                    | :white_check_mark: | :white_check_mark: |                    |
+| `IsFrameCapturing`                                    |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `EndFrameCapture`                                     |                    |                    |                    | :white_check_mark: |
+| `TriggerMultiFrameCapture`                            |                    | :white_check_mark: | :white_check_mark: |                    |
+| `SetCaptureFileComments`                              |                    | :white_check_mark: | :white_check_mark: |                    |
+| `DiscardFrameCapture`                                 |                    |                    |                    | :white_check_mark: |
+| `ShowReplayUI`                                        |                    | :white_check_mark: | :white_check_mark: |                    |
+| `SetCaptureTitle`                                     |                    |                    |                    | :white_check_mark: |
+
+**NOTE:** The official documentation contradicts itself regarding whether
+multiple overlapping frame captures are allowed or not. According to [the docs
+for `StartFrameCapture`][docs-sfc], overlapping frame captures are disallowed
+in no uncertain terms, even if they don't share the same window/device handle
+combination, stating this could risk crashes. On the other hand, [the docs for
+`SetCaptureTitle`][docs-sct] readily mention "multiple \[ongoing\] captures" as
+something it can handle.
+
+[docs-sfc]: https://github.com/baldurk/renderdoc/blob/10d402358cb5eac9d35bc66216eb77eddc6e9098/renderdoc/api/app/renderdoc_app.h#L530-L531
+[docs-sct]: https://github.com/baldurk/renderdoc/blob/10d402358cb5eac9d35bc66216eb77eddc6e9098/renderdoc/api/app/renderdoc_app.h#L556-L557
+
+Just to be on the safe side, we assume multiple overlapping captures are
+disallowed _per binary_ and that it's only technically allowed when multiple
+3D applications are being debugged with RenderDoc at the same time.
