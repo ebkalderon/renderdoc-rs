@@ -591,3 +591,12 @@ something it can handle.
 Just to be on the safe side, we assume multiple overlapping captures are
 disallowed _per binary_ and that it's only technically allowed when multiple
 3D applications are being debugged with RenderDoc at the same time.
+
+### Modeling as types
+
+**Should we use session types or enums to model states?** Session types would
+be the safest and most accurate representation, but it would result in poor
+ergonomics if used in a global unless modeled carefully (compared to simply
+exposing all API functionality and indicating incorrect state by returning
+`Result`). Maybe we could ship separate APIs for `renderdoc::local` and
+`renderdoc::global` to ensure the right balance for ergonomics vs. safety...
