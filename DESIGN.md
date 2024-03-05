@@ -482,3 +482,61 @@ loop {
     }
 }
 ```
+
+## Review of Past Work
+
+Looking back at this document at a later date, something not explicitly
+discussed is that some aspects of the API _can_ be safely used concurrently
+while others cannot.
+
+For instance, `{start,end}_frame_capture` _cannot_ be interleaved with other
+ongoing frame captures, and one should not be able to change the capture
+settings while a capture is ongoing. However, it should be perfectly safe to
+call `is_frame_capturing` in the meantime. As such, putting the entire RenderDoc
+API in a global lock is much too coarse-grained of an approach to be accurate.
+
+The entire RenderDoc in-app API surface must be reviewed and organized into
+logical groupings based on RenderDoc's current global state.
+
+### State Machine
+
+#### Simple State Machine
+
+This state machine describes the run-time behavior of RenderDoc, but it notably
+excludes the `RemoveHooks` state for simplicity.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Unloaded
+    Unloaded --> [*]
+    Unloaded --> Unloaded: Load Failure
+    Unloaded --> Loaded: Load Success
+    Loaded --> Capturing: Start
+    Capturing --> Loaded: End
+    Capturing --> Loaded: Discard
+    Loaded --> [*]
+```
+
+#### Full State Machine
+
+This more involved state machine includes the `RemoveHooks` state, thereby
+ensuring it can only be called before any graphics API work has taken place.
+
+With that said, the `RemoveHooks` method would still be considered `unsafe`
+because its behavior is not well defined, according to RenderDoc's own API
+documentation.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Unloaded
+    Unloaded --> [*]
+    Unloaded --> Unloaded: Load Failure
+    Unloaded --> Loaded: Load Success
+    Loaded --> Capturing: Start
+    Loaded --> Unloaded: Remove Hooks (Windows)
+    Capturing --> Loaded*: End
+    Capturing --> Loaded*: Discard
+    Loaded* --> Capturing: Start
+    Loaded* --> [*]
+    Loaded --> [*]
+```
